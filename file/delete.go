@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/util"
@@ -72,6 +73,7 @@ func DeleteBySize(dryRun bool) {
 		} else {
 			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.Filepath)
 			util.Execute("rm -f " + file.Filepath)
+			time.Sleep(1000 * time.Millisecond) // sleep 1 second
 		}
 	}
 }

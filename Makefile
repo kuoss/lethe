@@ -2,6 +2,7 @@ LETHE_VERSION=v0.1.2
 
 run-dev:
 	air
+
 git-push:
 	git add -A; git commit -am ${LETHE_VERSION}; git push
 
