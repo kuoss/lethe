@@ -1,0 +1,3 @@
+retention:
+  time: 100d
+  size: 100g
