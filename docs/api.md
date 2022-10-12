@@ -3,7 +3,8 @@ API docs
 query with curl
 
 ```shell
-$ curl -G -s http://localhost:8080/api/v1/query -d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' | jq
+$ curl -G -s http://localhost:8080/api/v1/query \
+-d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' | jq
 {
   "data": {
     "result": [
@@ -15,7 +16,9 @@ $ curl -G -s http://localhost:8080/api/v1/query -d 'query=pod{namespace="cert-ma
 query_range with curl
 
 ```shell
-$ curl -G -s http://localhost:8080/api/v1/query_range -d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' -d 'start=1665549365.661' -d 'end=1665549665.661' | jq
+$ curl -G -s http://localhost:8080/api/v1/query_range \
+-d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' \
+-d 'start=1665549365.661' -d 'end=1665549665.661' | jq
 {
   "data": {
     "result": [
