@@ -10,6 +10,9 @@ $ curl -G -s http://localhost:8080/api/v1/query \
     "result": [
       "2022-10-12T00:30:39Z[cert-manager|cert-manager-cainjector-6995cf7d4-582tw|cert-manager] I1012 00:30:39.116889...",
       ...
+    ]
+  }
+}
 ```
 
 
@@ -24,4 +27,7 @@ $ curl -G -s http://localhost:8080/api/v1/query_range \
     "result": [
       "2022-10-12T04:36:06Z[cert-manager|cert-manager-cainjector-6995cf7d4-582tw|cert-manager] I1012 04:36:06.709410...",
       ...
+    ]
+  }
+}
 ```
