@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/VictoriaMetrics/metricsql v0.43.0
 	github.com/gin-gonic/gin v1.7.7
-	github.com/go-co-op/gocron v1.13.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/cobra v1.4.0
@@ -33,7 +32,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.0-beta.8 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -42,7 +40,6 @@ require (
 	github.com/valyala/fastrand v1.1.0 // indirect
 	github.com/valyala/histogram v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220519141025-dcacdad47464 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
