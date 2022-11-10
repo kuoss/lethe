@@ -2,16 +2,15 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/kuoss/lethe/config"
-	"github.com/kuoss/lethe/cron"
+	"github.com/kuoss/lethe/routine"
 )
 
 func main() {
 	config.LoadConfig()
-	cron.Start([]cron.Job{
-		{Task: cron.TaskDelete, Interval: 20 * 60}, // 20 minutes
-	})
+	routine.Start(time.Duration(20) * time.Minute) // 20 minutes
 	log.Printf("🌊 lethe starting...")
 	startServer()
 }

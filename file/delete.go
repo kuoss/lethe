@@ -79,7 +79,7 @@ func DeleteBySize(dryRun bool) {
 }
 
 func GetDiskUsedKB() (int, error) {
-	kb, _, err := util.Execute("df /data --output=used | tail -1")
+	kb, _, err := util.Execute("df -P /data | tail -1 | awk '{print $3}'")
 	if err != nil {
 		return 0, err
 	}
