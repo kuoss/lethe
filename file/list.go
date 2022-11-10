@@ -71,7 +71,6 @@ func ListDirs() []LogDir {
 		return logDirs
 	}
 	dirs := strings.Split(strings.TrimSpace(out), "\n")
-	fmt.Println(dirs)
 	separator := regexp.MustCompile("[/.]+")
 	for _, dir := range dirs {
 		cols := separator.Split(dir, -1)

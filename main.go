@@ -12,14 +12,12 @@ func main() {
 	config.LoadConfig()
 	routine.Start(time.Duration(20) * time.Minute) // 20 minutes
 	log.Printf("🌊 lethe starting...")
-	startServer()
+
+	// start server
+	r := NewRouter()
+	r.Run()
 }
 
 type Query struct {
 	Expr string `form:"expr"`
-}
-
-func startServer() {
-	r := NewRouter()
-	r.Run()
 }
