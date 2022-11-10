@@ -2,9 +2,11 @@ package file
 
 import (
 	"fmt"
-	"log"
+	"io/fs"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/kuoss/lethe/config"
@@ -13,102 +15,105 @@ import (
 
 // GET
 
-var hourFile = "2???-??-??_??.log"
+var hourFile string
+
+func DirSize(path string) (int64, error) {
+	var size int64
+	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size, err
+}
 
 func ListFiles() []LogFile {
 	var logFiles []LogFile
-	result, _, err := util.Execute(fmt.Sprintf("ls %s/*/*/%s", config.GetLogRoot(), hourFile))
+	out, _, err := util.Execute(fmt.Sprintf("cd %s; find -type f -maxdepth 3 -mindepth 3", config.GetLogRoot()))
 	if err != nil {
-		log.Printf("GetAllFiles: no files err=%e\n", err)
+		fmt.Println("Warning: cannot find files")
 		return logFiles
 	}
-	rows := strings.Split(strings.Trim(result, "\n"), "\n")
+	files := strings.Split(strings.TrimSpace(out), "\n")
 	separator := regexp.MustCompile("[/.]+")
-	for _, row := range rows {
-		cols := separator.Split(util.SubstrAfter(row, "log/"), -1)
+	for _, file := range files {
+		cols := separator.Split(file, -1)
 		logFiles = append(logFiles, LogFile{
 			Typ:       cols[0],
 			Target:    cols[1],
 			Name:      cols[2],
 			Extention: cols[3],
-			Filepath:  row,
+			SubPath:   file[1:],
+			FullPath:  config.GetLogRoot() + file[1:],
 		})
 	}
 	return logFiles
 }
 
 func ListFilesWithSize() []LogFile {
-	var logFiles []LogFile
-	result, _, err := util.Execute(fmt.Sprintf("du %s/*/*/%s", config.GetLogRoot(), hourFile))
-	if err != nil {
-		log.Printf("GetAllFilesWithSize: no files err=%e\n", err)
-		return logFiles
-	}
-	rows := strings.Split(strings.Trim(result, "\n"), "\n")
-	separator := regexp.MustCompile("[\t/.]+")
-	for _, row := range rows {
-		kbString := util.SubstrBefore(row, "\t")
-		filepath := util.SubstrAfter(row, "\t")
-		kb, _ := strconv.Atoi(kbString)
-		cols := separator.Split(util.SubstrAfter(row, "log/"), -1)
-		logFiles = append(logFiles, LogFile{
-			Filepath:  filepath,
-			Typ:       cols[0],
-			Target:    cols[1],
-			Name:      cols[2],
-			Extention: cols[3],
-			KB:        kb, // KiB
-		})
+	logFiles := ListFiles()
+	for i, logFile := range logFiles {
+		stat, err := os.Stat(logFile.FullPath)
+		if err != nil {
+			fmt.Printf("Warning: cannot stat: %s\n", logFile.FullPath)
+			continue
+		}
+		logFiles[i].Size = stat.Size()
 	}
 	return logFiles
 }
 
-func ListDirs() []string {
-	out, _, err := util.Execute(fmt.Sprintf("cd %s; ls -d */%s", config.GetLogRoot(), hourFile))
+func ListDirs() []LogDir {
+	var logDirs []LogDir
+	out, _, err := util.Execute(fmt.Sprintf("cd %s; find -type d -maxdepth 2 -mindepth 2", config.GetLogRoot()))
 	if err != nil {
-		log.Println(fmt.Errorf("%e", err))
-		return []string{}
+		fmt.Println("Warning: cannot find dirs")
+		return logDirs
 	}
-	return strings.Split(strings.TrimSpace(out), "\n")
+	dirs := strings.Split(strings.TrimSpace(out), "\n")
+	fmt.Println(dirs)
+	separator := regexp.MustCompile("[/.]+")
+	for _, dir := range dirs {
+		cols := separator.Split(dir, -1)
+		logDirs = append(logDirs, LogDir{
+			Typ:      cols[0],
+			Target:   cols[1],
+			SubPath:  dir[1:],
+			FullPath: config.GetLogRoot() + dir[1:],
+		})
+	}
+	return logDirs
 }
 
 func ListDirsWithSize() []LogDir {
-	var logDirs []LogDir
-	result1, _, err := util.Execute(fmt.Sprintf("du -s %s/*/*", config.GetLogRoot()))
-	if err != nil {
-		log.Println(fmt.Errorf("%e", err))
-		return logDirs
-	}
-	result2, _, err := util.Execute(fmt.Sprintf("du --inode %s/*/*", config.GetLogRoot()))
-	if err != nil {
-		log.Println(fmt.Errorf("%e", err))
-		return logDirs
-	}
-	rows1 := strings.Split(strings.Trim(result1, "\n"), "\n")
-	rows2 := strings.Split(strings.Trim(result2, "\n"), "\n")
-	separator := regexp.MustCompile("[\t/.]+")
-	for i, row1 := range rows1 {
-		dirpath := util.SubstrAfter(row1, "\t")
-		kb, _ := strconv.Atoi(util.SubstrBefore(row1, "\t"))
-		cols1 := separator.Split(util.SubstrAfter(row1, "log/"), -1)
+	logDirs := ListDirs()
+	for i, logDir := range logDirs {
+		var err error
+		var size int64
+		var files []fs.FileInfo
 
-		row2 := rows2[i]
-		countFiles, _ := strconv.Atoi(util.SubstrBefore(row2, "\t"))
+		size, err = DirSize(logDir.FullPath)
+		if err != nil {
+			fmt.Printf("Warning: cannot get size of directory: %s\n", logDir.FullPath)
+		}
+		logDirs[i].Size = size
 
-		re := regexp.MustCompile(`.*/`)
-		firstFile, _, _ := util.Execute(fmt.Sprintf("ls %s/%s | head -1", dirpath, hourFile))
-		firstFile = re.ReplaceAllString(strings.TrimSpace(firstFile), "")
-		lastFile, _, _ := util.Execute(fmt.Sprintf("ls %s/%s | tail -1", dirpath, hourFile))
-		lastFile = re.ReplaceAllString(strings.TrimSpace(lastFile), "")
-		logDirs = append(logDirs, LogDir{
-			Dirpath:    dirpath,
-			Typ:        cols1[0],
-			Target:     cols1[1],
-			CountFiles: countFiles - 1, // exclude directory itself
-			KB:         kb,             // KiB
-			FirstFile:  firstFile,
-			LastFile:   lastFile,
-		})
+		files, err = ioutil.ReadDir(logDir.FullPath)
+		if err != nil {
+			fmt.Printf("Warning: cannot get file count of directory: %s\n", logDir.FullPath)
+			continue
+		}
+		fileCount := len(files)
+		logDirs[i].FileCount = fileCount
+		if fileCount > 0 {
+			logDirs[i].FirstFile = files[0].Name()
+			logDirs[i].LastFile = files[fileCount-1].Name()
+		}
+
 	}
 	return logDirs
 }
@@ -119,14 +124,12 @@ func ListTargets() []LogDir {
 		if logDir.LastFile == "" {
 			continue
 		}
-		command := fmt.Sprintf(`tail -1000 %s/%s | grep -Po ^[^Z]\+Z | tail -1`, logDir.Dirpath, logDir.LastFile)
-		// fmt.Println("command=", command)
+		command := fmt.Sprintf(`tail -1 %s/%s`, logDir.FullPath, logDir.LastFile)
 		out, _, err := util.Execute(command)
 		if err != nil {
-			// log.Println(fmt.Errorf("%e", err))
 			continue
 		}
-		logDirs[i].LastForward = strings.TrimSpace(out)
+		logDirs[i].LastForward = out[:20]
 	}
 	return logDirs
 }

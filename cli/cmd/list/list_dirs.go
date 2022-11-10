@@ -23,11 +23,11 @@ func listDirs(c *cobra.Command) {
 	dirs := file.ListDirsWithSize()
 
 	var data [][]string
-	totalKB := 0
-	totalCountFiles := 0
+	var totalSize int64
+	totalFileCount := 0
 	for _, dir := range dirs {
-		totalKB += dir.KB
-		totalCountFiles += dir.CountFiles
+		totalSize += dir.Size
+		totalFileCount += dir.FileCount
 		firstFile := dir.FirstFile
 		lastFile := dir.LastFile
 		if firstFile == "" {
@@ -37,17 +37,17 @@ func listDirs(c *cobra.Command) {
 			lastFile = "-"
 		}
 		data = append(data, []string{
-			dir.Dirpath,
-			fmt.Sprintf("%.1f", float64(dir.KB)/1024),
-			fmt.Sprintf("%d", dir.CountFiles),
+			dir.FullPath,
+			fmt.Sprintf("%.1f", float64(dir.Size)/1024/1024),
+			fmt.Sprintf("%d", dir.FileCount),
 			firstFile,
 			lastFile,
 		})
 	}
 	data = append(data, []string{
 		"TOTAL",
-		fmt.Sprintf("%.1f", float64(totalKB)/1024),
-		fmt.Sprintf("%d", totalCountFiles),
+		fmt.Sprintf("%.1f", float64(totalSize)/1024/1024),
+		fmt.Sprintf("%d", totalFileCount),
 		"-",
 		"-",
 	})
