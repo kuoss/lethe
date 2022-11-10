@@ -1,4 +1,4 @@
-LETHE_VERSION=v0.1.3
+LETHE_VERSION=v0.1.4
 
 run-dev:
 	air
