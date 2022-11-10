@@ -8,19 +8,16 @@ import (
 )
 
 func Start(interval time.Duration) {
-	log.Printf("Routine started... interval=%s", interval)
 	go routineLoop(interval)
 }
 
 func routineLoop(interval time.Duration) {
 	for {
-		TaskDelete()
+		file.DeleteByAge(false)
+		file.DeleteBySize(false)
+		file.Cleansing()
+
+		log.Printf("routineLoop... sleep %s\n", interval)
 		time.Sleep(interval)
 	}
-}
-
-func TaskDelete() {
-	log.Println("TaskDelete started...")
-	file.DeleteByAge(false)
-	file.DeleteBySize(false)
 }
