@@ -2,21 +2,23 @@ package file
 
 // LogFile
 type LogFile struct {
-	Filepath  string
+	FullPath  string
+	SubPath   string
 	Typ       string
 	Target    string
 	Name      string
 	Extention string
-	KB        int
+	Size      int64
 }
 
 type LogDir struct {
-	Dirpath     string
+	FullPath    string
+	SubPath     string
 	Typ         string
 	Target      string
-	CountFiles  int
+	FileCount   int
 	FirstFile   string
 	LastFile    string
-	KB          int
+	Size        int64
 	LastForward string
 }

@@ -36,10 +36,10 @@ func DeleteByAge(dryRun bool) {
 	for _, file := range files {
 		if file.Name < point {
 			if dryRun {
-				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s (dry run)\n", file.Name, point, file.Filepath)
+				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s (dry run)\n", file.Name, point, file.FullPath)
 			} else {
-				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s\n", file.Name, point, file.Filepath)
-				util.Execute("rm -f " + file.Filepath)
+				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s\n", file.Name, point, file.FullPath)
+				util.Execute("rm -f " + file.FullPath)
 			}
 		}
 	}
@@ -69,10 +69,10 @@ func DeleteBySize(dryRun bool) {
 			return
 		}
 		if dryRun {
-			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s (dry run)\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.Filepath)
+			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s (dry run)\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
 		} else {
-			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.Filepath)
-			util.Execute("rm -f " + file.Filepath)
+			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
+			util.Execute("rm -f " + file.FullPath)
 			time.Sleep(1000 * time.Millisecond) // sleep 1 second
 		}
 	}

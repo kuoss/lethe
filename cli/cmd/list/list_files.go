@@ -23,15 +23,15 @@ func listFiles(c *cobra.Command) {
 	files := file.ListFilesWithSize()
 
 	var data [][]string
-	total := 0
+	var totalSize int64
 	for _, file := range files {
-		total += file.KB
+		totalSize += file.Size
 		data = append(data, []string{
-			file.Filepath,
-			fmt.Sprintf("%.1f", float64(file.KB)/1024),
+			file.FullPath,
+			fmt.Sprintf("%.1f", float64(file.Size)/1024/1024),
 		})
 	}
-	data = append(data, []string{"TOTAL", fmt.Sprintf("%.1f", float64(total)/1024)})
+	data = append(data, []string{"TOTAL", fmt.Sprintf("%.1f", float64(totalSize)/1024/1024)})
 
 	buf := &bytes.Buffer{}
 	table := cliutil.NewTableWriter(buf)
