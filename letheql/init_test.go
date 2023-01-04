@@ -6,7 +6,7 @@ import (
 	"github.com/kuoss/lethe/config"
 )
 
-var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.Local)
+var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 func init() {
 	config.LoadConfig()

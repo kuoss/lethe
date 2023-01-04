@@ -12,6 +12,9 @@ COPY --from=go /app /app
 ARG LETHE_VERSION
 ENV LETHE_VERSION=$LETHE_VERSION
 
+RUN echo "http://nexus.sdsdev.co.kr:8081/repository/apk-alpine/v3.11/main" | tee /etc/apk/repositories \
+    echo "http://nexus.sdsdev.co.kr:8081/repository/apk-alpine/v3.11/community" | tee -a /etc/apk/repositories
+
 RUN set -x \
 && apk add --no-cache coreutils util-linux
 

@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/kuoss/lethe/file"
+	"github.com/kuoss/lethe/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -25,5 +25,5 @@ func DeleteByAge(cmd *cobra.Command) {
 		cmd.PrintErr(err)
 		return
 	}
-	file.DeleteByAge(dryRun)
+	logs.DeleteByAge(dryRun)
 }
