@@ -34,7 +34,7 @@ func (rotator *Rotator) DeleteByAge(dryRun bool) {
 	for _, file := range files {
 		if file.Name < point {
 			if dryRun {
-				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s (dry run)\n", file.Name, point, file.FullPath)
+				//		fmt.Fprintf(w, "DeleteByAge(%s < %s): %s (dry run)\n", file.Name, point, file.FullPath)
 			} else {
 				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s\n", file.Name, point, file.FullPath)
 				err := rotator.driver.Delete(file.FullPath)
@@ -48,7 +48,7 @@ func (rotator *Rotator) DeleteByAge(dryRun bool) {
 }
 
 func (rotator *Rotator) DeleteBySize(dryRun bool) {
-	w := config.GetWriter()
+	//	w := config.GetWriter()
 
 	retentionSizeKB, err := util.StringToKB(config.GetConfig().GetString("retention.size"))
 	if err != nil {
@@ -66,13 +66,13 @@ func (rotator *Rotator) DeleteBySize(dryRun bool) {
 			return
 		}
 		if diskUsedKB < retentionSizeKB {
-			fmt.Fprintf(w, "DeleteBySize(%.1fm < %.1fm): done\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024)
+			//		fmt.Fprintf(w, "DeleteBySize(%.1fm < %.1fm): done\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024)
 			return
 		}
 		if dryRun {
-			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s (dry run)\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
+			//			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s (dry run)\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
 		} else {
-			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
+			//	fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
 			rotator.driver.Delete(file.FullPath)
 			time.Sleep(1000 * time.Millisecond) // sleep 1 second
 		}

@@ -71,7 +71,6 @@ func (lh *LetheHandler) QueryRange(c *gin.Context) {
 	start := c.Query("start")
 	end := c.Query("end")
 
-	log.Println("query_range...", query, start, end)
 	fmt.Println("query_range...", query, start, end)
 	if query == "" || start == "" || end == "" {
 		c.JSON(http.StatusBadRequest, gin.H{

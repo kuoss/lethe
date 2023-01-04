@@ -18,7 +18,7 @@ func NewRotator() *Rotator {
 }
 
 func (rotator *Rotator) Start(interval time.Duration) {
-	rotator.routineLoop(interval)
+	go rotator.routineLoop(interval)
 }
 
 func (rotator *Rotator) routineLoop(interval time.Duration) {

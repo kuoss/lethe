@@ -72,6 +72,11 @@ func (ps PatternedString) PatternMatch(s string) bool {
 // if it has not pattern return its own string
 func (ps PatternedString) withoutPattern() string {
 	if ps.Patterned() {
+		//todo
+		//nginx-*  vs nginx-.* (regex)
+		if string(ps)[strings.IndexRune(string(ps), '*')-1] == '.' {
+			return string(ps)[0 : strings.IndexRune(string(ps), '*')-1]
+		}
 		return string(ps)[0:strings.IndexRune(string(ps), '*')]
 	}
 	return string(ps)
@@ -120,8 +125,12 @@ func dirExist(dirs []string, dir string) bool {
 
 func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 	//fmt.Printf("logSearch= %+v", logSearch)
+	//fmt.Printf("root directory  from driver: %s\n", ls.driver.RootDirectory())
+
 	logTypePath := filepath.Join(ls.driver.RootDirectory(), logSearch.LogType.GetName())
 	targets, err := ls.driver.List(logTypePath)
+	//fmt.Printf("log Type: %s, targets: %v", logTypePath, targets)
+
 	if err != nil {
 		return Result{IsCounting: false, Logs: []string{}}, nil
 	}
@@ -132,9 +141,9 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 		var patternMatched []string
 		for _, t := range targets {
 			//todo
-			_, ns := filepath.Split(t)
-			if strings.Contains(ns, logSearch.TargetPattern.withoutPattern()) {
-				patternMatched = append(patternMatched, ns)
+			_, candidates := filepath.Split(t)
+			if strings.Contains(candidates, logSearch.TargetPattern.withoutPattern()) {
+				patternMatched = append(patternMatched, candidates)
 			}
 		}
 		matchedTarget = patternMatched
@@ -144,12 +153,14 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 
 	rangeParamInit(&logSearch)
 
+	//fmt.Printf("log Type: %s, matched targets: %v", logTypePath, matchedTarget)
 	// from here only check matchedTarget
 	var timeFilteredFiles []string
 	for _, dir := range matchedTarget {
 		timeFilteredFiles = append(timeFilteredFiles, timeFilter(filepath.Join(logTypePath, dir), &logSearch, ls.driver)...)
 	}
 
+	//fmt.Printf("log Type: %s, timfiltered targets: %v\n", logTypePath, timeFilteredFiles)
 	logs := logFromTarget(timeFilteredFiles, logSearch, config.GetLimit(), ls.driver)
 
 	sort.SliceStable(*logs, func(i, j int) bool {

@@ -2,5 +2,5 @@ retention:
   time: 100d
   size: 100g
 storage:
-  rootdirectory: C:\Users\jsw\tmp\log
+  rootdirectory: /root/directory
   driver: filesystem

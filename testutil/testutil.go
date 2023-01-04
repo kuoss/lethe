@@ -34,8 +34,8 @@ func Init() {
 	config.GetConfig().Set("retention.size", "10m")
 	config.SetNow(now)
 	config.SetLimit(1000)
-	userHome, _ := os.UserHomeDir()
-	config.SetLogRoot(filepath.Join(userHome, "tmp", "log"))
+	//userHome, _ := os.UserHomeDir()
+	//config.SetLogRoot(filepath.Join(userHome, "tmp", "log"))
 	SetTestLogs()
 }
 

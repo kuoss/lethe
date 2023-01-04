@@ -31,5 +31,4 @@ func routesAPIV1Group(r *gin.Engine) {
 	v1.GET("query_range", h.QueryRange)
 	v1.GET("metadata", h.Metadata)
 	v1.GET("targets", h.Target)
-
 }
