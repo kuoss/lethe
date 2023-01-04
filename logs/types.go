@@ -3,8 +3,8 @@ package logs
 const (
 	AUDIT_TYPE = "audit"
 	EVENT_TYPE = "event"
-	POD_TYPE   = "POD"
-	NODE_TYPE  = "NODE"
+	POD_TYPE   = "pod"
+	NODE_TYPE  = "node"
 )
 
 type LogType interface {
