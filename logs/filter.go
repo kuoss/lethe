@@ -114,17 +114,17 @@ func (f *includeRegexFilter) isRegexFilter() bool {
 }
 
 type excludeRegexFilter struct {
-	*regexp.Regexp
+	regex   *regexp.Regexp
 	keyword string
 }
 
 func (f *excludeRegexFilter) match(line string) bool {
-	return !f.Regexp.MatchString(line)
+	return !f.regex.MatchString(line)
 }
 
 func (f *excludeRegexFilter) isRegexFilter() bool {
 	compile, err := regexp.Compile(f.keyword)
-	f.Regexp = compile
+	f.regex = compile
 	if err != nil {
 		return false
 	}

@@ -2,5 +2,5 @@ retention:
   time: 100d
   size: 100g
 storage:
-  rootdirectory: C:\Users\SDS\go\src\github.com\kuoss\lethe\data\log
+  rootdirectory: C:\Users\jsw\tmp\log
   driver: filesystem

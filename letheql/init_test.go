@@ -14,5 +14,5 @@ func init() {
 	config.GetConfig().Set("retention.size", "10m")
 	config.SetNow(now)
 	config.SetLimit(1000)
-	config.SetLogRoot("/tmp/log")
+	//config.SetLogRoot(filepath.Join("data", "log"))
 }

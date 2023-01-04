@@ -52,6 +52,7 @@ type TimeRange struct {
 }
 
 func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
+
 	//fmt.Printf("==> ProcQuery %s, timeRange= %s\n", query, timeRange)
 	ok, filterType, err := logs.IsFilterExist(query)
 	if err != nil {
