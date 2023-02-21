@@ -3,19 +3,30 @@ package testutil
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
+
 	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/kuoss/lethe/config"
-	"github.com/kuoss/lethe/util"
 	"github.com/spf13/cast"
 )
 
-var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.Local)
+var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+const (
+	POD         = "pod"
+	NODE        = "node"
+	namespace01 = "namespace01"
+	namespace02 = "namespace02"
+	node01      = "node01"
+	node02      = "node02"
+)
 
 func Init() {
 	config.LoadConfig()
@@ -23,7 +34,8 @@ func Init() {
 	config.GetConfig().Set("retention.size", "10m")
 	config.SetNow(now)
 	config.SetLimit(1000)
-	config.SetLogRoot("/tmp/log")
+	//userHome, _ := os.UserHomeDir()
+	//config.SetLogRoot(filepath.Join(userHome, "tmp", "log"))
 	SetTestLogs()
 }
 
@@ -56,32 +68,66 @@ func CheckEqualJSON(t *testing.T, got interface{}, want string, extras ...interf
 	if strings.Compare(gotJSONString, want) != 0 {
 		t.Fatalf("%s:%d: %s\nwant == `%v`\ngot === `%s`", filepath.Base(file), line, extraMessage, want, gotJSONString)
 	}
+	t.Logf("want: %s\ngot: %s\n", want, gotJSONString)
 }
 
 func SetTestLogFiles() {
-	util.Execute("rm -rf /tmp/log")
-	dirs := []string{"node/node01", "node/node02", "pod/namspace01", "pod/namespace02"}
+
+	RootDirectory := filepath.Join("tmp2", "log")
+
+	if runtime.GOOS == "windows" {
+		userHomeDir, _ := os.UserHomeDir()
+		RootDirectory = filepath.Join(userHomeDir, RootDirectory)
+		fmt.Printf("Running on windows os\n")
+	}
+
+	err := os.RemoveAll(RootDirectory)
+	if err != nil {
+		fmt.Printf("%+v", err)
+	}
+
+	dirs := []string{filepath.Join(RootDirectory, POD, namespace01), filepath.Join(RootDirectory, POD, namespace02), filepath.Join(RootDirectory, NODE, node01), filepath.Join(RootDirectory, NODE, node02)}
+
 	for _, dir := range dirs {
-		util.Execute("mkdir -p /tmp/log/" + dir)
+		os.MkdirAll(dir, 0777)
 		for i := 5; i >= 0; i-- {
 			yyyy_mm_dd_hh := now.Add(-time.Duration(i) * time.Hour).UTC().String()[0:13]
 			name := strings.Replace(yyyy_mm_dd_hh, " ", "_", -1)
-			util.Execute("fallocate -l 1M /tmp/log/" + dir + "/" + name + ".log")
-			// t.Log("create file /tmp/log/" + dir + "/" + name + ".log")
+
+			f, _ := os.OpenFile(filepath.Join(dir, name)+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			defer f.Close()
 		}
 	}
 }
 
 func SetTestLogs() {
-	util.Execute("rm -rf /tmp/log")
-	util.Execute(`mkdir -p /tmp/log/pod/namespace01/`)
-	util.Execute(`mkdir -p /tmp/log/pod/namespace02/`)
-	util.Execute(`mkdir -p /tmp/log/node/node01/`)
-	util.Execute(`mkdir -p /tmp/log/node/node02/`)
+
+	var RootDirectory string
+	RootDirectory = filepath.Join("tmp", "log")
+
+	if runtime.GOOS == "windows" {
+		userHomeDir, _ := os.UserHomeDir()
+		RootDirectory = filepath.Join(userHomeDir, RootDirectory)
+		fmt.Printf("Running on windows os\n")
+	}
+
+	fmt.Printf("Root Directory: %s\n", RootDirectory)
+
+	// flush
+	err := os.RemoveAll(RootDirectory)
+	if err != nil {
+		fmt.Printf("%+v", err)
+	}
+
+	os.MkdirAll(filepath.Join(RootDirectory, POD, namespace01), 0777)
+	os.MkdirAll(filepath.Join(RootDirectory, POD, namespace02), 0777)
+	os.MkdirAll(filepath.Join(RootDirectory, NODE, node01), 0777)
+	os.MkdirAll(filepath.Join(RootDirectory, NODE, node02), 0777)
+	os.MkdirAll(filepath.Join(RootDirectory, NODE, node02), 0777)
 
 	// 11 lines
-	util.Execute(`cat <<EOF > /tmp/log/pod/namespace01/2009-11-10_22.log
-2009-11-10T22:56:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
+	os.WriteFile(filepath.Join(RootDirectory, POD, namespace01, "2009-11-10_22.log"),
+		[]byte(`2009-11-10T22:56:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2009-11-10T22:56:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2009-11-10T22:56:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2009-11-10T22:59:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] lerom ipsum
@@ -91,17 +137,18 @@ func SetTestLogs() {
 2009-11-10T22:58:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] hello from sidecar
 2009-11-10T22:58:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] lerom from sidecar
 2009-11-10T22:58:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] hello from sidecar
-2009-11-10T22:59:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world
-EOF`)
-	// 3 lines
-	util.Execute(`cat <<EOF > /tmp/log/pod/namespace01/2009-11-10_23.log
-2009-11-10T23:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world
+2009-11-10T22:59:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world`), 0777)
+
+	//3 lines
+	os.WriteFile(path.Join(RootDirectory, POD, namespace01, "2009-11-10_23.log"),
+		[]byte(`2009-11-10T23:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world
 2009-11-10T23:01:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world
 2009-11-10T23:02:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world
-EOF`)
-	// 12 lines
-	util.Execute(`cat <<EOF > /tmp/log/pod/namespace02/2009-11-10_22.log
-2009-11-10T22:58:00.000000Z[namespace02|nginx-deployment-75675f5897-7ci7o|nginx] hello world
+`), 0777)
+
+	//12 lines
+	os.WriteFile(path.Join(RootDirectory, POD, namespace02, "2009-11-10_22.log"),
+		[]byte(`2009-11-10T22:58:00.000000Z[namespace02|nginx-deployment-75675f5897-7ci7o|nginx] hello world
 2009-11-10T22:58:00.000000Z[namespace02|nginx-deployment-75675f5897-7ci7o|nginx] lerom ipsum
 2009-11-10T22:58:00.000000Z[namespace02|nginx-deployment-75675f5897-7ci7o|nginx] hello world
 2009-11-10T22:58:00.000000Z[namespace02|nginx-deployment-75675f5897-7ci7o|sidecar] hello from sidecar
@@ -113,10 +160,11 @@ EOF`)
 2009-11-10T22:58:00.000000Z[namespace02|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2009-11-10T22:58:00.000000Z[namespace02|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2009-11-10T22:58:00.000000Z[namespace02|apache-75675f5897-7ci7o|httpd] hello from sidecar
-EOF`)
+`), 0777)
+
 	// 10 lines
-	util.Execute(`cat <<EOF > /tmp/log/node/node01/2009-11-10_22.log
-2009-11-10T22:56:00.000000Z[node01|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
+	os.WriteFile(path.Join(RootDirectory, NODE, node01, "2009-11-10_22.log"),
+		[]byte(`2009-11-10T22:56:00.000000Z[node01|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
 2009-11-10T22:56:00.000000Z[node01|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
 2009-11-10T22:56:00.000000Z[node01|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
 2009-11-10T22:59:00.000000Z[node01|containerd] lerom ipsum
@@ -127,14 +175,17 @@ EOF`)
 2009-11-10T22:58:00.000000Z[node01|dockerd] lerom from sidecar
 2009-11-10T22:58:00.000000Z[node01|dockerd] hello from sidecar
 2009-11-10T22:59:00.000000Z[node01|containerd] hello world
-EOF`)
-	util.Execute(`cat <<EOF > /tmp/log/node/node01/2009-11-10_23.log
-2009-11-10T23:00:00.000000Z[node01|containerd] hello world
+`), 0777)
+
+	// 3 lines
+	os.WriteFile(path.Join(RootDirectory, NODE, node01, "2009-11-10_23.log"),
+		[]byte(`2009-11-10T23:00:00.000000Z[node01|containerd] hello world
 2009-11-10T23:01:00.000000Z[node01|containerd] hello world
 2009-11-10T23:02:00.000000Z[node01|containerd] hello world
-EOF`)
-	util.Execute(`cat <<EOF > /tmp/log/node/node02/2009-11-10_22.log
-2009-11-10T22:58:00.000000Z[node02|containerd] hello world
+`), 0777)
+
+	os.WriteFile(path.Join(RootDirectory, NODE, node02, "2009-11-10_22.log"),
+		[]byte(`2009-11-10T22:58:00.000000Z[node02|containerd] hello world
 2009-11-10T22:58:00.000000Z[node02|containerd] lerom ipsum
 2009-11-10T22:58:00.000000Z[node02|containerd] hello world
 2009-11-10T22:58:00.000000Z[node02|dockerd] hello from sidecar
@@ -146,5 +197,6 @@ EOF`)
 2009-11-10T22:58:00.000000Z[node02|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
 2009-11-10T22:58:00.000000Z[node02|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
 2009-11-10T22:58:00.000000Z[node02|kubelet] I0525 20:00:45.752587   17221 scope.go:110] "RemoveContainer" hello from sidecar
-EOF`)
+`), 0777)
+
 }

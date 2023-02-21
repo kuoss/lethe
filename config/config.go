@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"time"
 
@@ -24,22 +25,24 @@ var config *viper.Viper
 var writer io.Writer
 var now time.Time
 var limit = 1000
-var logRoot = "/data/log"
+var logRoot = filepath.Join("data", "log")
 
 func LoadConfig() {
 	config = viper.New()
 	config.SetConfigName("lethe")
 	config.SetConfigType("yaml")
-	config.AddConfigPath("./etc/")
-	config.AddConfigPath("../etc/")
+	config.AddConfigPath(filepath.Join(".", "etc"))
+	config.AddConfigPath(filepath.Join("..", "etc"))
 	err := config.ReadInConfig()
 	if err != nil {
-		log.Fatal(fmt.Errorf("fatal error config file: %w", err))
+		log.Fatal(fmt.Errorf("fatal error config logs: %w", err))
 	}
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		log.Fatal(fmt.Errorf("unable to decode into struct, %v", err))
 	}
+
+	SetLogRoot(config.GetString("storage.rootdirectory"))
 }
 
 func GetConfig() *viper.Viper {

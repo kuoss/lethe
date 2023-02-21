@@ -1,3 +1,6 @@
 retention:
   time: 100d
   size: 100g
+storage:
+  rootdirectory: /root/directory
+  driver: filesystem

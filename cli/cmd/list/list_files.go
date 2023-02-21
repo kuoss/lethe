@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
-	"github.com/kuoss/lethe/file"
+	"github.com/kuoss/lethe/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func initListFiles() {
 }
 
 func listFiles(c *cobra.Command) {
-	files := file.ListFilesWithSize()
+	files := logs.ListFilesWithSize()
 
 	var data [][]string
 	var totalSize int64
