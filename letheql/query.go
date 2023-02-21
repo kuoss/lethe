@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/VictoriaMetrics/metricsql"
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/file"
-	"github.com/VictoriaMetrics/metricsql"
 )
 
 type LeafType string
