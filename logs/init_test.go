@@ -1,4 +1,4 @@
-package file
+package logs
 
 import (
 	"github.com/kuoss/lethe/testutil"
