@@ -3,6 +3,7 @@ package factory
 import (
 	"errors"
 	"fmt"
+
 	"github.com/kuoss/lethe/storage/driver"
 )
 

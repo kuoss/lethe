@@ -1,210 +1,147 @@
 package logs
 
 import (
-	"fmt"
-	"github.com/kuoss/lethe/storage/driver/factory"
-	"github.com/stretchr/testify/assert"
-	"os"
-	"path/filepath"
 	"testing"
 
+	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/testutil"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetDiskUsedKB(t *testing.T) {
+func Test_GetDiskUsedBytes(t *testing.T) {
+	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
-	rotator := Rotator{driver: d}
-
-	kb, err := rotator.GetDiskUsedKB(rotator.driver.RootDirectory())
+	actual, err := rotator.GetDiskUsedBytes(rotator.driver.RootDirectory())
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("kb=", kb)
+
+	expected := 69632
+	assert.Equal(t, expected, actual)
 }
 
-func Test_DeleteByAge(t *testing.T) {
+func Test_DeleteByAge_10d(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp2", "log")})
-	rotator := Rotator{driver: d}
+	config.GetConfig().Set("retention.time", "20d")
+	rotator.DeleteByAge()
 
-	rotator.DeleteByAge(false)
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
 
-	got := rotator.ListFiles()
-	//want := `[{"Filepath":"/tmp/log/node/node01/2009-11-10_20.log","LogType":"node","Target":"node01","Name":"2009-11-10_20","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node01/2009-11-10_21.log","LogType":"node","Target":"node01","Name":"2009-11-10_21","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node01/2009-11-10_22.log","LogType":"node","Target":"node01","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node01/2009-11-10_23.log","LogType":"node","Target":"node01","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_20.log","LogType":"node","Target":"node02","Name":"2009-11-10_20","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_21.log","LogType":"node","Target":"node02","Name":"2009-11-10_21","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_22.log","LogType":"node","Target":"node02","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_23.log","LogType":"node","Target":"node02","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_20.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_20","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_21.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_21","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_22.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_23.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_20.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_20","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_21.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_21","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_22.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_23.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_23","Extention":"log","KB":0}]`
-	want := []LogFile{
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_20.log"),
-			SubPath:   "2009-11-10_20.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_20.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_21.log"),
-			SubPath:   "2009-11-10_21.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_21.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02", "2009-11-10_20.log"),
-			SubPath:   "2009-11-10_20.log",
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			Name:      "2009-11-10_20.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02", "2009-11-10_21.log"),
-			SubPath:   "2009-11-10_21.log",
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			Name:      "2009-11-10_21.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_20.log"),
-			SubPath:   "2009-11-10_20.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_20.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_21.log"),
-			SubPath:   "2009-11-10_21.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_21.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02", "2009-11-10_20.log"),
-			SubPath:   "2009-11-10_20.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			Name:      "2009-11-10_20.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02", "2009-11-10_21.log"),
-			SubPath:   "2009-11-10_21.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			Name:      "2009-11-10_21.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      0,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      0,
-		},
-	}
-	assert.Equal(t, want, got)
+	assert.FileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.FileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
 }
 
-func Test_DeleteBySize(t *testing.T) {
+func Test_DeleteByAge_1d(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp2", "log")})
-	rotator := Rotator{driver: d}
+	config.GetConfig().Set("retention.time", "2d")
+	rotator.DeleteByAge()
 
-	rotator.DeleteBySize(false)
-	want := `[{"Filepath":"/tmp/log/node/node01/2009-11-10_22.log","LogType":"node","Target":"node01","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node01/2009-11-10_23.log","LogType":"node","Target":"node01","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_22.log","LogType":"node","Target":"node02","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/node/node02/2009-11-10_23.log","LogType":"node","Target":"node02","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_21.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_21","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_22.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namespace02/2009-11-10_23.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_23","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_22.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_22","Extention":"log","KB":0},{"Filepath":"/tmp/log/pod/namspace01/2009-11-10_23.log","LogType":"pod","Target":"namspace01","Name":"2009-11-10_23","Extention":"log","KB":0}]`
-	got := rotator.ListFiles()
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
 
-	testutil.CheckEqualJSON(t, got, want)
-	testutil.CheckEqualJSON(t, len(got), "9")
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.FileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
 }
 
-func Test_DeleteBySize_DryRun(t *testing.T) {
+func Test_DeleteByAge_1h(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
-	rotator := Rotator{driver: d}
+	config.GetConfig().Set("retention.time", "1h")
+	rotator.DeleteByAge()
 
-	rotator.DeleteBySize(true)
+	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
+}
+
+func Test_DeleteBySize_1m(t *testing.T) {
+	testutil.Init()
+	testutil.SetTestLogFiles()
+
+	config.GetConfig().Set("retention.size", "1m")
+	rotator.DeleteBySize()
+
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+	assert.FileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.FileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.FileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
+}
+
+func Test_DeleteBySize_50k(t *testing.T) {
+	testutil.Init()
+	testutil.SetTestLogFiles()
+
+	config.GetConfig().Set("retention.size", "50k")
+	rotator.DeleteBySize()
+
+	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	// assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
+}
+
+func Test_DeleteBySize_1k(t *testing.T) {
+	testutil.Init()
+	testutil.SetTestLogFiles()
+
+	config.GetConfig().Set("retention.size", "1k")
+	rotator.DeleteBySize()
+
+	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
 }

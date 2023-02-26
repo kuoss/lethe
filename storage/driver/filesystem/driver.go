@@ -4,9 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/kuoss/lethe/storage"
-	storagedriver "github.com/kuoss/lethe/storage/driver"
-	"github.com/kuoss/lethe/storage/driver/factory"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -14,11 +11,15 @@ import (
 	"path"
 	"path/filepath"
 	"time"
+
+	"github.com/kuoss/lethe/storage"
+	storagedriver "github.com/kuoss/lethe/storage/driver"
+	"github.com/kuoss/lethe/storage/driver/factory"
 )
 
 const (
 	driverName           = "filesystem"
-	defaultRootDirectory = "/data/log"
+	defaultRootDirectory = "./tmp/log"
 )
 
 type DriverParameters struct {

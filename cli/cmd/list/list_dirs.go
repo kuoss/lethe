@@ -20,7 +20,7 @@ func initListDirs() {
 }
 
 func listDirs(c *cobra.Command) {
-	dirs := logs.ListDirsWithSize()
+	dirs := logs.NewRotator().ListDirsWithSize()
 
 	var data [][]string
 	var totalSize int64

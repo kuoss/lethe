@@ -23,10 +23,12 @@ func init() {
 
 func Query(cmd *cobra.Command) {
 	query, err := cmd.Flags().GetString("query")
+	fmt.Println("======= query=", query)
 	if err != nil {
 		cmd.PrintErr(err)
 		return
 	}
+
 	if query == "" {
 		cmd.PrintErr("error: logs command needs an flag: --query\n")
 		return
@@ -37,6 +39,6 @@ func Query(cmd *cobra.Command) {
 		return
 	}
 	for _, log := range data.Logs {
-		fmt.Println(log)
+		cmd.Println(log)
 	}
 }

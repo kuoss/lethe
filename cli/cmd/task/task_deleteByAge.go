@@ -14,16 +14,9 @@ var deleteByAgeCmd = &cobra.Command{
 }
 
 func initDeleteByAge() {
-	var dryRun bool
-	deleteByAgeCmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "dry run")
 	taskCmd.AddCommand(deleteByAgeCmd)
 }
 
 func DeleteByAge(cmd *cobra.Command) {
-	dryRun, err := cmd.Flags().GetBool("dry-run")
-	if err != nil {
-		cmd.PrintErr(err)
-		return
-	}
-	logs.DeleteByAge(dryRun)
+	logs.NewRotator().DeleteByAge()
 }

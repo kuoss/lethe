@@ -24,7 +24,6 @@ func routesRootGroup(r *gin.Engine) {
 func routesAPIV1Group(r *gin.Engine) {
 
 	v1 := r.Group("api/v1")
-
 	h := handlers.LetheHandler{Rotator: logs.NewRotator()}
 
 	v1.GET("query", h.Query)

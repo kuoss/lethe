@@ -7,15 +7,16 @@ import (
 	"github.com/kuoss/lethe/cli/cmd"
 	cliutil "github.com/kuoss/lethe/cli/util"
 	"github.com/kuoss/lethe/config"
+	"github.com/kuoss/lethe/logs"
 	testutil "github.com/kuoss/lethe/testutil"
 )
 
+var rotator *logs.Rotator
+
 func init() {
-	config.LoadConfig()
-	config.GetConfig().Set("retention.time", "3h")
-	config.GetConfig().Set("retention.size", "10m")
-	config.SetNow(testutil.GetNow())
-	config.SetLogRoot("/tmp/log")
+	testutil.Init()
+	testutil.SetTestLogFiles()
+	rotator = logs.NewRotator()
 	config.SetWriter(cliutil.GetWriter())
 }
 

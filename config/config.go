@@ -6,26 +6,17 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"time"
 
+	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/spf13/viper"
 )
-
-// Config
-// type Config struct {
-// 	Retention Retention
-// }
-// type Retention struct {
-// 	Time string
-// 	Size string
-// }
 
 var config *viper.Viper
 var writer io.Writer
 var now time.Time
 var limit = 1000
-var logRoot = filepath.Join("data", "log")
+var logRoot = "./tmp/log"
 
 func LoadConfig() {
 	config = viper.New()
@@ -59,18 +50,6 @@ func GetWriter() io.Writer {
 		return os.Stdout
 	}
 	return writer
-}
-
-// FOR TEST
-func SetNow(t time.Time) {
-	now = t
-}
-
-func GetNow() time.Time {
-	if reflect.ValueOf(now).IsZero() {
-		return time.Now()
-	}
-	return now
 }
 
 func GetLimit() int {

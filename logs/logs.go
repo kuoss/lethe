@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/kuoss/lethe/storage/driver"
-	"github.com/kuoss/lethe/storage/driver/factory"
 	"log"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/kuoss/lethe/clock"
+	"github.com/kuoss/lethe/storage/driver"
+	"github.com/kuoss/lethe/storage/driver/factory"
 
 	"github.com/kuoss/lethe/config"
 	"github.com/thoas/go-funk"
@@ -71,15 +73,17 @@ func (ps PatternedString) PatternMatch(s string) bool {
 // withoutPattern return pattern removed string,
 // if it has not pattern return its own string
 func (ps PatternedString) withoutPattern() string {
-	if ps.Patterned() {
-		//todo
-		//nginx-*  vs nginx-.* (regex)
-		if string(ps)[strings.IndexRune(string(ps), '*')-1] == '.' {
-			return string(ps)[0 : strings.IndexRune(string(ps), '*')-1]
-		}
-		return string(ps)[0:strings.IndexRune(string(ps), '*')]
+	psString := string(ps)
+	if !ps.Patterned() {
+		return psString
 	}
-	return string(ps)
+	//todo
+	//nginx-*  vs nginx-.* (regex)
+	pos := strings.IndexRune(psString, '*')
+	if pos > 0 && psString[pos-1] == '.' {
+		return psString[0 : pos-1]
+	}
+	return psString[0:pos]
 }
 
 type LogSearch struct {
@@ -124,7 +128,7 @@ func dirExist(dirs []string, dir string) bool {
 }
 
 func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
-	//fmt.Printf("logSearch= %+v", logSearch)
+	// fmt.Printf("logSearch= %+v", logSearch)
 	//fmt.Printf("root directory  from driver: %s\n", ls.driver.RootDirectory())
 
 	logTypePath := filepath.Join(ls.driver.RootDirectory(), logSearch.LogType.GetName())
@@ -175,7 +179,7 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 
 func rangeParamInit(search *LogSearch) {
 	if search.EndTime.IsZero() {
-		now := config.GetNow()
+		now := clock.GetNow()
 		search.EndTime = now
 	}
 
@@ -322,7 +326,7 @@ func rangeCheckFromFilename(name string, start time.Time, end time.Time) bool {
 func matchedTimePatternFiles(filepaths []string, durationSeconds int, endTime time.Time) []logFileSearch {
 	// durationSeconds & timeRange => EndTimeAgo & endTimeAgo
 	if endTime.IsZero() {
-		endTime = config.GetNow()
+		endTime = clock.GetNow()
 	}
 	var startTime time.Time
 	if durationSeconds == 0 {

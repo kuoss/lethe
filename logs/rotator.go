@@ -1,11 +1,12 @@
 package logs
 
 import (
+	"log"
+	"time"
+
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/storage/driver"
 	"github.com/kuoss/lethe/storage/driver/factory"
-	"log"
-	"time"
 )
 
 type Rotator struct {
@@ -22,13 +23,15 @@ func (rotator *Rotator) Start(interval time.Duration) {
 }
 
 func (rotator *Rotator) routineLoop(interval time.Duration) {
-
 	for {
-		rotator.DeleteByAge(true)
-		rotator.DeleteBySize(true)
-		rotator.Cleansing()
-
+		rotator.RunOnce()
 		log.Printf("routineLoop... sleep %s\n", interval)
 		time.Sleep(interval)
 	}
+}
+
+func (rotator *Rotator) RunOnce() {
+	rotator.DeleteByAge()
+	rotator.DeleteBySize()
+	rotator.Cleansing()
 }

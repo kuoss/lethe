@@ -14,16 +14,9 @@ var deleteBySizeCmd = &cobra.Command{
 }
 
 func initDeleteBySize() {
-	var dryRun bool
-	deleteBySizeCmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "dry run")
 	taskCmd.AddCommand(deleteBySizeCmd)
 }
 
 func DeleteBySize(cmd *cobra.Command) {
-	dryRun, err := cmd.Flags().GetBool("dry-run")
-	if err != nil {
-		cmd.PrintErr(err)
-		return
-	}
-	logs.DeleteBySize(dryRun)
+	logs.NewRotator().DeleteBySize()
 }

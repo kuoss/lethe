@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/metricsql"
-	"github.com/kuoss/lethe/config"
+	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/logs"
 )
 
@@ -53,7 +53,7 @@ type TimeRange struct {
 
 func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
 
-	//fmt.Printf("==> ProcQuery %s, timeRange= %s\n", query, timeRange)
+	fmt.Printf("ProcQuery: query=%s, timeRange=%s\n", query, timeRange)
 	ok, filterType, err := logs.IsFilterExist(query)
 	if err != nil {
 		return QueryData{}, err
@@ -133,7 +133,7 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 	}
 	req := leaf.LogRequest
 	// DurationSeconds, TimeRange{} => DurationSeconds, EndTime
-	now := config.GetNow()
+	now := clock.GetNow()
 	if leaf.TimeRange.End.IsZero() {
 		leaf.TimeRange.End = now
 	}
@@ -164,16 +164,6 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 	}
 	switch leaf.LeafType {
 
-	/*
-		case LeafTypeAuditLogRequest:
-			logSearch.LogType = "audit"
-			logSearch.TargetPattern = "audit"
-			// logSearch.AuditSearchParams = req.AuditSearchParams
-		case LeafTypeEventLogRequest:
-			logSearch.LogType = "event"
-			logSearch.TargetPattern = "event"
-			logSearch.EventSearchParams = req.EventSearchParams
-	*/
 	case LeafTypeNodeLogRequest:
 		logSearch.LogType = logs.NodeLog{Name: logs.NODE_TYPE}
 		logSearch.TargetPattern = req.NodeSearchParams.Node

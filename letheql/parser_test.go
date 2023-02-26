@@ -2,9 +2,15 @@ package letheql
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/kuoss/lethe/testutil"
+	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	testutil.Init()
+}
 
 func Test_ParseQuerySuccess(t *testing.T) {
 
