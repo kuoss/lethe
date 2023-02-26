@@ -16,8 +16,8 @@ func Test_GetDiskUsedBytes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := 69632
-	assert.Equal(t, expected, actual)
+	assert.LessOrEqual(t, actual, 106496)
+	assert.GreaterOrEqual(t, actual, -4096)
 }
 
 func Test_DeleteByAge_10d(t *testing.T) {

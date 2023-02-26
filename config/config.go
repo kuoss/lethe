@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
 	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/spf13/viper"
@@ -14,7 +13,6 @@ import (
 
 var config *viper.Viper
 var writer io.Writer
-var now time.Time
 var limit = 1000
 var logRoot = "./tmp/log"
 

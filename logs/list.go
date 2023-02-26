@@ -62,7 +62,7 @@ func (rotator *Rotator) ListFiles() []LogFile {
 	return logFiles
 }
 
-//Deprecated?
+// Deprecated?
 func (rotator *Rotator) ListFilesWithSize() []LogFile {
 	logFiles := rotator.ListFiles()
 
