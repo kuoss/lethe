@@ -20,7 +20,7 @@ func initListFiles() {
 }
 
 func listFiles(c *cobra.Command) {
-	files := logs.ListFilesWithSize()
+	files := logs.NewRotator().ListFilesWithSize()
 
 	var data [][]string
 	var totalSize int64

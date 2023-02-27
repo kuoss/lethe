@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/logs"
 	"github.com/kuoss/lethe/util"
 	"github.com/thoas/go-funk"
-	"net/http"
 )
 
 type LetheHandler struct {

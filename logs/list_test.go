@@ -1,223 +1,53 @@
 package logs
 
 import (
-	"github.com/kuoss/lethe/storage/driver/factory"
-	"github.com/stretchr/testify/assert"
-	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/kuoss/lethe/config"
+
+	"github.com/kuoss/lethe/storage/driver/factory"
 
 	"github.com/kuoss/lethe/testutil"
 )
 
 func TestListFiles(t *testing.T) {
-	testutil.SetTestLogs()
+	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
+	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogRoot()})
 	rotator := Rotator{driver: d}
-
-	want := []LogFile{
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      1057,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      177,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      1116,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      1031,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01", "2009-11-10_23.log"),
-			SubPath:   "2009-11-10_23.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			Name:      "2009-11-10_23.log",
-			Extention: ".log",
-			Size:      279,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02", "2009-11-10_22.log"),
-			SubPath:   "2009-11-10_22.log",
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			Name:      "2009-11-10_22.log",
-			Extention: ".log",
-			Size:      1125,
-		},
-	}
 	got := rotator.ListFiles()
-	assert.Equal(t, want, got)
+	want := `[{"FullPath":"tmp/log/node/node01/2009-11-10_21.log","SubPath":"2009-11-10_21.log","LogType":"node","Target":"node01","Name":"2009-11-10_21.log","Extention":".log","Size":1057},{"FullPath":"tmp/log/node/node01/2009-11-10_22.log","SubPath":"2009-11-10_22.log","LogType":"node","Target":"node01","Name":"2009-11-10_22.log","Extention":".log","Size":177},{"FullPath":"tmp/log/node/node02/2009-11-01_00.log","SubPath":"2009-11-01_00.log","LogType":"node","Target":"node02","Name":"2009-11-01_00.log","Extention":".log","Size":0},{"FullPath":"tmp/log/node/node02/2009-11-10_21.log","SubPath":"2009-11-10_21.log","LogType":"node","Target":"node02","Name":"2009-11-10_21.log","Extention":".log","Size":1116},{"FullPath":"tmp/log/pod/namespace01/2000-01-01_00.log","SubPath":"2000-01-01_00.log","LogType":"pod","Target":"namespace01","Name":"2000-01-01_00.log","Extention":".log","Size":1031},{"FullPath":"tmp/log/pod/namespace01/2009-11-10_21.log","SubPath":"2009-11-10_21.log","LogType":"pod","Target":"namespace01","Name":"2009-11-10_21.log","Extention":".log","Size":279},{"FullPath":"tmp/log/pod/namespace01/2009-11-10_22.log","SubPath":"2009-11-10_22.log","LogType":"pod","Target":"namespace01","Name":"2009-11-10_22.log","Extention":".log","Size":1031},{"FullPath":"tmp/log/pod/namespace01/2029-11-10_23.log","SubPath":"2029-11-10_23.log","LogType":"pod","Target":"namespace01","Name":"2029-11-10_23.log","Extention":".log","Size":279},{"FullPath":"tmp/log/pod/namespace02/0000-00-00_00.log","SubPath":"0000-00-00_00.log","LogType":"pod","Target":"namespace02","Name":"0000-00-00_00.log","Extention":".log","Size":12},{"FullPath":"tmp/log/pod/namespace02/2009-11-10_22.log","SubPath":"2009-11-10_22.log","LogType":"pod","Target":"namespace02","Name":"2009-11-10_22.log","Extention":".log","Size":1125}]`
+	testutil.CheckEqualJSON(t, got, want)
 }
 
 func TestListDirs(t *testing.T) {
-	testutil.SetTestLogs()
+	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
+	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogRoot()})
 	rotator := Rotator{driver: d}
-	want := []LogDir{
-		{
-			FullPath: filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01"),
-			SubPath:  filepath.Join(NODE_TYPE, "node01"),
-			LogType:  NODE_TYPE,
-			Target:   "node01",
-		},
-		{
-			FullPath: filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02"),
-			SubPath:  filepath.Join(NODE_TYPE, "node02"),
-			LogType:  NODE_TYPE,
-			Target:   "node02",
-		},
-		{
-			FullPath: filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01"),
-			SubPath:  filepath.Join(POD_TYPE, "namespace01"),
-			LogType:  POD_TYPE,
-			Target:   "namespace01",
-		},
-		{
-			FullPath: filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02"),
-			SubPath:  filepath.Join(POD_TYPE, "namespace02"),
-			LogType:  POD_TYPE,
-			Target:   "namespace02",
-		},
-	}
 	got := rotator.ListDirs()
-	assert.Equal(t, want, got)
+	want := `[{"FullPath":"tmp/log/node/node01","SubPath":"node/node01","LogType":"node","Target":"node01","FileCount":0,"FirstFile":"","LastFile":"","Size":0,"LastForward":""},{"FullPath":"tmp/log/node/node02","SubPath":"node/node02","LogType":"node","Target":"node02","FileCount":0,"FirstFile":"","LastFile":"","Size":0,"LastForward":""},{"FullPath":"tmp/log/pod/namespace01","SubPath":"pod/namespace01","LogType":"pod","Target":"namespace01","FileCount":0,"FirstFile":"","LastFile":"","Size":0,"LastForward":""},{"FullPath":"tmp/log/pod/namespace02","SubPath":"pod/namespace02","LogType":"pod","Target":"namespace02","FileCount":0,"FirstFile":"","LastFile":"","Size":0,"LastForward":""}]`
+	testutil.CheckEqualJSON(t, got, want)
 }
 
 func TestListDirWithSize(t *testing.T) {
-	testutil.SetTestLogs()
+	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
+	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogRoot()})
 	rotator := Rotator{driver: d}
-
-	want := []LogDir{
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01"),
-			SubPath:   filepath.Join(NODE_TYPE, "node01"),
-			LogType:   NODE_TYPE,
-			Target:    "node01",
-			FileCount: 2,
-			FirstFile: "2009-11-10_22.log",
-			LastFile:  "2009-11-10_23.log",
-			Size:      1234,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02"),
-			SubPath:   filepath.Join(NODE_TYPE, "node02"),
-			LogType:   NODE_TYPE,
-			Target:    "node02",
-			FileCount: 1,
-			FirstFile: "2009-11-10_22.log",
-			LastFile:  "2009-11-10_22.log",
-			Size:      1116,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01"),
-			SubPath:   filepath.Join(POD_TYPE, "namespace01"),
-			LogType:   POD_TYPE,
-			Target:    "namespace01",
-			FileCount: 2,
-			FirstFile: "2009-11-10_22.log",
-			LastFile:  "2009-11-10_23.log",
-			Size:      1310,
-		},
-		{
-			FullPath:  filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02"),
-			SubPath:   filepath.Join(POD_TYPE, "namespace02"),
-			LogType:   POD_TYPE,
-			Target:    "namespace02",
-			FileCount: 1,
-			FirstFile: "2009-11-10_22.log",
-			LastFile:  "2009-11-10_22.log",
-			Size:      1125,
-		},
-	}
 	got := rotator.ListDirsWithSize()
-	assert.Equal(t, want, got)
+
+	want := `[{"FullPath":"tmp/log/node/node01","SubPath":"node/node01","LogType":"node","Target":"node01","FileCount":2,"FirstFile":"2009-11-10_21.log","LastFile":"2009-11-10_22.log","Size":1234,"LastForward":""},{"FullPath":"tmp/log/node/node02","SubPath":"node/node02","LogType":"node","Target":"node02","FileCount":2,"FirstFile":"2009-11-01_00.log","LastFile":"2009-11-10_21.log","Size":1116,"LastForward":""},{"FullPath":"tmp/log/pod/namespace01","SubPath":"pod/namespace01","LogType":"pod","Target":"namespace01","FileCount":4,"FirstFile":"2000-01-01_00.log","LastFile":"2029-11-10_23.log","Size":2620,"LastForward":""},{"FullPath":"tmp/log/pod/namespace02","SubPath":"pod/namespace02","LogType":"pod","Target":"namespace02","FileCount":2,"FirstFile":"0000-00-00_00.log","LastFile":"2009-11-10_22.log","Size":1137,"LastForward":""}]`
+	testutil.CheckEqualJSON(t, got, want)
 }
 
 func TestListTargets(t *testing.T) {
-	testutil.SetTestLogs()
+	testutil.SetTestLogFiles()
 
-	userHome, _ := os.UserHomeDir()
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": filepath.Join(userHome, "tmp", "log")})
+	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogRoot()})
 	rotator := Rotator{driver: d}
-	want := []LogDir{
-		{
-			FullPath:    filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node01"),
-			SubPath:     filepath.Join(NODE_TYPE, "node01"),
-			LogType:     NODE_TYPE,
-			Target:      "node01",
-			FileCount:   2,
-			FirstFile:   "2009-11-10_22.log",
-			LastFile:    "2009-11-10_23.log",
-			Size:        1234,
-			LastForward: "2009-11-10T23:00:00.",
-		},
-		{
-			FullPath:    filepath.Join(rotator.driver.RootDirectory(), NODE_TYPE, "node02"),
-			SubPath:     filepath.Join(NODE_TYPE, "node02"),
-			LogType:     NODE_TYPE,
-			Target:      "node02",
-			FileCount:   1,
-			FirstFile:   "2009-11-10_22.log",
-			LastFile:    "2009-11-10_22.log",
-			Size:        1116,
-			LastForward: "2009-11-10T22:58:00.",
-		},
-		{
-			FullPath:    filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace01"),
-			SubPath:     filepath.Join(POD_TYPE, "namespace01"),
-			LogType:     POD_TYPE,
-			Target:      "namespace01",
-			FileCount:   2,
-			FirstFile:   "2009-11-10_22.log",
-			LastFile:    "2009-11-10_23.log",
-			Size:        1310,
-			LastForward: "2009-11-10T23:00:00.",
-		},
-		{
-			FullPath:    filepath.Join(rotator.driver.RootDirectory(), POD_TYPE, "namespace02"),
-			SubPath:     filepath.Join(POD_TYPE, "namespace02"),
-			LogType:     POD_TYPE,
-			Target:      "namespace02",
-			FileCount:   1,
-			FirstFile:   "2009-11-10_22.log",
-			LastFile:    "2009-11-10_22.log",
-			Size:        1125,
-			LastForward: "2009-11-10T22:58:00.",
-		},
-	}
 	got := rotator.ListTargets()
-	assert.Equal(t, want, got)
+
+	want := `[{"FullPath":"tmp/log/node/node01","SubPath":"node/node01","LogType":"node","Target":"node01","FileCount":2,"FirstFile":"2009-11-10_21.log","LastFile":"2009-11-10_22.log","Size":1234,"LastForward":"2009-11-10T23:00:00."},{"FullPath":"tmp/log/node/node02","SubPath":"node/node02","LogType":"node","Target":"node02","FileCount":2,"FirstFile":"2009-11-01_00.log","LastFile":"2009-11-10_21.log","Size":1116,"LastForward":"2009-11-10T21:58:00."},{"FullPath":"tmp/log/pod/namespace01","SubPath":"pod/namespace01","LogType":"pod","Target":"namespace01","FileCount":4,"FirstFile":"2000-01-01_00.log","LastFile":"2029-11-10_23.log","Size":2620,"LastForward":"2009-11-10T23:00:00."},{"FullPath":"tmp/log/pod/namespace02","SubPath":"pod/namespace02","LogType":"pod","Target":"namespace02","FileCount":2,"FirstFile":"0000-00-00_00.log","LastFile":"2009-11-10_22.log","Size":1137,"LastForward":"2009-11-10T22:58:00."}]`
+	testutil.CheckEqualJSON(t, got, want)
 }

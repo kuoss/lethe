@@ -2,17 +2,18 @@ package handlers
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/letheql"
 	"github.com/kuoss/lethe/util"
-	"log"
-	"net/http"
 )
 
 func (lh *LetheHandler) Query(c *gin.Context) {
-	log.Println("QueryHandler...")
 	query := c.Query("query")
-	log.Println("query=", query)
+	log.Println("QueryHandler", "query=", query)
+
 	if query == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
@@ -22,7 +23,6 @@ func (lh *LetheHandler) Query(c *gin.Context) {
 	}
 
 	queryData, err := letheql.ProcQuery(query, letheql.TimeRange{})
-	// log.Println("queryData=", queryData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
@@ -71,7 +71,7 @@ func (lh *LetheHandler) QueryRange(c *gin.Context) {
 	start := c.Query("start")
 	end := c.Query("end")
 
-	fmt.Println("query_range...", query, start, end)
+	log.Println("query_range...", query, start, end)
 	if query == "" || start == "" || end == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",

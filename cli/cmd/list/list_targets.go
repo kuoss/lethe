@@ -23,7 +23,7 @@ func initListTargets() {
 
 func listTargets(c *cobra.Command) {
 	now := time.Now().UTC()
-	dirs := logs.ListTargets()
+	dirs := logs.NewRotator().ListTargets()
 
 	var data [][]string
 	var totalSize int64

@@ -82,7 +82,7 @@ func (l *LogPath) Filename() string {
 	return l.file
 }
 
-//just for testing?
+// just for testing?
 func (l *LogPath) SetFullPath(subPath string) {
 	l.fullPath = filepath.Join(l.RootDirectory, subPath)
 }

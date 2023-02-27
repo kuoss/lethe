@@ -3,28 +3,30 @@ package logs
 import (
 	"fmt"
 	"log"
+	"os"
 	"sort"
+	"strconv"
 	"strings"
-	"time"
 
+	"golang.org/x/sys/unix"
+
+	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/util"
 )
 
 // DELETE
-func (rotator *Rotator) DeleteByAge(dryRun bool) {
-	w := config.GetWriter()
-
+func (rotator *Rotator) DeleteByAge() {
 	retentionTime := config.GetConfig().GetString("retention.time")
 	duration, err := util.GetDurationFromAge(retentionTime)
 	if err != nil {
 		log.Fatalf("cannot parse duration=[%s] error=%s", retentionTime, err)
 		return
 	}
-	point := strings.Replace(config.GetNow().Add(-duration).UTC().String()[0:13], " ", "_", 1)
+	point := strings.Replace(clock.GetNow().Add(-duration).UTC().String()[0:13], " ", "_", 1)
 	files := rotator.ListFiles()
 	if len(files) < 1 {
-		fmt.Fprintf(w, "DeleteByAge( < %s): no files. done.\n", point)
+		fmt.Printf("DeleteByAge( < %s): no files. done.\n", point)
 		return
 	}
 	sort.Slice(files, func(i, j int) bool {
@@ -33,24 +35,18 @@ func (rotator *Rotator) DeleteByAge(dryRun bool) {
 
 	for _, file := range files {
 		if file.Name < point {
-			if dryRun {
-				//		fmt.Fprintf(w, "DeleteByAge(%s < %s): %s (dry run)\n", file.Name, point, file.FullPath)
-			} else {
-				fmt.Fprintf(w, "DeleteByAge(%s < %s): %s\n", file.Name, point, file.FullPath)
-				err := rotator.driver.Delete(file.FullPath)
-				if err != nil {
-					return
-				}
+			fmt.Printf("DeleteByAge(%s < %s): %s\n", file.Name, point, file.FullPath)
+			err := rotator.driver.Delete(file.FullPath)
+			if err != nil {
+				return
 			}
 		}
 	}
-	fmt.Fprintf(w, "DeleteByAge(%s): done\n", point)
+	fmt.Printf("DeleteByAge(%s): Done\n", point)
 }
 
-func (rotator *Rotator) DeleteBySize(dryRun bool) {
-	//	w := config.GetWriter()
-
-	retentionSizeKB, err := util.StringToKB(config.GetConfig().GetString("retention.size"))
+func (rotator *Rotator) DeleteBySize() {
+	retentionSizeBytes, err := util.StringToBytes(config.GetConfig().GetString("retention.size"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,29 +56,48 @@ func (rotator *Rotator) DeleteBySize(dryRun bool) {
 	})
 
 	for _, file := range files {
-		diskUsedKB, err := rotator.GetDiskUsedKB(file.FullPath)
+		diskUsedBytes, err := rotator.GetDiskUsedBytes(config.GetLogRoot())
 		if err != nil {
-			log.Fatalf("cannot find out disk used. error=%s", err)
+			log.Fatalf("Cannot get disk used bytes: %s", err)
 			return
 		}
-		if diskUsedKB < retentionSizeKB {
-			//		fmt.Fprintf(w, "DeleteBySize(%.1fm < %.1fm): done\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024)
+		if diskUsedBytes < retentionSizeBytes {
+			fmt.Printf("DeleteBySize(%d < %d): Done\n", diskUsedBytes, retentionSizeBytes)
 			return
 		}
-		if dryRun {
-			//			fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s (dry run)\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
-		} else {
-			//	fmt.Fprintf(w, "DeleteBySize(%.1fm > %.1fm): %s\n", float64(diskUsedKB)/1024, float64(retentionSizeKB)/1024, file.FullPath)
-			rotator.driver.Delete(file.FullPath)
-			time.Sleep(1000 * time.Millisecond) // sleep 1 second
-		}
+		fmt.Printf("DeleteBySize(%d > %d): %s\n", diskUsedBytes, retentionSizeBytes, file.FullPath)
+		rotator.driver.Delete(file.FullPath)
+		// time.Sleep(500 * time.Millisecond)
 	}
 }
 
-func (rotator *Rotator) GetDiskUsedKB(path string) (int, error) {
+func (rotator *Rotator) GetDiskUsedBytes(path string) (int, error) {
+	if os.Getenv("TEST_MODE") == "1" {
+		return rotator.GetDiskUsedBytesInTest(path)
+	}
+	var stat unix.Statfs_t
+	err := unix.Statfs(path, &stat)
+	if err != nil {
+		return -1, err
+	}
+	return int(int64(stat.Blocks-stat.Bavail) * stat.Bsize), nil
+}
 
-	// todo
-	// get disk used ? or under path size total?
+func (rotator *Rotator) GetDiskUsedBytesInTest(path string) (int, error) {
+	var stat unix.Statfs_t
+	err := unix.Statfs(path, &stat)
+	if err != nil {
+		return -1, err
+	}
+	avail := int(int64(stat.Bavail) * stat.Bsize)
+	initialAvail, err := strconv.Atoi(os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES"))
+	if err != nil {
+		return -1, err
+	}
+	return initialAvail - avail, nil
+}
+
+func (rotator *Rotator) GetFilesUsedBytes(path string) (int, error) {
 	fileInfos, err := rotator.driver.Walk(path)
 	if err != nil {
 		return 0, err
@@ -91,6 +106,5 @@ func (rotator *Rotator) GetDiskUsedKB(path string) (int, error) {
 	for _, fileInfo := range fileInfos {
 		size += fileInfo.Size()
 	}
-
 	return int(size), err
 }

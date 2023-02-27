@@ -75,10 +75,7 @@ type includeFilter struct {
 }
 
 func (f *includeFilter) match(line string) bool {
-	if strings.Contains(line, f.keyword) {
-		return true
-	}
-	return false
+	return strings.Contains(line, f.keyword)
 }
 
 type excludeFilter struct {
@@ -86,10 +83,7 @@ type excludeFilter struct {
 }
 
 func (f *excludeFilter) match(line string) bool {
-	if !strings.Contains(line, f.keyword) {
-		return true
-	}
-	return false
+	return !strings.Contains(line, f.keyword)
 }
 
 type includeRegexFilter struct {

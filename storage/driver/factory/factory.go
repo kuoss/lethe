@@ -1,8 +1,8 @@
 package factory
 
 import (
-	"errors"
 	"fmt"
+
 	"github.com/kuoss/lethe/storage/driver"
 )
 
@@ -26,7 +26,7 @@ func Register(name string, factory StorageDriverFactory) {
 func Get(name string, parameters map[string]interface{}) (driver.StorageDriver, error) {
 	driverFactory, ok := driverFactories[name]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Invalid StorageDriver named %s", name))
+		return nil, fmt.Errorf("invalid StorageDriver named %s", name)
 	}
 	return driverFactory.Create(parameters)
 }
