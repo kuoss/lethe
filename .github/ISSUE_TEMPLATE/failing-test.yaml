@@ -1,6 +1,6 @@
 name: Failing Test
 description: Report continuously failing tests or jobs in Kubernetes CI
-labels: failing-test
+labels: testing
 body:
   - type: textarea
     id: jobs
