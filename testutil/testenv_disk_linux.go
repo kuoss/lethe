@@ -3,6 +3,14 @@
 
 package testutil
 
+import (
+	"fmt"
+	"path/filepath"
+
+	fscryptFilesystem "github.com/google/fscrypt/filesystem"
+	"golang.org/x/sys/unix"
+)
+
 func getDiskAvailableBytes(path string) (string, error) {
 	// get absolute path
 	absPath, err := filepath.Abs(path)

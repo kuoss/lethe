@@ -6,14 +6,12 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 
 	"runtime"
-	"time"
 
 	"github.com/kuoss/lethe/config"
 )
-
-var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 const (
 	POD         = "pod"
@@ -32,20 +30,24 @@ func Init() {
 	config.LoadConfig()
 	config.GetConfig().Set("retention.time", "3h")
 	config.GetConfig().Set("retention.size", "10m")
+	config.GetConfig().Set("retention.sizingStrategy", "files")
 	config.SetLimit(1000)
 	config.SetLogRoot(logRoot)
 
 	ClearTestLogFiles()
-	avail, err := getDiskAvailableBytes(logRoot)
+	setenvIntialDiskAvailableBytes()
+	fmt.Println("Test environment initialized...")
+}
+
+func setenvIntialDiskAvailableBytes() {
+	if os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES") != "" {
+		return
+	}
+	avail, err := getDiskAvailableBytes(config.GetLogRoot())
 	if err != nil {
 		log.Fatal(err)
 	}
 	os.Setenv("TEST_INITIAL_DISK_AVAILABLE_BYTES", avail)
-	fmt.Println("Test environment initialized...")
-}
-
-func GetNow() time.Time {
-	return now
 }
 
 func changeWorkingDirectoryToProjectRoot() {
@@ -65,6 +67,7 @@ func ClearTestLogFiles() {
 		log.Fatalf("Cannot remove logDirectory [%s]: %s", logDirectory, err)
 	}
 	os.MkdirAll(logDirectory, 0755)
+	time.Sleep(200 * time.Millisecond)
 }
 
 func SetTestLogFiles() {

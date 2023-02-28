@@ -52,29 +52,16 @@ func (rotator *Rotator) DeleteBySize() {
 	})
 
 	for _, file := range files {
-		diskUsedBytes, err := rotator.GetDiskUsedBytes(config.GetLogRoot())
+		usedBytes, err := rotator.GetUsedBytes(config.GetLogRoot())
 		if err != nil {
-			log.Fatalf("Cannot get disk used bytes: %s", err)
+			log.Fatalf("cannot get used bytes: %s", err)
 			return
 		}
-		if diskUsedBytes < retentionSizeBytes {
-			fmt.Printf("DeleteBySize(%d < %d): Done\n", diskUsedBytes, retentionSizeBytes)
+		if usedBytes < retentionSizeBytes {
+			fmt.Printf("DeleteBySize(%d < %d): Done\n", usedBytes, retentionSizeBytes)
 			return
 		}
-		fmt.Printf("DeleteBySize(%d > %d): %s\n", diskUsedBytes, retentionSizeBytes, file.FullPath)
+		fmt.Printf("DeleteBySize(%d > %d): %s\n", usedBytes, retentionSizeBytes, file.FullPath)
 		rotator.driver.Delete(file.FullPath)
-		// time.Sleep(500 * time.Millisecond)
 	}
-}
-
-func (rotator *Rotator) GetFilesUsedBytes(path string) (int, error) {
-	fileInfos, err := rotator.driver.Walk(path)
-	if err != nil {
-		return 0, err
-	}
-	var size int64
-	for _, fileInfo := range fileInfos {
-		size += fileInfo.Size()
-	}
-	return int(size), err
 }
