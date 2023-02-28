@@ -7,7 +7,7 @@ body:
     attributes:
       label: What would you like to be added?
       description: |
-
+        Feature request
     validations:
       required: true
 
