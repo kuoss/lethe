@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"runtime"
 	"testing"
 
 	"github.com/kuoss/lethe/config"
@@ -15,7 +16,6 @@ func Test_GetDiskUsedBytes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	assert.LessOrEqual(t, actual, 106496)
 	assert.GreaterOrEqual(t, actual, -4096)
 }
@@ -111,20 +111,70 @@ func Test_DeleteBySize_50k(t *testing.T) {
 	config.GetConfig().Set("retention.size", "50k")
 	rotator.DeleteBySize()
 
-	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
-	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+	if runtime.GOOS == "linux" {
+		assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+		assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
 
-	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
-	assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
 
-	assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
-	// assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
-	assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+		assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+		// assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
 
-	assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
-	assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_21.log")
+		assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+		assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_22.log")
+	} else {
+		assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+		assert.FileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+		assert.FileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+		assert.FileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace02/2009-11-10_22.log")
+	}
 }
 
+func Test_DeleteBySize_15k(t *testing.T) {
+	testutil.Init()
+	testutil.SetTestLogFiles()
+
+	config.GetConfig().Set("retention.size", "15k")
+	rotator.DeleteBySize()
+
+	if runtime.GOOS == "linux" {
+		assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+		assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+		assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+		// assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+		assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+		assert.NoFileExists(t, "./tmp/log/pod/namespace02/2009-11-10_22.log")
+	} else {
+		assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
+
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-01_00.log")
+		assert.NoFileExists(t, "./tmp/log/node/node02/2009-11-10_21.log")
+
+		assert.NoFileExists(t, "./tmp/log/pod/namespace01/2000-01-01_00.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_21.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace01/2009-11-10_22.log")
+
+		assert.NoFileExists(t, "./tmp/log/pod/namespace02/0000-00-00_00.log")
+		assert.FileExists(t, "./tmp/log/pod/namespace02/2009-11-10_22.log")
+	}
+}
 func Test_DeleteBySize_1k(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()

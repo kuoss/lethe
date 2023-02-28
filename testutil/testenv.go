@@ -6,14 +6,11 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 
 	"runtime"
 	"time"
 
-	fscryptFilesystem "github.com/google/fscrypt/filesystem"
 	"github.com/kuoss/lethe/config"
-	"golang.org/x/sys/unix"
 )
 
 var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -45,29 +42,6 @@ func Init() {
 	}
 	os.Setenv("TEST_INITIAL_DISK_AVAILABLE_BYTES", avail)
 	fmt.Println("Test environment initialized...")
-}
-
-func getDiskAvailableBytes(path string) (string, error) {
-	// get absolute path
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return "", fmt.Errorf("cannot get absoluth path for [%s]: %s", path, err)
-	}
-
-	// find mount
-	// ignoring mountpoint "/init" because it is not a directory
-	mount, err := fscryptFilesystem.FindMount(absPath)
-	if err != nil {
-		return "", fmt.Errorf("cannot find mount for [%s]: %s", absPath, err)
-	}
-
-	// get disk available bytes
-	var stat unix.Statfs_t
-	err = unix.Statfs(mount.Path, &stat)
-	if err != nil {
-		return "", fmt.Errorf("cannot get disk available bytes for [%s]: %s", mount.Path, err)
-	}
-	return fmt.Sprintf("%d", stat.Bavail*uint64(stat.Bsize)), nil
 }
 
 func GetNow() time.Time {

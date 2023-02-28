@@ -3,11 +3,11 @@ package main
 import (
 	"testing"
 
-	testutil "github.com/kuoss/lethe/testutil"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_version(t *testing.T) {
-	got := execute("version")
-	want := `"lethetool v0.0.1"`
-	testutil.CheckEqualJSON(t, got, want)
+	actual := execute("version")
+	expected := "lethetool v0.0.1"
+	assert.Equal(t, expected, actual)
 }

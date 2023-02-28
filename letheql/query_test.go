@@ -13,10 +13,10 @@ import (
 
 func init() {
 	testutil.Init()
+	testutil.SetTestLogFiles()
 }
 
 func Test_Query_Success(t *testing.T) {
-	testutil.SetTestLogFiles()
 
 	tests := map[string]struct {
 		query string
@@ -87,8 +87,6 @@ func ago(m int) time.Time {
 }
 func Test_QueryWithTimeRange(t *testing.T) {
 
-	testutil.SetTestLogFiles()
-
 	now := clock.GetNow()
 
 	tests := map[string]struct {
@@ -107,7 +105,7 @@ func Test_QueryWithTimeRange(t *testing.T) {
 			want: QueryData{ResultType: "scalar", Logs: []string(nil), Scalar: 2}},
 		"05": {query: `count_over_time(pod{namespace="*"})`, timeRange: TimeRange{Start: ago(2), End: now},
 			want: QueryData{ResultType: "scalar", Logs: []string(nil), Scalar: 17}},
-		"06": {query: `count_over_time(pod{namespace="*"})`, timeRange: TimeRange{Start: ago(3), End: time.Time{}},
+		"06": {query: `count_over_time(pod{namespace="*"})`, timeRange: TimeRange{Start: ago(3), End: now},
 			want: QueryData{ResultType: ValueTypeScalar, Logs: nil, Scalar: 20}},
 	}
 

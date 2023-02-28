@@ -3,12 +3,8 @@ package logs
 import (
 	"fmt"
 	"log"
-	"os"
 	"sort"
-	"strconv"
 	"strings"
-
-	"golang.org/x/sys/unix"
 
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/config"
@@ -69,32 +65,6 @@ func (rotator *Rotator) DeleteBySize() {
 		rotator.driver.Delete(file.FullPath)
 		// time.Sleep(500 * time.Millisecond)
 	}
-}
-
-func (rotator *Rotator) GetDiskUsedBytes(path string) (int, error) {
-	if os.Getenv("TEST_MODE") == "1" {
-		return rotator.GetDiskUsedBytesInTest(path)
-	}
-	var stat unix.Statfs_t
-	err := unix.Statfs(path, &stat)
-	if err != nil {
-		return -1, err
-	}
-	return int(int64(stat.Blocks-stat.Bavail) * stat.Bsize), nil
-}
-
-func (rotator *Rotator) GetDiskUsedBytesInTest(path string) (int, error) {
-	var stat unix.Statfs_t
-	err := unix.Statfs(path, &stat)
-	if err != nil {
-		return -1, err
-	}
-	avail := int(int64(stat.Bavail) * stat.Bsize)
-	initialAvail, err := strconv.Atoi(os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES"))
-	if err != nil {
-		return -1, err
-	}
-	return initialAvail - avail, nil
 }
 
 func (rotator *Rotator) GetFilesUsedBytes(path string) (int, error) {
