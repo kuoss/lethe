@@ -23,7 +23,7 @@ func init() {
 
 func Query(cmd *cobra.Command) {
 	query, err := cmd.Flags().GetString("query")
-	fmt.Println("======= query=", query)
+	fmt.Println("=== query=", query)
 	if err != nil {
 		cmd.PrintErr(err)
 		return

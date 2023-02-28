@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
-	"time"
+	"path/filepath"
 
 	"runtime"
 
@@ -23,7 +23,7 @@ const (
 )
 
 func Init() {
-	logRoot := "./tmp/log"
+	logRoot := filepath.Join(".", "tmp", "log")
 	os.Setenv("TEST_MODE", "1")
 	changeWorkingDirectoryToProjectRoot()
 
@@ -34,7 +34,6 @@ func Init() {
 	config.SetLimit(1000)
 	config.SetLogRoot(logRoot)
 
-	ClearTestLogFiles()
 	setenvIntialDiskAvailableBytes()
 	fmt.Println("Test environment initialized...")
 }
@@ -55,23 +54,22 @@ func changeWorkingDirectoryToProjectRoot() {
 	dir := path.Join(path.Dir(filename), "..")
 	err := os.Chdir(dir)
 	if err != nil {
-		log.Fatalf("Cannot change directory to [%s]", dir)
+		log.Fatalf("cannot change directory to [%s]", dir)
 	}
 }
 
-func ClearTestLogFiles() {
-	logDirectory := config.GetLogRoot()
-	fmt.Printf("clear logDirectory: %s\n", logDirectory)
-	err := os.RemoveAll(logDirectory)
-	if err != nil {
-		log.Fatalf("Cannot remove logDirectory [%s]: %s", logDirectory, err)
-	}
-	os.MkdirAll(logDirectory, 0755)
-	time.Sleep(200 * time.Millisecond)
-}
+// func ClearTestLogFiles() {
+// 	logDirectory := config.GetLogRoot()
+// 	fmt.Printf("clear logDirectory: %s\n", logDirectory)
+// 	err := os.RemoveAll(logDirectory)
+// 	if err != nil {
+// 		log.Fatalf("cannot remove logDirectory [%s]: %s", logDirectory, err)
+// 	}
+// 	os.MkdirAll(logDirectory, 0755)
+// }
 
 func SetTestLogFiles() {
-	ClearTestLogFiles()
+	// ClearTestLogFiles()
 	logDirectory := config.GetLogRoot()
 	fmt.Printf("copy to logDirectory: %s\n", logDirectory)
 	copyRecursively("./testutil/log", logDirectory)
