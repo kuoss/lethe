@@ -30,3 +30,12 @@ test-all:
 test-win:
 	.\scripts\go_test_all_packages_failfast.bat
 
+
+go-licenses: go-licenses-report go-licenses-check
+
+go-licenses-report:
+	# go install github.com/google/go-licenses@latest
+	go-licenses report github.com/kuoss/lethe | tee docs/licenses.csv
+
+go-licenses-check:
+	go-licenses check github.com/kuoss/lethe && echo OK
