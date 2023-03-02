@@ -9,14 +9,9 @@ import (
 	"path/filepath"
 
 	"runtime"
-	"time"
 
-	fscryptFilesystem "github.com/google/fscrypt/filesystem"
 	"github.com/kuoss/lethe/config"
-	"golang.org/x/sys/unix"
 )
-
-var now = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 const (
 	POD         = "pod"
@@ -28,50 +23,30 @@ const (
 )
 
 func Init() {
-	logRoot := "./tmp/log"
+	logRoot := filepath.Join(".", "tmp", "log")
 	os.Setenv("TEST_MODE", "1")
 	changeWorkingDirectoryToProjectRoot()
 
 	config.LoadConfig()
 	config.GetConfig().Set("retention.time", "3h")
 	config.GetConfig().Set("retention.size", "10m")
+	config.GetConfig().Set("retention.sizingStrategy", "files")
 	config.SetLimit(1000)
 	config.SetLogRoot(logRoot)
 
-	ClearTestLogFiles()
-	avail, err := getDiskAvailableBytes(logRoot)
+	setenvIntialDiskAvailableBytes()
+	fmt.Println("Test environment initialized...")
+}
+
+func setenvIntialDiskAvailableBytes() {
+	if os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES") != "" {
+		return
+	}
+	avail, err := getDiskAvailableBytes(config.GetLogRoot())
 	if err != nil {
 		log.Fatal(err)
 	}
 	os.Setenv("TEST_INITIAL_DISK_AVAILABLE_BYTES", avail)
-	fmt.Println("Test environment initialized...")
-}
-
-func getDiskAvailableBytes(path string) (string, error) {
-	// get absolute path
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return "", fmt.Errorf("cannot get absoluth path for [%s]: %s", path, err)
-	}
-
-	// find mount
-	// ignoring mountpoint "/init" because it is not a directory
-	mount, err := fscryptFilesystem.FindMount(absPath)
-	if err != nil {
-		return "", fmt.Errorf("cannot find mount for [%s]: %s", absPath, err)
-	}
-
-	// get disk available bytes
-	var stat unix.Statfs_t
-	err = unix.Statfs(mount.Path, &stat)
-	if err != nil {
-		return "", fmt.Errorf("cannot get disk available bytes for [%s]: %s", mount.Path, err)
-	}
-	return fmt.Sprintf("%d", stat.Bavail*uint64(stat.Bsize)), nil
-}
-
-func GetNow() time.Time {
-	return now
 }
 
 func changeWorkingDirectoryToProjectRoot() {
@@ -79,22 +54,22 @@ func changeWorkingDirectoryToProjectRoot() {
 	dir := path.Join(path.Dir(filename), "..")
 	err := os.Chdir(dir)
 	if err != nil {
-		log.Fatalf("Cannot change directory to [%s]", dir)
+		log.Fatalf("cannot change directory to [%s]", dir)
 	}
 }
 
-func ClearTestLogFiles() {
-	logDirectory := config.GetLogRoot()
-	fmt.Printf("clear logDirectory: %s\n", logDirectory)
-	err := os.RemoveAll(logDirectory)
-	if err != nil {
-		log.Fatalf("Cannot remove logDirectory [%s]: %s", logDirectory, err)
-	}
-	os.MkdirAll(logDirectory, 0755)
-}
+// func ClearTestLogFiles() {
+// 	logDirectory := config.GetLogRoot()
+// 	fmt.Printf("clear logDirectory: %s\n", logDirectory)
+// 	err := os.RemoveAll(logDirectory)
+// 	if err != nil {
+// 		log.Fatalf("cannot remove logDirectory [%s]: %s", logDirectory, err)
+// 	}
+// 	os.MkdirAll(logDirectory, 0755)
+// }
 
 func SetTestLogFiles() {
-	ClearTestLogFiles()
+	// ClearTestLogFiles()
 	logDirectory := config.GetLogRoot()
 	fmt.Printf("copy to logDirectory: %s\n", logDirectory)
 	copyRecursively("./testutil/log", logDirectory)

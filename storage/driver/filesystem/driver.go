@@ -19,7 +19,7 @@ import (
 
 const (
 	driverName           = "filesystem"
-	defaultRootDirectory = "./tmp/log"
+	defaultRootDirectory = "/tmp/log"
 )
 
 type DriverParameters struct {

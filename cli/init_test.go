@@ -18,6 +18,7 @@ func init() {
 	testutil.SetTestLogFiles()
 	rotator = logs.NewRotator()
 	config.SetWriter(cliutil.GetWriter())
+	// time.Sleep(500 * time.Millisecond)
 }
 
 func execute(args ...string) string {
@@ -27,5 +28,7 @@ func execute(args ...string) string {
 	cmd.SetErr(buf)
 	cmd.SetArgs(args)
 	cmd.Execute()
-	return strings.TrimSpace(buf.String() + cliutil.GetString())
+	result := strings.TrimSpace(buf.String() + cliutil.GetString())
+	// time.Sleep(500 * time.Millisecond)
+	return result
 }

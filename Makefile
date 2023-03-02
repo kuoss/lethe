@@ -24,3 +24,9 @@ staticcheck:
 test:
 	go test ./... -failfast -cover
 
+test-all:
+	scripts/go_test_all_packages_failfast.sh
+
+test-win:
+	.\scripts\go_test_all_packages_failfast.bat
+

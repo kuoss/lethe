@@ -1,11 +1,11 @@
 package testutil
 
 import (
-	"log"
 	"os"
 	"testing"
 
 	"github.com/kuoss/lethe/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -23,10 +23,5 @@ func Test_SetTestLogFiles(t *testing.T) {
 	SetTestLogFiles()
 
 	logDirectory := config.GetLogRoot()
-	if _, err := os.Stat(logDirectory); err != nil {
-		if os.IsNotExist(err) {
-			log.Fatalf("logDirectory [%s] not exists: %s", logDirectory, err)
-		}
-		log.Fatalf("Cannot stat logDirectory [%s]: %s", logDirectory, err)
-	}
+	assert.DirExists(t, logDirectory)
 }
