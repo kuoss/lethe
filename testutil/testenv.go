@@ -2,7 +2,6 @@ package testutil
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -92,7 +91,7 @@ func copyRecursively(src string, dest string) {
 	if err != nil {
 		log.Fatalf("Cannot make directory [%s]: %s", dest, err)
 	}
-	files, err := ioutil.ReadDir(src)
+	files, err := os.ReadDir(src)
 	if err != nil {
 		log.Fatalf("Cannot read directory [%s]: %s", dest, err)
 	}
@@ -104,11 +103,11 @@ func copyRecursively(src string, dest string) {
 			continue
 		}
 		// log.Println("copy file:", srcFile, destFile)
-		content, err := ioutil.ReadFile(srcFile)
+		content, err := os.ReadFile(srcFile)
 		if err != nil {
 			log.Fatalf("Cannot read file [%s]: %s", srcFile, err)
 		}
-		err = ioutil.WriteFile(destFile, content, 0755)
+		err = os.WriteFile(destFile, content, 0755)
 		if err != nil {
 			log.Fatalf("Cannot write file [%s]: %s", destFile, err)
 		}
