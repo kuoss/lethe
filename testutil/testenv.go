@@ -41,7 +41,9 @@ func setenvIntialDiskAvailableBytes() {
 	if os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES") != "" {
 		return
 	}
-	avail, err := getDiskAvailableBytes(config.GetLogRoot())
+	logDirectory := config.GetLogRoot()
+	os.MkdirAll(logDirectory, 0755)
+	avail, err := getDiskAvailableBytes(logDirectory)
 	if err != nil {
 		log.Fatal(err)
 	}
