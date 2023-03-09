@@ -39,3 +39,16 @@ go-licenses-report:
 
 go-licenses-check:
 	go-licenses check github.com/kuoss/lethe && echo OK
+
+mock:
+	./scripts/mock/restart.sh
+
+mock-status:
+	./scripts/mock/status.sh
+
+mock-logs:
+	./scripts/mock/logs.sh
+
+mock-delete:
+	./scripts/mock/delete.sh
+
