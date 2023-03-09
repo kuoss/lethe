@@ -88,6 +88,11 @@ jobs:
       uses: codecov/codecov-action@v3
     - name: Convert coverage to lcov
       uses: jandelgado/gcov2lcov-action@v1
+    - name: Coveralls 
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage.lcov
     - name: Coverage Gate
       uses: VeryGoodOpenSource/very_good_coverage@v2
       with:
