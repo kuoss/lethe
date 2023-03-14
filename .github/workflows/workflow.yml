@@ -72,6 +72,19 @@ jobs:
         gofmt-path: '.'
         gofmt-flags: '-l -d'
 
+  go-test-failfast:
+    name: go-test-failfast
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: go test failfast
+      run: go test ./... -v -failfast
+
   go-test-with-coverage:
     name: go-test-with-coverage
     runs-on: ubuntu-latest
