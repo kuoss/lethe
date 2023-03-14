@@ -3,9 +3,17 @@ package main
 import (
 	"testing"
 	"time"
-
 	"github.com/stretchr/testify/assert"
+	// cliutil "github.com/kuoss/lethe/cli/util"
+	testutil "github.com/kuoss/lethe/testutil"
 )
+
+func init() {
+	testutil.Init()
+	// testutil.SetTestLogFiles()
+	// rotator = logs.NewRotator()
+	// config.SetWriter(cliutil.GetWriter())
+}
 
 func Test_logs(t *testing.T) {
 

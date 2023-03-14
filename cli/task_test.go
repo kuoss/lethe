@@ -8,11 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	testutil.Init()
-}
-
 func Test_task_deleteByAge_10d(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.time", "20d")
@@ -33,6 +30,7 @@ func Test_task_deleteByAge_10d(t *testing.T) {
 }
 
 func Test_task_deleteByAge_1d(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.time", "2d")
@@ -53,6 +51,7 @@ func Test_task_deleteByAge_1d(t *testing.T) {
 }
 
 func Test_task_deleteByAge_1h(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.time", "1h")
@@ -73,6 +72,7 @@ func Test_task_deleteByAge_1h(t *testing.T) {
 }
 
 func Test_task_deleteBySize_1m(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.size", "1m")
@@ -93,6 +93,7 @@ func Test_task_deleteBySize_1m(t *testing.T) {
 }
 
 func Test_task_deleteBySize_1k(t *testing.T) {
+	testutil.Init()
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.size", "1k")
