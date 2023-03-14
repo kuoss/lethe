@@ -83,7 +83,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: go test with coverage
-      run: go test ./... -coverprofile=coverage.out
+      run: go test ./... -v -coverprofile=coverage.out
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
     - name: Convert coverage to lcov
