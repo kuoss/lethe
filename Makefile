@@ -21,7 +21,7 @@ test-win:
 	.\scripts\go_test_all_packages_failfast.bat
 
 test-cover:
-	go test ./... -coverprofile=cover.out ;\
+	go test ./... -coverprofile cover.out ;\
 	go tool cover -func cover.out
 
 
@@ -30,7 +30,7 @@ pre-checks:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/google/go-licenses@latest
 
-checks: fmt vet staticcheck test
+checks: fmt vet staticcheck go-licenses-check test-gate
 
 fmt:
 	go fmt ./...
@@ -39,19 +39,21 @@ vet:
 	go vet ./...
 
 staticcheck:
-	# need staticcheck
-	/root/go/bin/staticcheck ./...
-
-go-licenses: go-licenses-report go-licenses-check
-
-go-licenses-report:
-	# need go-licenses
-	go-licenses report github.com/kuoss/lethe | tee docs/go-licenses.csv
+	staticcheck ./...
 
 go-licenses-check:
-	go-licenses check github.com/kuoss/lethe && echo OK
+	go-licenses check  github.com/kuoss/lethe 2> /dev/null
+	go-licenses report github.com/kuoss/lethe 2> /dev/null | tee docs/go-licenses.csv
+
+test-gate: 
+	./scripts/test-gate.sh
 
 
+
+
+govulncheck:
+	# go install golang.org/x/vuln/cmd/govulncheck@latest
+	govulncheck ./...
 
 mock:
 	./scripts/mock/restart.sh

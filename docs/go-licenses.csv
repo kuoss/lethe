@@ -24,9 +24,9 @@ github.com/thoas/go-funk,https://github.com/thoas/go-funk/blob/v0.9.2/LICENSE,MI
 github.com/ugorji/go/codec,https://github.com/ugorji/go/blob/codec/v1.2.7/codec/LICENSE,MIT
 github.com/valyala/fastrand,https://github.com/valyala/fastrand/blob/v1.1.0/LICENSE,MIT
 github.com/valyala/histogram,https://github.com/valyala/histogram/blob/v1.2.0/LICENSE,MIT
-golang.org/x/crypto/sha3,https://cs.opensource.google/go/x/crypto/+/6f7dac96:LICENSE,BSD-3-Clause
-golang.org/x/sys,https://cs.opensource.google/go/x/sys/+/dcacdad4:LICENSE,BSD-3-Clause
-golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.3.7:LICENSE,BSD-3-Clause
+golang.org/x/crypto/sha3,https://cs.opensource.google/go/x/crypto/+/v0.7.0:LICENSE,BSD-3-Clause
+golang.org/x/sys/unix,https://cs.opensource.google/go/x/sys/+/v0.6.0:LICENSE,BSD-3-Clause
+golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.8.0:LICENSE,BSD-3-Clause
 google.golang.org/protobuf,https://github.com/protocolbuffers/protobuf-go/blob/v1.28.0/LICENSE,BSD-3-Clause
 gopkg.in/ini.v1,https://github.com/go-ini/ini/blob/v1.66.4/LICENSE,Apache-2.0
 gopkg.in/yaml.v2,https://github.com/go-yaml/yaml/blob/v2.4.0/LICENSE,Apache-2.0

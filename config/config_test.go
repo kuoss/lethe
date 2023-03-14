@@ -2,8 +2,8 @@ package config
 
 import (
 	"bytes"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_LoadConfig(t *testing.T) {
