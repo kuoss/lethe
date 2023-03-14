@@ -1,13 +1,46 @@
 package config
 
 import (
-	"fmt"
-	"path/filepath"
+	"bytes"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestConfig(t *testing.T) {
+func Test_LoadConfig(t *testing.T) {
+	LoadConfig()
+	assert.NotNil(t, config)
+}
 
-	fmt.Println(filepath.Join(".", "etc"))
-	fmt.Println(filepath.Join("..", "etc"))
+func Test_GetConfig(t *testing.T) {
+	ret := GetConfig()
+	assert.NotNil(t, ret)
+}
+
+func Test_SetWriter(t *testing.T) {
+	tempWriter := new(bytes.Buffer)
+	SetWriter(tempWriter)
+	assert.NotNil(t, writer, tempWriter)
+}
+
+func Test_GetWriter(t *testing.T) {
+	ret := GetWriter()
+	assert.NotNil(t, ret)
+}
+
+func Test_GetLimit(t *testing.T) {
+	limit := GetLimit()
+	assert.NotNil(t, limit)
+}
+
+func Test_SetLimit(t *testing.T) {
+	assert.NotNil(t, limit)
+}
+
+func Test_GetLogRoot(t *testing.T) {
+	logRoot := GetLogRoot()
+	assert.NotNil(t, logRoot)
+}
+
+func Test_SetLogRoot(t *testing.T) {
+	assert.NotNil(t, logRoot)
 }
