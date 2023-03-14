@@ -1,4 +1,4 @@
-name: pr-workflow
+name: workflow
 on:
   push:
     branches:
