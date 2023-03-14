@@ -9,7 +9,27 @@ docker-build-dev:
 docker-build:
 	docker build -t ghcr.io/kuoss/lethe:${LETHE_VERSION} --build-arg LETHE_VERSION=${LETHE_VERSION} . && docker push ghcr.io/kuoss/lethe:${LETHE_VERSION}
 
-check: fmt vet staticcheck test
+
+
+test:
+	go test ./... -failfast
+
+test-all:
+	scripts/go_test_all_packages_failfast.sh
+
+test-win:
+	.\scripts\go_test_all_packages_failfast.bat
+
+test-cover:
+	@./scripts/test-cover.sh
+
+
+
+pre-checks:
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install github.com/google/go-licenses@latest
+
+checks: fmt vet staticcheck go-licenses-check test-cover
 
 fmt:
 	go fmt ./...
@@ -18,27 +38,17 @@ vet:
 	go vet ./...
 
 staticcheck:
-	# go install honnef.co/go/tools/cmd/staticcheck@latest
-	/root/go/bin/staticcheck ./...
-
-test:
-	go test ./... -failfast -cover
-
-test-all:
-	scripts/go_test_all_packages_failfast.sh
-
-test-win:
-	.\scripts\go_test_all_packages_failfast.bat
-
-
-go-licenses: go-licenses-report go-licenses-check
-
-go-licenses-report:
-	# go install github.com/google/go-licenses@latest
-	go-licenses report github.com/kuoss/lethe | tee docs/go-licenses.csv
+	staticcheck ./...
 
 go-licenses-check:
-	go-licenses check github.com/kuoss/lethe && echo OK
+	go-licenses check  github.com/kuoss/lethe 2> /dev/null
+	go-licenses report github.com/kuoss/lethe 2> /dev/null | tee docs/go-licenses.csv
+
+
+
+govulncheck:
+	# go install golang.org/x/vuln/cmd/govulncheck@latest
+	govulncheck ./...
 
 mock:
 	./scripts/mock/restart.sh
