@@ -2,7 +2,12 @@
 MIN_COVER=50.0
 
 cd $(dirname $0)/..
-go test ./... -coverprofile cover.out
+go test ./... -failfast -coverprofile cover.out
+if [[ $? != 0 ]]; then
+    echo "❌ FAIL ( test failed )"
+    exit 1
+fi
+
 COVER=$(go tool cover -func cover.out | tail -1 | grep -oP [0-9.]+)
 if [[ $COVER < $MIN_COVER ]]; then
     echo

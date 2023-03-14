@@ -1,12 +1,12 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"math"
+	"time"
+	"errors"
 	"regexp"
 	"strconv"
-	"time"
 
 	"github.com/spf13/cast"
 )
