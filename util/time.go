@@ -47,7 +47,7 @@ func GetDurationFromAge(durationStr string) (time.Duration, error) {
 	m(10, 1000*60)          // m
 	m(12, 1000)             // s
 	m(14, 1)                // ms
-	return time.Duration(dur), overflowErr
+	return dur, overflowErr
 }
 
 func FloatStringToTime(timeFloat string) time.Time {
