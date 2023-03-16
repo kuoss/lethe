@@ -14,7 +14,7 @@ type LogFile struct {
 	LogType   string
 	Target    string
 	Name      string
-	Extention string
+	Extension string
 	Size      int64
 }
 
@@ -54,7 +54,7 @@ func (rotator *Rotator) ListFiles() []LogFile {
 				LogType:   logPath.LogType(),
 				Target:    logPath.Target(),
 				Name:      logPath.Filename(),
-				Extention: filepath.Ext(logPath.Filename()),
+				Extension: filepath.Ext(logPath.Filename()),
 				Size:      fileInfo.Size(),
 			})
 		}
