@@ -1,5 +1,8 @@
 LETHE_VERSION=v0.1.5
 
+install-dev:
+	go mod tidy
+
 run-dev:
 	air
 
