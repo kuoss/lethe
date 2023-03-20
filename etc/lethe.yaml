@@ -1,6 +1,6 @@
 retention:
-  time: 100d
-  size: 100g
+  time: 1d
+  size: 100m
 storage:
   rootdirectory: /data/log
   driver: filesystem
