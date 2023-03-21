@@ -1,13 +1,10 @@
-LETHE_VERSION=v0.1.5
+LETHE_VERSION=v0.2.0-dev.1
 
 install-dev:
 	go mod tidy
 
 run-dev:
 	air
-
-docker-build-dev:
-	docker build -t ghcr.io/kuoss/lethe:dev -f Dockerfile.dev . && docker push ghcr.io/kuoss/lethe:dev
 
 docker-build:
 	docker build -t ghcr.io/kuoss/lethe:${LETHE_VERSION} --build-arg LETHE_VERSION=${LETHE_VERSION} . && docker push ghcr.io/kuoss/lethe:${LETHE_VERSION}
