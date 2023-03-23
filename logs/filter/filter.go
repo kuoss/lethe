@@ -1,4 +1,4 @@
-package logs
+package filter
 
 import (
 	"errors"
@@ -56,7 +56,7 @@ func FilterFromQuery(query string) (Filter, error) {
 }
 
 type Filter interface {
-	match(string) bool
+	Match(string) bool
 }
 
 type RegexFilter interface {
@@ -66,7 +66,7 @@ type RegexFilter interface {
 // for just test build
 type TempExportFilter struct{}
 
-func (f TempExportFilter) match(line string) bool {
+func (f TempExportFilter) Match(line string) bool {
 	return true
 }
 
@@ -74,7 +74,7 @@ type includeFilter struct {
 	keyword string
 }
 
-func (f *includeFilter) match(line string) bool {
+func (f *includeFilter) Match(line string) bool {
 	return strings.Contains(line, f.keyword)
 }
 
@@ -82,7 +82,7 @@ type excludeFilter struct {
 	keyword string
 }
 
-func (f *excludeFilter) match(line string) bool {
+func (f *excludeFilter) Match(line string) bool {
 	return !strings.Contains(line, f.keyword)
 }
 
@@ -91,7 +91,7 @@ type includeRegexFilter struct {
 	keyword string
 }
 
-func (f *includeRegexFilter) match(line string) bool {
+func (f *includeRegexFilter) Match(line string) bool {
 	return f.regex.MatchString(line)
 }
 
@@ -112,7 +112,7 @@ type excludeRegexFilter struct {
 	keyword string
 }
 
-func (f *excludeRegexFilter) match(line string) bool {
+func (f *excludeRegexFilter) Match(line string) bool {
 	return !f.regex.MatchString(line)
 }
 

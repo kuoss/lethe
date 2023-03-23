@@ -3,11 +3,11 @@ package list
 import (
 	"bytes"
 	"fmt"
+	"github.com/kuoss/lethe/logs/rotator"
 	"regexp"
 	"time"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
-	"github.com/kuoss/lethe/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ func initListTargets() {
 
 func listTargets(c *cobra.Command) {
 	now := time.Now().UTC()
-	dirs := logs.NewRotator().ListTargets()
+	dirs := rotator.NewRotator().ListTargets()
 
 	var data [][]string
 	var totalSize int64

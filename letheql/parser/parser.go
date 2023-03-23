@@ -1,18 +1,22 @@
-package letheql
+package parser
 
 import (
 	"errors"
+	"github.com/kuoss/lethe/letheql"
 	"regexp"
 	"strings"
 )
 
 var partSeparator = regexp.MustCompile("[{}]")
 
-func ParseQuery(queryString string) (ParsedQuery, error) {
+func ParseQuery(queryString string) (letheql.ParsedQuery, error) {
+
 	queryString = strings.TrimSpace(queryString)
-	var query ParsedQuery
+	var query letheql.ParsedQuery
+
 	parts := partSeparator.Split(queryString, -1)
 	partsLength := len(parts)
+
 	if partsLength != 1 && partsLength != 3 {
 		return query, errors.New("invalid query")
 	}
@@ -40,8 +44,8 @@ func ParseQuery(queryString string) (ParsedQuery, error) {
 	return query, nil
 }
 
-func ParseLabels(labelsString string) ([]Label, error) {
-	var labels []Label
+func ParseLabels(labelsString string) ([]letheql.Label, error) {
+	var labels []letheql.Label
 	labelsString = strings.TrimSpace(labelsString)
 	if labelsString == "" {
 		return labels, nil
@@ -64,7 +68,7 @@ func ParseLabels(labelsString string) ([]Label, error) {
 		value = strings.ReplaceAll(value, `"`, ``)
 		value = strings.TrimSpace(value)
 
-		labels = append(labels, Label{
+		labels = append(labels, letheql.Label{
 			Key:   key,
 			Value: value,
 		})

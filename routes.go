@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/handlers"
-	"github.com/kuoss/lethe/logs"
+	"github.com/kuoss/lethe/logs/rotator"
 )
 
 func NewRouter() *gin.Engine {
@@ -24,7 +24,7 @@ func routesRootGroup(r *gin.Engine) {
 func routesAPIV1Group(r *gin.Engine) {
 
 	v1 := r.Group("api/v1")
-	h := handlers.LetheHandler{Rotator: logs.NewRotator()}
+	h := handlers.LetheHandler{Rotator: rotator.NewRotator()}
 
 	v1.GET("query", h.Query)
 	v1.GET("query_range", h.QueryRange)

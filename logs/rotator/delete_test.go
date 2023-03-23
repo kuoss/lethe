@@ -1,4 +1,4 @@
-package logs
+package rotator
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func Test_DeleteByAge_10d(t *testing.T) {
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.time", "20d")
-	rotator.DeleteByAge()
+	NewRotator().DeleteByAge()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -35,7 +35,7 @@ func Test_DeleteByAge_1d(t *testing.T) {
 
 	config.GetConfig().Set("retention.time", "2d")
 	config.GetConfig().Set("retention.size", "100m")
-	rotator.DeleteByAge()
+	NewRotator().DeleteByAge()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -56,7 +56,7 @@ func Test_DeleteByAge_1h(t *testing.T) {
 
 	config.GetConfig().Set("retention.time", "1h")
 	config.GetConfig().Set("retention.size", "100m")
-	rotator.DeleteByAge()
+	NewRotator().DeleteByAge()
 
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -76,7 +76,7 @@ func Test_DeleteBySize_1m(t *testing.T) {
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.size", "1m")
-	rotator.DeleteBySize()
+	NewRotator().DeleteBySize()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -97,7 +97,7 @@ func Test_DeleteBySize_3k(t *testing.T) {
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.size", "3k")
-	rotator.DeleteBySize()
+	NewRotator().DeleteBySize()
 
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -118,7 +118,7 @@ func Test_DeleteBySize_2k(t *testing.T) {
 	testutil.SetTestLogFiles()
 
 	config.GetConfig().Set("retention.size", "2k")
-	rotator.DeleteBySize()
+	NewRotator().DeleteBySize()
 
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")

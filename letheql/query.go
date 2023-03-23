@@ -3,6 +3,7 @@ package letheql
 import (
 	"errors"
 	"fmt"
+	"github.com/kuoss/lethe/logs/filter"
 	"log"
 	"reflect"
 	"strings"
@@ -54,22 +55,22 @@ type TimeRange struct {
 func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
 
 	fmt.Printf("ProcQuery: query=%s, timeRange=%s\n", query, timeRange)
-	ok, filterType, err := logs.IsFilterExist(query)
+	ok, filterType, err := filter.IsFilterExist(query)
 	if err != nil {
 		return QueryData{}, err
 	}
 
 	var parsableQuery, keyword string
-	var filter logs.Filter
+	var f filter.Filter
 	if ok {
 		parts := strings.Split(query, filterType)
 		parsableQuery = strings.TrimSpace(parts[0])
 		keyword = strings.TrimSpace(parts[1])
-		filterFromQuery, err := logs.FilterFromQuery(query)
+		filterFromQuery, err := filter.FilterFromQuery(query)
 		if err != nil {
 			return QueryData{}, err
 		}
-		filter = filterFromQuery
+		f = filterFromQuery
 	} else {
 		parsableQuery = query
 		keyword = ""
@@ -89,7 +90,7 @@ func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
 		log.Println("ProcQuery: procExpr: err=", err)
 		return QueryData{}, err
 	}
-	leaf, err = resolveLeaf(leaf, filter)
+	leaf, err = resolveLeaf(leaf, f)
 	if err != nil {
 		log.Println("ProcQuery: resolveLeaf: err=", err)
 		return QueryData{}, err
@@ -121,7 +122,7 @@ func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 	return queryData, nil
 }
 
-func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
+func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 
 	logStore := logs.New()
 
@@ -241,12 +242,12 @@ func procBinaryOpExpr(expr *metricsql.BinaryOpExpr, leaf Leaf) (Leaf, error) {
 		return Leaf{}, err
 	}
 	//todo filter parameter ?
-	leftLeaf, err = resolveLeaf(leftLeaf, logs.TempExportFilter{})
+	leftLeaf, err = resolveLeaf(leftLeaf, filter.TempExportFilter{})
 	if err != nil {
 		return Leaf{}, err
 	}
 	//todo filter parameter ?
-	rightLeaf, err = resolveLeaf(rightLeaf, logs.TempExportFilter{})
+	rightLeaf, err = resolveLeaf(rightLeaf, filter.TempExportFilter{})
 	if err != nil {
 		return Leaf{}, err
 	}

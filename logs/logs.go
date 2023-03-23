@@ -3,6 +3,7 @@ package logs
 import (
 	"bufio"
 	"fmt"
+	"github.com/kuoss/lethe/logs/filter"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -86,7 +87,7 @@ type LogSearch struct {
 	EndTime           time.Time
 	StartTime         time.Time
 	IsCounting        bool
-	Filter            Filter
+	Filter            filter.Filter
 }
 
 type Result struct {
@@ -214,7 +215,7 @@ func checkTarget(file string, search LogSearch, logs *[]string, driver driver.St
 
 			//todo filtering here?
 			if search.Filter != nil {
-				if search.Filter.match(line) {
+				if search.Filter.Match(line) {
 					*logs = append(*logs, line)
 				}
 			} else {
@@ -246,7 +247,7 @@ func checkTarget(file string, search LogSearch, logs *[]string, driver driver.St
 			}
 			//todo filtering here?
 			if search.Filter != nil {
-				if search.Filter.match(line) {
+				if search.Filter.Match(line) {
 					*logs = append(*logs, line)
 				}
 			} else {

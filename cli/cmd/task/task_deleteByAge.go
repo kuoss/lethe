@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/kuoss/lethe/logs"
+	"github.com/kuoss/lethe/logs/rotator"
 	"github.com/spf13/cobra"
 )
 
@@ -18,5 +18,5 @@ func initDeleteByAge() {
 }
 
 func DeleteByAge(cmd *cobra.Command) {
-	logs.NewRotator().DeleteByAge()
+	rotator.NewRotator().DeleteByAge()
 }
