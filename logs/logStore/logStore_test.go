@@ -1,4 +1,4 @@
-package logs
+package logStore
 
 import (
 	"github.com/stretchr/testify/assert"

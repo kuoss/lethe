@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kuoss/lethe/logs/filter"
+	"github.com/kuoss/lethe/logs/logStore"
 	"log"
 	"reflect"
 	"strings"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/VictoriaMetrics/metricsql"
 	"github.com/kuoss/lethe/clock"
-	"github.com/kuoss/lethe/logs"
 )
 
 type LeafType string
@@ -40,9 +40,9 @@ type Leaf struct {
 
 type LogRequest struct {
 	// AuditSearchParams logs.AuditSearchParams
-	EventSearchParams logs.EventSearchParams
-	NodeSearchParams  logs.NodeSearchParams
-	PodSearchParams   logs.PodSearchParams
+	EventSearchParams logStore.EventSearchParams
+	NodeSearchParams  logStore.NodeSearchParams
+	PodSearchParams   logStore.PodSearchParams
 	DurationSeconds   int
 	Function          string
 }
@@ -124,8 +124,6 @@ func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 
 func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 
-	logStore := logs.New()
-
 	if leaf.LeafType != LeafTypeAuditLogRequest &&
 		leaf.LeafType != LeafTypeEventLogRequest &&
 		leaf.LeafType != LeafTypeNodeLogRequest &&
@@ -157,7 +155,7 @@ func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 	if durationSeconds == 0 || (durationSecondsFromTimeRange != 0 && durationSecondsFromTimeRange < durationSeconds) {
 		durationSeconds = durationSecondsFromTimeRange
 	}
-	logSearch := logs.LogSearch{
+	logSearch := logStore.LogSearch{
 		DurationSeconds: durationSeconds,
 		EndTime:         leaf.TimeRange.End,
 		Keyword:         leaf.Keyword,
@@ -166,19 +164,20 @@ func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 	switch leaf.LeafType {
 
 	case LeafTypeNodeLogRequest:
-		logSearch.LogType = logs.NodeLog{Name: logs.NODE_TYPE}
+		logSearch.LogType = logStore.NodeLog{Name: logStore.NODE_TYPE}
 		logSearch.TargetPattern = req.NodeSearchParams.Node
 		logSearch.NodeSearchParams = req.NodeSearchParams
 
 	case LeafTypePodLogRequest:
-		logSearch.LogType = logs.PodLog{Name: logs.POD_TYPE}
+		logSearch.LogType = logStore.PodLog{Name: logStore.POD_TYPE}
 		logSearch.TargetPattern = req.PodSearchParams.Namespace
 		logSearch.PodSearchParams = req.PodSearchParams
 	}
 
+	ls := logStore.New()
 	switch req.Function {
 	case "":
-		result, err := logStore.GetLogs(logSearch)
+		result, err := ls.GetLogs(logSearch)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -186,7 +185,7 @@ func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 		leaf.LeafType = LeafTypeLogsResult
 	case "count_over_time":
 		logSearch.IsCounting = true
-		result, err := logStore.GetLogs(logSearch)
+		result, err := ls.GetLogs(logSearch)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -323,7 +322,7 @@ func procEventExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		}
 	}
 	leaf.LeafType = LeafTypeEventLogRequest
-	leaf.LogRequest = LogRequest{EventSearchParams: logs.EventSearchParams{Namespace: namespace, Type: typ, Reason: reason, Object: object, Count: count}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{EventSearchParams: logStore.EventSearchParams{Namespace: namespace, Type: typ, Reason: reason, Object: object, Count: count}, Function: leaf.Function}
 	return leaf, nil
 }
 
@@ -338,7 +337,7 @@ func procNodeExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		}
 	}
 	leaf.LeafType = LeafTypeNodeLogRequest
-	leaf.LogRequest = LogRequest{NodeSearchParams: logs.NodeSearchParams{Node: logs.PatternedString(node), Process: logs.PatternedString(process)}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{NodeSearchParams: logStore.NodeSearchParams{Node: logStore.PatternedString(node), Process: logStore.PatternedString(process)}, Function: leaf.Function}
 	return leaf, nil
 }
 
@@ -366,7 +365,7 @@ func procPodExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		namespace = "*"
 	}
 	leaf.LeafType = LeafTypePodLogRequest
-	leaf.LogRequest = LogRequest{PodSearchParams: logs.PodSearchParams{Namespace: logs.PatternedString(namespace), Pod: logs.PatternedString(pod), Container: logs.PatternedString(container)}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{PodSearchParams: logStore.PodSearchParams{Namespace: logStore.PatternedString(namespace), Pod: logStore.PatternedString(pod), Container: logStore.PatternedString(container)}, Function: leaf.Function}
 	return leaf, nil
 
 }

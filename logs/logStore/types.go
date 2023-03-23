@@ -1,4 +1,4 @@
-package logs
+package logStore
 
 const (
 	AUDIT_TYPE = "audit"

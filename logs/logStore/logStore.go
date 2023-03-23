@@ -1,4 +1,4 @@
-package logs
+package logStore
 
 import (
 	"bufio"
@@ -37,7 +37,7 @@ type PodSearchParams struct {
 	Container  PatternedString
 }
 
-// Todo now Patternable can handle only one '*' and starts with substring
+// now Patternable can handle only one '*' and starts with substring
 // exampel) nignx-*, namespace*,
 type Patternable interface {
 	Patterned() bool
