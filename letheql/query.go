@@ -7,7 +7,6 @@ import (
 	"github.com/kuoss/lethe/logs/logStore"
 	"log"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/VictoriaMetrics/metricsql"
@@ -52,53 +51,56 @@ type TimeRange struct {
 	End   time.Time
 }
 
-func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
+type Query interface {
+	Exec() []string
+}
 
-	fmt.Printf("ProcQuery: query=%s, timeRange=%s\n", query, timeRange)
-	ok, filterType, err := filter.IsFilterExist(query)
+type query struct {
+	q       string
+	filter  filter.Filter
+	keyword string
+	engine  *Engine
+}
+
+func (q *query) String() string {
+	return q.q
+}
+
+func (q *query) Exec() []string {
+
+	// q.engine.exec()
+	// to do
+	return nil
+}
+
+func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
+
+	log.Printf("ProcQuery: queryString=%s, timeRange=%s\n", queryString, timeRange)
+	engine := &Engine{}
+	query, err := engine.newQuery(queryString)
 	if err != nil {
-		return QueryData{}, err
+		return QueryData{}, nil
 	}
 
-	var parsableQuery, keyword string
-	var f filter.Filter
-	if ok {
-		parts := strings.Split(query, filterType)
-		parsableQuery = strings.TrimSpace(parts[0])
-		keyword = strings.TrimSpace(parts[1])
-		filterFromQuery, err := filter.FilterFromQuery(query)
-		if err != nil {
-			return QueryData{}, err
-		}
-		f = filterFromQuery
-	} else {
-		parsableQuery = query
-		keyword = ""
-	}
-
-	if len(query) < 1 {
-		return QueryData{}, errors.New("empty query")
-	}
-
-	expr, err := metricsql.Parse(parsableQuery)
+	expr, err := metricsql.Parse(query.q)
 	if err != nil {
 		log.Println("ProcQuery: Parse: err=", err)
 		return QueryData{}, err
 	}
-	leaf, err := procExpr(expr, Leaf{TimeRange: timeRange, Keyword: keyword})
+
+	leaf, err := procExpr(expr, Leaf{TimeRange: timeRange, Keyword: query.keyword})
 	if err != nil {
 		log.Println("ProcQuery: procExpr: err=", err)
 		return QueryData{}, err
 	}
-	leaf, err = resolveLeaf(leaf, f)
+	leaf, err = resolveLeaf(leaf, query.filter)
 	if err != nil {
 		log.Println("ProcQuery: resolveLeaf: err=", err)
 		return QueryData{}, err
 	}
 
 	queryData, err := getQueryDataFromLeaf(leaf)
-	// fmt.Printf("ProcQuery: leaf=%#v\n", leaf)
-	// fmt.Printf("ProcQuery: queryData=%#v\n", queryData)
+
 	if err != nil {
 		log.Println("ProcQuery: getQueryDataFromLeaf: err=", err)
 		return QueryData{}, err
