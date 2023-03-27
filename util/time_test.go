@@ -25,5 +25,5 @@ func Test_GetDurationFromAge(t *testing.T) {
 }
 
 func Test_FloatStringToTime(t *testing.T) {
-	assert.Equal(t, time.Time(time.Date(2015, time.July, 1, 20, 10, 51, 780999898, time.Local)), FloatStringToTime("1435781451.781"))
+	assert.Equal(t, time.Date(2015, time.July, 1, 20, 10, 51, 780999898, time.Local), FloatStringToTime("1435781451.781"))
 }

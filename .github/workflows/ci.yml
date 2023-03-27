@@ -10,37 +10,39 @@ on:
     - "main"
 
 jobs:
+  size-label:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: size-label
+      uses: "pascalgn/size-label-action@v0.4.3"
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
   go-fmt:
     name: go-fmt
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 1
     - uses: Jerome1337/gofmt-action@v1.0.5
       with:
         gofmt-path: '.'
         gofmt-flags: '-l -d'
 
   go-vet:
-    name: go-vet
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+    - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 1
     - run: go vet ./...
 
   go-staticcheck:
-    name: go-staticcheck
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 1
     - name: go staticcheck
       uses: dominikh/staticcheck-action@v1.3.0
       with:
@@ -56,58 +58,44 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
 
-  go-licenses:
-    name: go-licenses
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
-    - run: go install github.com/google/go-licenses@v1.5.0
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 1
-    - run: go-licenses check .
-
   go-test-failfast:
-    name: go-test-failfast
     runs-on: ubuntu-latest
     steps:
-    - name: Setup go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v3
     - name: go test failfast
       run: go test ./... -v -failfast
 
-  go-test-with-coverage:
-    name: go-test-with-coverage
+  go-test-coverage:
     runs-on: ubuntu-latest
     steps:
-    - name: Setup go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v3
     - name: go test with coverage
-      run: go test ./... -v -coverprofile=coverage.out
+      #run: go test -v -covermode=count -coverprofile=coverage.out
+      run: go test -race -coverprofile=coverage.out -covermode=atomic
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
     - name: Convert coverage to lcov
       uses: jandelgado/gcov2lcov-action@v1
-    - name: Coveralls 
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage.lcov
+    #- name: Coveralls 
+    #  uses: coverallsapp/github-action@master
+    #  with:
+    #    github-token: ${{ secrets.GITHUB_TOKEN }}
+    #    path-to-lcov: coverage.lcov
     - name: Coverage Gate
       uses: VeryGoodOpenSource/very_good_coverage@v2
       with:
         path: coverage.lcov
-        min_coverage: 50
+        min_coverage: 55
+
+  go-licenses:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v3
+    - run: go install github.com/google/go-licenses@v1.5.0    
+    - run: go-licenses check .
 
   docker:
     runs-on: ubuntu-latest
@@ -138,7 +126,6 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
           type=sha
-
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
