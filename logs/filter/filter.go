@@ -31,7 +31,7 @@ func IsFilterExist(query string) (ok bool, filter string, err error) {
 	return false, "", errors.New("filter must be only one or no filters")
 }
 
-func FilterFromQuery(query string) (Filter, error) {
+func FromQuery(query string) (Filter, error) {
 	_, filterType, _ := IsFilterExist(query)
 	parts := strings.Split(query, filterType)
 	switch filterType {
