@@ -25,7 +25,7 @@ func (e *Engine) newQuery(queryString string) (*query, error) {
 		parts := strings.Split(queryString, filterType)
 		parsableQuery = strings.TrimSpace(parts[0])
 		keyword = strings.TrimSpace(parts[1])
-		filterFromQuery, err := filter.FilterFromQuery(queryString)
+		filterFromQuery, err := filter.FromQuery(queryString)
 		if err != nil {
 			return nil, err
 		}
