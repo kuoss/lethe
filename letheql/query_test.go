@@ -148,3 +148,33 @@ func Test_QueryFail(t *testing.T) {
 		})
 	}
 }
+
+func TestNewQuery(t *testing.T) {
+
+	e := &Engine{}
+
+	tests := map[string]struct {
+		query string
+		want  *query
+	}{
+		`pod metric with namespace label matcher`: {
+			query: `pod{namespace="namespace01"}`,
+			want: &query{
+				q:       `pod{namespace="namespace01"}`,
+				filter:  nil,
+				keyword: "",
+				engine:  e,
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name+"_"+tt.query, func(subt *testing.T) {
+			query, err := e.newQuery(tt.query)
+			if err != nil {
+				subt.Fatalf("%s test failed. build new Query with err: %v", tt.query, err)
+			}
+			assert.Equal(subt, query, tt.want)
+		})
+	}
+}
