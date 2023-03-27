@@ -42,7 +42,7 @@ func setenvIntialDiskAvailableBytes() {
 		return
 	}
 	logDirectory := config.GetLogRoot()
-	os.MkdirAll(logDirectory, 0755)
+	_ = os.MkdirAll(logDirectory, 0755)
 	avail, err := getDiskAvailableBytes(logDirectory)
 	if err != nil {
 		log.Fatal(err)

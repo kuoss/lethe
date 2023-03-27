@@ -29,7 +29,7 @@ pre-checks:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/google/go-licenses@latest
 
-checks: fmt vet staticcheck go-licenses-check test-cover
+checks: fmt vet staticcheck golangci-lint go-licenses-check test-cover
 
 fmt:
 	go fmt ./...
@@ -40,15 +40,12 @@ vet:
 staticcheck:
 	staticcheck ./...
 
+golangci-lint:
+	golangci-lint run
+
 go-licenses-check:
 	go-licenses check  github.com/kuoss/lethe 2> /dev/null
 	go-licenses report github.com/kuoss/lethe 2> /dev/null | tee docs/go-licenses.csv
-
-
-
-govulncheck:
-	# go install golang.org/x/vuln/cmd/govulncheck@latest
-	govulncheck ./...
 
 mock:
 	./scripts/mock/restart.sh

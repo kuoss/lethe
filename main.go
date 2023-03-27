@@ -16,5 +16,5 @@ func main() {
 	fmt.Println("🌊 lethe starting...")
 
 	r := NewRouter()
-	r.Run(":3100")
+	_ = r.Run(":3100")
 }

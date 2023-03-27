@@ -77,7 +77,7 @@ func (d *driver) PutContent(subPath string, content []byte) error {
 	defer writer.Close()
 	_, err = io.Copy(writer, bytes.NewReader(content))
 	if err != nil {
-		writer.Cancel()
+		_ = writer.Cancel()
 		return err
 	}
 	return writer.Commit()
