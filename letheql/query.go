@@ -84,18 +84,19 @@ func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
 
 	expr, err := metricsql.Parse(query.q)
 	if err != nil {
-		log.Println("ProcQuery: Parse: err=", err)
+		log.Printf("parse query failed. err: %v\n", err)
 		return QueryData{}, err
 	}
 
-	leaf, err := procExpr(expr, Leaf{TimeRange: timeRange, Keyword: query.keyword})
+	leaf, err := resolveExpr(expr, Leaf{TimeRange: timeRange, Keyword: query.keyword})
 	if err != nil {
-		log.Println("ProcQuery: procExpr: err=", err)
+		log.Printf("resolve Expr failed. err: %v\n", err)
 		return QueryData{}, err
 	}
+
 	leaf, err = resolveLeaf(leaf, query.filter)
 	if err != nil {
-		log.Println("ProcQuery: resolveLeaf: err=", err)
+		log.Printf("resolve leaf failed. err: %v\n", err)
 		return QueryData{}, err
 	}
 
@@ -199,8 +200,8 @@ func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 	return leaf, nil
 }
 
-func procExpr(expr metricsql.Expr, leaf Leaf) (Leaf, error) {
-	// fmt.Printf("procExpr: %#T %#v\n", expr, leaf.TimeRange)
+func resolveExpr(expr metricsql.Expr, leaf Leaf) (Leaf, error) {
+	// fmt.Printf("resolveExpr: %#T %#v\n", expr, leaf.TimeRange)
 	switch v := expr.(type) {
 	case *metricsql.BinaryOpExpr:
 		return procBinaryOpExpr(v, leaf)
@@ -221,7 +222,7 @@ func procFuncExpr(expr *metricsql.FuncExpr, leaf Leaf) (Leaf, error) {
 	newLeaf := Leaf{}
 	for _, arg := range expr.Args {
 		var err error
-		newLeaf, err = procExpr(arg, leaf)
+		newLeaf, err = resolveExpr(arg, leaf)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -234,11 +235,11 @@ func procBinaryOpExpr(expr *metricsql.BinaryOpExpr, leaf Leaf) (Leaf, error) {
 	// TODO: should be vector not scalar
 	var leftLeaf, rightLeaf Leaf
 	var err error
-	leftLeaf, err = procExpr(expr.Left, leaf)
+	leftLeaf, err = resolveExpr(expr.Left, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
-	rightLeaf, err = procExpr(expr.Right, leaf)
+	rightLeaf, err = resolveExpr(expr.Right, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
@@ -381,7 +382,7 @@ func procRollupExpr(expr *metricsql.RollupExpr, leaf Leaf) (Leaf, error) {
 	if reflect.ValueOf(expr.Window).Type().String() != "*metricsql.DurationExpr" {
 		return Leaf{}, errors.New("not duration expr")
 	}
-	leaf, err := procExpr(expr.Expr, leaf)
+	leaf, err := resolveExpr(expr.Expr, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
