@@ -9,5 +9,5 @@ import (
 func main() {
 	config.LoadConfig()
 	config.SetWriter(cliutil.GetWriter())
-	cmd.Execute()
+	_ = cmd.Execute()
 }
