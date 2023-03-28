@@ -6,3 +6,4 @@
 [![GitHub license](https://img.shields.io/github/license/kuoss/lethe.svg)](https://github.com/kuoss/lethe/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/kuoss/lethe.svg)](https://github.com/kuoss/lethe/stargazers)
 [![contribuiton welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)](https://github.com/kuoss/lethe/blob/main/CONTRIBUTING.md)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kuoss/lethe)](https://goreportcard.com/report/github.com/kuoss/lethe)
