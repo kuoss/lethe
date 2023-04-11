@@ -111,7 +111,6 @@ func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
 
 func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 	var queryData QueryData
-	// fmt.Printf("getQueryDataFromLeaf: leaf=%#v\n", leaf)
 	switch leaf.LeafType {
 	case LeafTypeLogsResult:
 		queryData.ResultType = ValueTypeLogs

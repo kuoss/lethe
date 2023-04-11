@@ -135,14 +135,12 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 
 	rangeParamInit(&logSearch)
 
-	//fmt.Printf("log Type: %s, matched targets: %v", logTypePath, matchedTarget)
 	// from here only check matchedTarget
 	var timeFilteredFiles []string
 	for _, dir := range matchedTarget {
 		timeFilteredFiles = append(timeFilteredFiles, timeFilter(filepath.Join(logTypePath, dir), &logSearch, ls.driver)...)
 	}
 
-	//fmt.Printf("log Type: %s, timfiltered targets: %v\n", logTypePath, timeFilteredFiles)
 	logs := logFromTarget(timeFilteredFiles, logSearch, config.GetLimit(), ls.driver)
 
 	sort.SliceStable(*logs, func(i, j int) bool {
