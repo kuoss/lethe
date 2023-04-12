@@ -1,5 +1,7 @@
 package logStore
 
+import "fmt"
+
 const (
 	AUDIT_TYPE = "audit"
 	EVENT_TYPE = "event"
@@ -11,6 +13,7 @@ type LogLine interface {
 	GetName() string
 	process() int
 	getTime() string
+	CompactRaw() string
 }
 
 type NodeLog struct {
@@ -19,6 +22,10 @@ type NodeLog struct {
 	Node    string `json:"node,omitempty"`
 	Process string `json:"process,omitempty"`
 	Log     string `json:"log,omitempty"`
+}
+
+func (log NodeLog) CompactRaw() string {
+	return fmt.Sprintf("%s[%s|%s] %s", log.Time, log.Node, log.Process, log.Log)
 }
 
 func (log NodeLog) process() int {
@@ -40,6 +47,10 @@ type PodLog struct {
 	Pod       string `json:"pod,omitempty"`
 	Container string `json:"container,omitempty"`
 	Log       string `json:"log,omitempty"`
+}
+
+func (log PodLog) CompactRaw() string {
+	return fmt.Sprintf("%s[%s|%s|%s] %s", log.Time, log.Namespace, log.Pod, log.Container, log.Log)
 }
 
 func (log PodLog) process() int {
