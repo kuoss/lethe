@@ -31,7 +31,7 @@ type Leaf struct {
 	LeafType     LeafType
 	LogRequest   LogRequest
 	ScalarResult float64
-	LogsResult   []string
+	LogsResult   []logStore.LogLine
 	Function     string
 	TimeRange    TimeRange
 	Keyword      string

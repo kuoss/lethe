@@ -75,7 +75,7 @@ func (ps PatternedString) withoutPattern() string {
 }
 
 type LogSearch struct {
-	LogType       LogType         // audit | event | pod | node
+	LogType       LogLine         // audit | event | pod | node
 	TargetPattern PatternedString // audit | event | <namespace_pattern> | <node_pattern>
 	Targets       []string
 	// AuditSearchParams AuditSearchParams
@@ -92,7 +92,7 @@ type LogSearch struct {
 
 type Result struct {
 	IsCounting bool
-	Logs       []string
+	Logs       []LogLine
 	Count      int
 }
 
@@ -114,7 +114,7 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 	//fmt.Printf("log Type: %s, targets: %v", logTypePath, targets)
 
 	if err != nil {
-		return Result{IsCounting: false, Logs: []string{}}, nil
+		return Result{IsCounting: false, Logs: nil}, nil
 	}
 
 	var matchedTarget []string
@@ -145,9 +145,9 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 
 	sort.SliceStable(*logs, func(i, j int) bool {
 		l := *logs
-		x, _ := timeParse(l[i])
-		y, _ := timeParse(l[j])
-		return x.Before(y)
+		x := l[i].getTime()
+		y := l[j].getTime()
+		return x > y
 	})
 
 	return Result{Logs: *logs, Count: len(*logs)}, nil
@@ -168,9 +168,9 @@ func rangeParamInit(search *LogSearch) {
 
 // todo
 // limit check here?
-func logFromTarget(files []string, search LogSearch, limit int, driver driver.StorageDriver) (logs *[]string) {
+func logFromTarget(files []string, search LogSearch, limit int, driver driver.StorageDriver) (logs *[]LogLine) {
 
-	logs = &[]string{}
+	logs = &[]LogLine{}
 
 	sort.Strings(files)
 	for _, file := range files {
@@ -184,7 +184,7 @@ func logFromTarget(files []string, search LogSearch, limit int, driver driver.St
 
 // This function process line by line
 // very Dependent on performance
-func checkTarget(file string, search LogSearch, logs *[]string, driver driver.StorageDriver) (logSize int) {
+func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.StorageDriver) (logSize int) {
 	switch search.LogType.GetName() {
 	case "audit":
 	case "event":
@@ -195,6 +195,7 @@ func checkTarget(file string, search LogSearch, logs *[]string, driver driver.St
 		sc := bufio.NewScanner(rc)
 		for sc.Scan() {
 			// 2009-11-10T23:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world [ddd12wewe]
+			// 2009-11-10T22:58:00.000000Z[node01|dockerd] hello from sidecar
 			line := sc.Text()
 			//todo error handling
 			timeFromLog, _ := timeParse(line)
@@ -211,13 +212,20 @@ func checkTarget(file string, search LogSearch, logs *[]string, driver driver.St
 				continue
 			}
 
+			nodeLog := NodeLog{
+				Time:    timeFromLog.Format(time.RFC3339Nano),
+				Node:    node,
+				Process: process,
+				Log:     line,
+			}
+
 			//todo filtering here?
 			if search.Filter != nil {
 				if search.Filter.Match(line) {
-					*logs = append(*logs, line)
+					*logs = append(*logs, nodeLog)
 				}
 			} else {
-				*logs = append(*logs, line)
+				*logs = append(*logs, nodeLog)
 			}
 		}
 		return len(*logs)
@@ -244,12 +252,21 @@ func checkTarget(file string, search LogSearch, logs *[]string, driver driver.St
 				continue
 			}
 			//todo filtering here?
+
+			podLog := PodLog{
+				Time:      timeFromLog.Format(time.RFC3339Nano),
+				Namespace: ns,
+				Pod:       pod,
+				Container: container,
+				Log:       line,
+			}
+
 			if search.Filter != nil {
 				if search.Filter.Match(line) {
-					*logs = append(*logs, line)
+					*logs = append(*logs, podLog)
 				}
 			} else {
-				*logs = append(*logs, line)
+				*logs = append(*logs, podLog)
 			}
 		}
 		return len(*logs)
