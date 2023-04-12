@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/kuoss/lethe/logs/logStore"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -155,6 +157,73 @@ func Test_Routes_QueryRange_With_StartEnd(t *testing.T) {
 			t.Log(tt.url, tt.param)
 			got := GET(tt.url, tt.param)
 			assert.Equal(subt, tt.want, got)
+		})
+	}
+}
+
+type TempDTO struct {
+	Status string `json:"status,omitempty"`
+	Data   struct {
+		ResultType string            `json:"resultType,omitempty"`
+		Result     []logStore.PodLog `json:"result,omitempty"`
+	} `json:"data"`
+}
+
+func Test_Routes_Query_json(t *testing.T) {
+	prefix := "04_"
+	tests := map[string]struct {
+		url   string
+		param Params
+		want  TempDTO
+	}{
+		// modify test case.. for supoorting sort by time
+		"04_query_namespace01": {url: "/api/v1/query", param: Params{"query": `pod{namespace="namespace01"}`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "logs", Result: []logStore.PodLog{logStore.PodLog{Name: "", Time: "2009-11-10T21:00:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}, logStore.PodLog{Name: "", Time: "2009-11-10T21:01:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}, logStore.PodLog{Name: "", Time: "2009-11-10T21:02:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:56:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:56:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:56:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:57:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:57:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:57:00Z", Namespace: "namespace01", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " lerom from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:59:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " lerom ipsum"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:59:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}}}}},
+		"05_query_namespace02": {url: "/api/v1/query", param: Params{"query": `pod{namespace="namespace02"}`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "logs", Result: []logStore.PodLog{logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " lerom ipsum"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " lerom from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace02", Pod: "apache-75675f5897-7ci7o", Container: "httpd", Log: " hello from sidecar"}}}}},
+		"06_query_namespace03": {url: "/api/v1/query", param: Params{"query": `pod{namespace="namespace03"}`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "logs", Result: []logStore.PodLog{}}}},
+		"07_query_with_duration": {url: "/api/v1/query", param: Params{"query": `pod{namespace="namespace01"}[2m]`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "logs", Result: []logStore.PodLog{logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " lerom from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:58:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: " hello from sidecar"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:59:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " lerom ipsum"}, logStore.PodLog{Name: "", Time: "2009-11-10T22:59:00Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: " hello world"}}}}},
+		"08_query_with_count_over_time_function": {url: "/api/v1/query", param: Params{"query": `count_over_time(pod{namespace="namespace01"}[2m])`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "vector", Result: []logStore.PodLog{logStore.PodLog{Name: "", Time: "", Namespace: "", Pod: "", Container: "", Log: ""}}}}},
+		"09_query_with_count_over_time_function_and_binary_operator": {url: "/api/v1/query", param: Params{"query": `count_over_time(pod{namespace="namespace02"}[2m])>0`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "vector", Result: []logStore.PodLog{logStore.PodLog{Name: "", Time: "", Namespace: "", Pod: "", Container: "", Log: ""}}}}},
+		"10_query_namespace03_with_count_over_time_function_and_binary_operator": {url: "/api/v1/query", param: Params{"query": `count_over_time(pod{namespace="namespace03"}[2m])>0`, "logFormat": "json"},
+			want: TempDTO{Status: "success", Data: struct {
+				ResultType string            "json:\"resultType,omitempty\""
+				Result     []logStore.PodLog "json:\"result,omitempty\""
+			}{ResultType: "vector", Result: []logStore.PodLog{}}},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(prefix+name, func(subt *testing.T) {
+			got := GET(tt.url, tt.param)
+			var gotDTO TempDTO
+			err := json.Unmarshal([]byte(got), &gotDTO)
+			if err != nil {
+				t.Fail()
+			}
+			assert.Equal(subt, tt.want, gotDTO)
 		})
 	}
 }
