@@ -147,7 +147,7 @@ func (ls *LogStore) GetLogs(logSearch LogSearch) (Result, error) {
 		l := *logs
 		x := l[i].getTime()
 		y := l[j].getTime()
-		return x > y
+		return x < y
 	})
 
 	return Result{Logs: *logs, Count: len(*logs)}, nil
@@ -198,12 +198,12 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 			// 2009-11-10T22:58:00.000000Z[node01|dockerd] hello from sidecar
 			line := sc.Text()
 			//todo error handling
-			timeFromLog, _ := timeParse(line)
+			timeFromLog, str, _ := timeParse(line)
 			if search.StartTime.After(timeFromLog) || search.EndTime.Before(timeFromLog) {
 				continue
 			}
-
-			node, process, err := parseHierarchyNode(line)
+			withoutTime := strings.TrimPrefix(line, str)
+			node, process, bulk, err := parseHierarchyNode(line)
 			if err != nil {
 				return 0
 			}
@@ -212,11 +212,13 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 				continue
 			}
 
+			withoutMeta := strings.TrimPrefix(withoutTime, bulk)
+
 			nodeLog := NodeLog{
 				Time:    timeFromLog.Format(time.RFC3339Nano),
 				Node:    node,
 				Process: process,
-				Log:     line,
+				Log:     withoutMeta,
 			}
 
 			//todo filtering here?
@@ -238,12 +240,14 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 			// 2009-11-10T23:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world [ddd12wewe]
 			line := sc.Text()
 			//todo error handling
-			timeFromLog, _ := timeParse(line)
+			timeFromLog, str, _ := timeParse(line)
 			if search.StartTime.After(timeFromLog) || search.EndTime.Before(timeFromLog) {
 				continue
 			}
 
-			ns, pod, container, err := parseHierarchyPod(line)
+			withoutTime := strings.TrimPrefix(line, str)
+
+			ns, pod, container, bulk, err := parseHierarchyPod(line)
 			if err != nil {
 				return 0
 			}
@@ -253,12 +257,14 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 			}
 			//todo filtering here?
 
+			withoutMeta := strings.TrimPrefix(withoutTime, bulk)
+
 			podLog := PodLog{
 				Time:      timeFromLog.Format(time.RFC3339Nano),
 				Namespace: ns,
 				Pod:       pod,
 				Container: container,
-				Log:       line,
+				Log:       withoutMeta,
 			}
 
 			if search.Filter != nil {
@@ -274,13 +280,13 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 	return 0
 }
 
-func timeParse(line string) (time.Time, error) {
+func timeParse(line string) (time.Time, string, error) {
 	s := line[0:strings.IndexRune(line, '[')]
 	parsed, err := time.Parse(time.RFC3339Nano, s)
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, "", err
 	}
-	return parsed, nil
+	return parsed, s, nil
 }
 
 func timeFilter(directory string, search *LogSearch, driver driver.StorageDriver) (filteredFiles []string) {
@@ -318,24 +324,24 @@ func rangeCheckFromFilename(name string, start time.Time, end time.Time) bool {
 
 // todo
 // go to PodLog type private fucntion
-func parseHierarchyPod(line string) (namespace, pod, container string, err error) {
-	pos := line[strings.IndexRune(line, '[')+1 : strings.IndexRune(line, ']')]
-	parts := strings.Split(pos, "|")
+func parseHierarchyPod(line string) (namespace, pod, container, bulk string, err error) {
+	bulk = line[strings.IndexRune(line, '[')+1 : strings.IndexRune(line, ']')]
+	parts := strings.Split(bulk, "|")
 	if len(parts) != 3 {
-		return namespace, pod, container, fmt.Errorf("log line not follow [{ns}|{pod}|{container}]. : %s", line)
+		return namespace, pod, container, "[" + bulk + "]", fmt.Errorf("log line not follow [{ns}|{pod}|{container}]. : %s", line)
 	}
 	namespace, pod, container = parts[0], parts[1], parts[2]
-	return namespace, pod, container, nil
+	return namespace, pod, container, "[" + bulk + "]", nil
 }
 
 // todo
 // go to NodeLog type private fucntion
-func parseHierarchyNode(line string) (node, process string, err error) {
-	meta := line[strings.IndexRune(line, '[')+1 : strings.IndexRune(line, ']')]
-	parts := strings.Split(meta, "|")
+func parseHierarchyNode(line string) (node, process, bulk string, err error) {
+	bulk = line[strings.IndexRune(line, '[')+1 : strings.IndexRune(line, ']')]
+	parts := strings.Split(bulk, "|")
 	if len(parts) != 2 {
-		return node, process, fmt.Errorf("log line not follow [{node}|{process}]. : %s", line)
+		return node, process, "[" + bulk + "]", fmt.Errorf("log line not follow [{node}|{process}]. : %s", line)
 	}
 	node, process = parts[0], parts[1]
-	return node, process, nil
+	return node, process, "[" + bulk + "]", nil
 }
