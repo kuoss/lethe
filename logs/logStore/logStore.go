@@ -198,11 +198,11 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 			// 2009-11-10T22:58:00.000000Z[node01|dockerd] hello from sidecar
 			line := sc.Text()
 			//todo error handling
-			timeFromLog, str, _ := timeParse(line)
+			timeFromLog, withoutTime, _ := timeParse(line)
 			if search.StartTime.After(timeFromLog) || search.EndTime.Before(timeFromLog) {
 				continue
 			}
-			withoutTime := strings.TrimPrefix(line, str)
+
 			node, process, bulk, err := parseHierarchyNode(line)
 			if err != nil {
 				return 0
@@ -240,12 +240,10 @@ func checkTarget(file string, search LogSearch, logs *[]LogLine, driver driver.S
 			// 2009-11-10T23:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world [ddd12wewe]
 			line := sc.Text()
 			//todo error handling
-			timeFromLog, str, _ := timeParse(line)
+			timeFromLog, withoutTime, _ := timeParse(line)
 			if search.StartTime.After(timeFromLog) || search.EndTime.Before(timeFromLog) {
 				continue
 			}
-
-			withoutTime := strings.TrimPrefix(line, str)
 
 			ns, pod, container, bulk, err := parseHierarchyPod(line)
 			if err != nil {
@@ -286,7 +284,8 @@ func timeParse(line string) (time.Time, string, error) {
 	if err != nil {
 		return time.Time{}, "", err
 	}
-	return parsed, s, nil
+	//parsed, withoutTime,error
+	return parsed, strings.TrimPrefix(line, s), nil
 }
 
 func timeFilter(directory string, search *LogSearch, driver driver.StorageDriver) (filteredFiles []string) {
