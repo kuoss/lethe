@@ -42,11 +42,11 @@ func (log NodeLog) getTime() string {
 
 type PodLog struct {
 	Name      string `json:"-"`
-	Time      string `json:"time,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	Pod       string `json:"pod,omitempty"`
-	Container string `json:"container,omitempty"`
-	Log       string `json:"log,omitempty"`
+	Time      string `json:"time"`
+	Namespace string `json:"namespace"`
+	Pod       string `json:"pod"`
+	Container string `json:"container"`
+	Log       string `json:"log"`
 }
 
 func (log PodLog) CompactRaw() string {
