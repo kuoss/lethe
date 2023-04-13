@@ -12,6 +12,7 @@ import (
 
 func (lh *LetheHandler) Query(c *gin.Context) {
 	query := c.Query("query")
+	logFormat := c.Query("logFormat")
 	log.Println("QueryHandler", "query=", query)
 
 	if query == "" {
@@ -32,11 +33,25 @@ func (lh *LetheHandler) Query(c *gin.Context) {
 	}
 
 	if queryData.ResultType == letheql.ValueTypeLogs {
+		if logFormat == "json" {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "success",
+				"data": gin.H{
+					"resultType": "logs",
+					"result":     queryData.Logs,
+				},
+			})
+			return
+		}
+		var stringLogs []string
+		for _, logLine := range queryData.Logs {
+			stringLogs = append(stringLogs, logLine.CompactRaw())
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 			"data": gin.H{
 				"resultType": "logs",
-				"result":     queryData.Logs,
+				"result":     stringLogs,
 			},
 		})
 		return
@@ -68,6 +83,7 @@ func (lh *LetheHandler) Query(c *gin.Context) {
 
 func (lh *LetheHandler) QueryRange(c *gin.Context) {
 	query := c.Query("query")
+	logFormat := c.Query("logFormat")
 	start := c.Query("start")
 	end := c.Query("end")
 
@@ -91,11 +107,25 @@ func (lh *LetheHandler) QueryRange(c *gin.Context) {
 	}
 	fmt.Println("queryData.ResultType=", queryData.ResultType)
 	if queryData.ResultType == letheql.ValueTypeLogs {
+		if logFormat == "json" {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "success",
+				"data": gin.H{
+					"resultType": "logs",
+					"result":     queryData.Logs,
+				},
+			})
+			return
+		}
+		var stringLogs []string
+		for _, logLine := range queryData.Logs {
+			stringLogs = append(stringLogs, logLine.CompactRaw())
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 			"data": gin.H{
 				"resultType": "logs",
-				"result":     queryData.Logs,
+				"result":     stringLogs,
 			},
 		})
 		return

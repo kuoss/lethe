@@ -31,7 +31,7 @@ type Leaf struct {
 	LeafType     LeafType
 	LogRequest   LogRequest
 	ScalarResult float64
-	LogsResult   []string
+	LogsResult   []logStore.LogLine
 	Function     string
 	TimeRange    TimeRange
 	Keyword      string
@@ -75,7 +75,7 @@ func (q *query) Exec() []string {
 
 func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
 
-	log.Printf("ProcQuery: queryString=%s, timeRange=%s\n", queryString, timeRange)
+	// log.Printf("ProcQuery: queryString=%s, timeRange=%s\n", queryString, timeRange)
 	engine := &Engine{}
 	query, err := engine.newQuery(queryString)
 	if err != nil {
@@ -103,7 +103,7 @@ func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
 	queryData, err := getQueryDataFromLeaf(leaf)
 
 	if err != nil {
-		log.Println("ProcQuery: getQueryDataFromLeaf: err=", err)
+		// log.Println("ProcQuery: getQueryDataFromLeaf: err=", err)
 		return QueryData{}, err
 	}
 	return queryData, nil
@@ -111,7 +111,6 @@ func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
 
 func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 	var queryData QueryData
-	// fmt.Printf("getQueryDataFromLeaf: leaf=%#v\n", leaf)
 	switch leaf.LeafType {
 	case LeafTypeLogsResult:
 		queryData.ResultType = ValueTypeLogs
