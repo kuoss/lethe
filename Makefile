@@ -9,10 +9,10 @@ run-dev:
 	air
 
 test:
-	hack/go-test-failfast.sh
+	hack/test-failfast.sh
 
 test-win:
-	.\hack\go-test-failfast.bat
+	.\hack\test-failfast.bat
 
 checks:
 	hack/checks.sh
