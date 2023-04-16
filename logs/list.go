@@ -2,9 +2,10 @@ package logs
 
 import (
 	"fmt"
-	"github.com/kuoss/lethe/storage"
 	"os"
 	"path/filepath"
+
+	"github.com/kuoss/lethe/storage"
 )
 
 // LogFile

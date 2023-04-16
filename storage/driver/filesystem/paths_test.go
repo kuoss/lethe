@@ -2,11 +2,12 @@ package filesystem
 
 import (
 	"fmt"
-	"github.com/kuoss/lethe/storage"
-	"github.com/kuoss/lethe/storage/driver/factory"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/kuoss/lethe/storage"
+	"github.com/kuoss/lethe/storage/driver/factory"
 )
 
 func TestDepth(t *testing.T) {

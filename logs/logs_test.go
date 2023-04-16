@@ -1,8 +1,9 @@
 package logs
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var hello1 PatternedString = "hello"

@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
 	// cliutil "github.com/kuoss/lethe/cli/util"
 	testutil "github.com/kuoss/lethe/testutil"
 )
