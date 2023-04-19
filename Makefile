@@ -17,7 +17,12 @@ test-win:
 checks:
 	hack/checks.sh
 
-docker:
+# go build
+build:
+	go build -ldflags="-X 'main.Version=$(VERSION)'" -o bin/lethe
+
+# docker build & push
+docker: 
 	docker build -t $(IMAGE) --build-arg VERSION=$(VERSION) . && docker push $(IMAGE)
 
 
