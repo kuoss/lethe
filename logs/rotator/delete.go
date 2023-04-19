@@ -62,6 +62,6 @@ func (rotator *Rotator) DeleteBySize() {
 			return
 		}
 		fmt.Printf("DeleteBySize(%d > %d): %s\n", usedBytes, retentionSizeBytes, file.FullPath)
-		rotator.driver.Delete(file.FullPath)
+		_ = rotator.driver.Delete(file.FullPath)
 	}
 }

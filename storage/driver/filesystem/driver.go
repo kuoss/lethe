@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -61,7 +60,7 @@ func (d *driver) GetContent(path string) ([]byte, error) {
 	}
 	defer rc.Close()
 
-	p, err := ioutil.ReadAll(rc)
+	p, err := io.ReadAll(rc)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +76,7 @@ func (d *driver) PutContent(subPath string, content []byte) error {
 	defer writer.Close()
 	_, err = io.Copy(writer, bytes.NewReader(content))
 	if err != nil {
-		writer.Cancel()
+		_ = writer.Cancel()
 		return err
 	}
 	return writer.Commit()

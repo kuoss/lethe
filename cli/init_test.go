@@ -26,7 +26,7 @@ func execute(args ...string) string {
 	cmd.SetOut(buf)
 	cmd.SetErr(buf)
 	cmd.SetArgs(args)
-	cmd.Execute()
+	_ = cmd.Execute()
 	result := strings.TrimSpace(buf.String() + cliutil.GetString())
 	// time.Sleep(500 * time.Millisecond)
 	return result

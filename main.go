@@ -1,20 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"github.com/kuoss/lethe/logs/rotator"
 	"time"
 
 	"github.com/kuoss/lethe/config"
+	"github.com/kuoss/lethe/logger"
+	"github.com/kuoss/lethe/logs"
+)
+
+var (
+	Version = "unknown"
 )
 
 func main() {
+	logger.Infof("🌊 lethe starting... version: %s", Version)
 	config.LoadConfig()
-	rotator := rotator.NewRotator()
+
+	rotator := logs.NewRotator()
 	rotator.Start(time.Duration(20) * time.Minute) // 20 minutes
 
-	fmt.Println("🌊 lethe starting...")
-
-	r := NewRouter()
-	r.Run(":3100")
+	router := NewRouter()
+	_ = router.Run(":3100")
 }
