@@ -64,6 +64,7 @@ func TestDebugf(t *testing.T) {
 	output := captureOutput(func() {
 		Debugf("hello=%s lorem=%s number=%d", "hello", "ipsum", 42)
 	})
+	// no output ( logger.Level == InfoLevel )
 	assert.Regexp(t, ``, output)
 }
 
