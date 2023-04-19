@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/config"
-	"github.com/kuoss/lethe/logger"
 	"github.com/kuoss/lethe/logs/rotator"
 )
 
