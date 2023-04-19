@@ -2,16 +2,16 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/kuoss/lethe/logs/rotator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kuoss/lethe/logs"
 	"github.com/kuoss/lethe/util"
 	"github.com/thoas/go-funk"
 )
 
 type LetheHandler struct {
-	*logs.Rotator
+	*rotator.Rotator
 }
 
 func (lh *LetheHandler) Metadata(c *gin.Context) {

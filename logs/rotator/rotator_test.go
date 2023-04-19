@@ -1,4 +1,4 @@
-package logs
+package rotator
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func Test_RoutineDelete_100m_50k(t *testing.T) {
 
 	config.GetConfig().Set("retention.time", "100m")
 	config.GetConfig().Set("retention.size", "50k")
-	rotator.RunOnce()
+	NewRotator().RunOnce()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -35,7 +35,7 @@ func Test_RoutineDelete_100m_3k(t *testing.T) {
 
 	config.GetConfig().Set("retention.time", "100m")
 	config.GetConfig().Set("retention.size", "3k")
-	rotator.RunOnce()
+	NewRotator().RunOnce()
 
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")
@@ -56,7 +56,7 @@ func Test_RoutineDelete_1d(t *testing.T) {
 
 	config.GetConfig().Set("retention.time", "1d")
 	config.GetConfig().Set("retention.size", "100g")
-	rotator.RunOnce()
+	NewRotator().RunOnce()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_22.log")

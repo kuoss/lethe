@@ -1,4 +1,4 @@
-package logs
+package rotator
 
 import (
 	"github.com/kuoss/lethe/config"

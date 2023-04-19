@@ -1,0 +1,114 @@
+name: workflow
+on:
+  push:
+    branches:
+    - '**'
+    - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  go-licenses:
+    name: go-licenses
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - run: go install github.com/google/go-licenses@v1.5.0
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - run: go-licenses check .
+  go-vet:
+    name: go-vet
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - run: go vet ./...
+  go-staticcheck:
+    name: go-staticcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: go staticcheck
+      uses: dominikh/staticcheck-action@v1.3.0
+      with:
+        version: "2022.1.3"
+        install-go: false
+        cache-key: 1.18
+  go-vulncheck:
+    name: go-vulncheck
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - uses: Templum/govulncheck-action@v0.0.7
+      with:
+        go-version: 1.18
+        vulncheck-version: latest
+        package: ./...
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+  go-fmt:
+    name: go-fmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - uses: Jerome1337/gofmt-action@v1.0.5
+      with:
+        gofmt-path: '.'
+        gofmt-flags: '-l -d'
+
+  go-test-failfast:
+    name: go-test-failfast
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: go test failfast
+      run: go test ./... -v -failfast
+
+  go-test-with-coverage:
+    name: go-test-with-coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: go test with coverage
+      run: go test ./... -v -coverprofile=coverage.out
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+    - name: Convert coverage to lcov
+      uses: jandelgado/gcov2lcov-action@v1
+    - name: Coveralls 
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage.lcov
+    - name: Coverage Gate
+      uses: VeryGoodOpenSource/very_good_coverage@v2
+      with:
+        path: coverage.lcov
+        min_coverage: 50

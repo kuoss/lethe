@@ -1,4 +1,4 @@
-package logs
+package filter
 
 import (
 	"regexp"
@@ -35,7 +35,7 @@ func TestGetFilterFromQuery(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(subt *testing.T) {
-			got, err := FilterFromQuery(tt.query)
+			got, err := FromQuery(tt.query)
 			if err != nil {
 				subt.Fatalf("query: %s err: %s", name, err.Error())
 			}

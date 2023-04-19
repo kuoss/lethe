@@ -1,5 +1,7 @@
 package letheql
 
+import "github.com/kuoss/lethe/logs/logStore"
+
 type ParsedQuery struct {
 	Type    string
 	Labels  []Label
@@ -19,7 +21,7 @@ const (
 )
 
 type QueryData struct {
-	ResultType ValueType `json:"resultType"`
-	Logs       []string  `json:"logs,omitempty"`
-	Scalar     float64   `json:"scalar,omitempty"`
+	ResultType ValueType          `json:"resultType"`
+	Logs       []logStore.LogLine `json:"logs,omitempty"`
+	Scalar     float64            `json:"scalar,omitempty"`
 }

@@ -3,9 +3,9 @@ package list
 import (
 	"bytes"
 	"fmt"
+	"github.com/kuoss/lethe/logs/rotator"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
-	"github.com/kuoss/lethe/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func initListFiles() {
 }
 
 func listFiles(c *cobra.Command) {
-	files := logs.NewRotator().ListFilesWithSize()
+	files := rotator.NewRotator().ListFilesWithSize()
 
 	var data [][]string
 	var totalSize int64

@@ -1,9 +1,11 @@
 //go:build windows
 // +build windows
 
-package logs
+package rotator
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // "golang.org/x/sys/windows"
 

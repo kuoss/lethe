@@ -1,4 +1,4 @@
-package logs
+package rotator
 
 import (
 	"testing"
@@ -9,6 +9,8 @@ import (
 
 func Test_GetDiskUsedBytes(t *testing.T) {
 	testutil.SetTestLogFiles()
+
+	rotator := NewRotator()
 
 	actual, err := rotator.GetDiskUsedBytes(rotator.driver.RootDirectory())
 	if err != nil {

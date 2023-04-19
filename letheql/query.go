@@ -3,14 +3,14 @@ package letheql
 import (
 	"errors"
 	"fmt"
+	"github.com/kuoss/lethe/logs/filter"
+	"github.com/kuoss/lethe/logs/logStore"
 	"log"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/VictoriaMetrics/metricsql"
 	"github.com/kuoss/lethe/clock"
-	"github.com/kuoss/lethe/logs"
 )
 
 type LeafType string
@@ -31,7 +31,7 @@ type Leaf struct {
 	LeafType     LeafType
 	LogRequest   LogRequest
 	ScalarResult float64
-	LogsResult   []string
+	LogsResult   []logStore.LogLine
 	Function     string
 	TimeRange    TimeRange
 	Keyword      string
@@ -39,9 +39,9 @@ type Leaf struct {
 
 type LogRequest struct {
 	// AuditSearchParams logs.AuditSearchParams
-	EventSearchParams logs.EventSearchParams
-	NodeSearchParams  logs.NodeSearchParams
-	PodSearchParams   logs.PodSearchParams
+	EventSearchParams logStore.EventSearchParams
+	NodeSearchParams  logStore.NodeSearchParams
+	PodSearchParams   logStore.PodSearchParams
 	DurationSeconds   int
 	Function          string
 }
@@ -51,55 +51,59 @@ type TimeRange struct {
 	End   time.Time
 }
 
-func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
+type Query interface {
+	Exec() []string
+}
 
-	fmt.Printf("ProcQuery: query=%s, timeRange=%s\n", query, timeRange)
-	ok, filterType, err := logs.IsFilterExist(query)
+type query struct {
+	q       string
+	filter  filter.Filter
+	keyword string
+	engine  *Engine
+}
+
+func (q *query) String() string {
+	return q.q
+}
+
+func (q *query) Exec() []string {
+
+	// q.engine.exec()
+	// to do
+	return nil
+}
+
+func ProcQuery(queryString string, timeRange TimeRange) (QueryData, error) {
+
+	// log.Printf("ProcQuery: queryString=%s, timeRange=%s\n", queryString, timeRange)
+	engine := &Engine{}
+	query, err := engine.newQuery(queryString)
 	if err != nil {
+		return QueryData{}, nil
+	}
+
+	expr, err := metricsql.Parse(query.q)
+	if err != nil {
+		log.Printf("parse query failed. err: %v\n", err)
 		return QueryData{}, err
 	}
 
-	var parsableQuery, keyword string
-	var filter logs.Filter
-	if ok {
-		parts := strings.Split(query, filterType)
-		parsableQuery = strings.TrimSpace(parts[0])
-		keyword = strings.TrimSpace(parts[1])
-		filterFromQuery, err := logs.FilterFromQuery(query)
-		if err != nil {
-			return QueryData{}, err
-		}
-		filter = filterFromQuery
-	} else {
-		parsableQuery = query
-		keyword = ""
-	}
-
-	if len(query) < 1 {
-		return QueryData{}, errors.New("empty query")
-	}
-
-	expr, err := metricsql.Parse(parsableQuery)
+	leaf, err := resolveExpr(expr, Leaf{TimeRange: timeRange, Keyword: query.keyword})
 	if err != nil {
-		log.Println("ProcQuery: Parse: err=", err)
+		log.Printf("resolve Expr failed. err: %v\n", err)
 		return QueryData{}, err
 	}
-	leaf, err := procExpr(expr, Leaf{TimeRange: timeRange, Keyword: keyword})
+
+	leaf, err = resolveLeaf(leaf, query.filter)
 	if err != nil {
-		log.Println("ProcQuery: procExpr: err=", err)
-		return QueryData{}, err
-	}
-	leaf, err = resolveLeaf(leaf, filter)
-	if err != nil {
-		log.Println("ProcQuery: resolveLeaf: err=", err)
+		log.Printf("resolve leaf failed. err: %v\n", err)
 		return QueryData{}, err
 	}
 
 	queryData, err := getQueryDataFromLeaf(leaf)
-	// fmt.Printf("ProcQuery: leaf=%#v\n", leaf)
-	// fmt.Printf("ProcQuery: queryData=%#v\n", queryData)
+
 	if err != nil {
-		log.Println("ProcQuery: getQueryDataFromLeaf: err=", err)
+		// log.Println("ProcQuery: getQueryDataFromLeaf: err=", err)
 		return QueryData{}, err
 	}
 	return queryData, nil
@@ -107,7 +111,6 @@ func ProcQuery(query string, timeRange TimeRange) (QueryData, error) {
 
 func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 	var queryData QueryData
-	// fmt.Printf("getQueryDataFromLeaf: leaf=%#v\n", leaf)
 	switch leaf.LeafType {
 	case LeafTypeLogsResult:
 		queryData.ResultType = ValueTypeLogs
@@ -121,9 +124,7 @@ func getQueryDataFromLeaf(leaf Leaf) (QueryData, error) {
 	return queryData, nil
 }
 
-func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
-
-	logStore := logs.New()
+func resolveLeaf(leaf Leaf, filter filter.Filter) (Leaf, error) {
 
 	if leaf.LeafType != LeafTypeAuditLogRequest &&
 		leaf.LeafType != LeafTypeEventLogRequest &&
@@ -156,7 +157,7 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 	if durationSeconds == 0 || (durationSecondsFromTimeRange != 0 && durationSecondsFromTimeRange < durationSeconds) {
 		durationSeconds = durationSecondsFromTimeRange
 	}
-	logSearch := logs.LogSearch{
+	logSearch := logStore.LogSearch{
 		DurationSeconds: durationSeconds,
 		EndTime:         leaf.TimeRange.End,
 		Keyword:         leaf.Keyword,
@@ -165,19 +166,20 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 	switch leaf.LeafType {
 
 	case LeafTypeNodeLogRequest:
-		logSearch.LogType = logs.NodeLog{Name: logs.NODE_TYPE}
+		logSearch.LogType = logStore.NodeLog{Name: logStore.NODE_TYPE}
 		logSearch.TargetPattern = req.NodeSearchParams.Node
 		logSearch.NodeSearchParams = req.NodeSearchParams
 
 	case LeafTypePodLogRequest:
-		logSearch.LogType = logs.PodLog{Name: logs.POD_TYPE}
+		logSearch.LogType = logStore.PodLog{Name: logStore.POD_TYPE}
 		logSearch.TargetPattern = req.PodSearchParams.Namespace
 		logSearch.PodSearchParams = req.PodSearchParams
 	}
 
+	ls := logStore.New()
 	switch req.Function {
 	case "":
-		result, err := logStore.GetLogs(logSearch)
+		result, err := ls.GetLogs(logSearch)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -185,7 +187,7 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 		leaf.LeafType = LeafTypeLogsResult
 	case "count_over_time":
 		logSearch.IsCounting = true
-		result, err := logStore.GetLogs(logSearch)
+		result, err := ls.GetLogs(logSearch)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -197,8 +199,8 @@ func resolveLeaf(leaf Leaf, filter logs.Filter) (Leaf, error) {
 	return leaf, nil
 }
 
-func procExpr(expr metricsql.Expr, leaf Leaf) (Leaf, error) {
-	// fmt.Printf("procExpr: %#T %#v\n", expr, leaf.TimeRange)
+func resolveExpr(expr metricsql.Expr, leaf Leaf) (Leaf, error) {
+	// fmt.Printf("resolveExpr: %#T %#v\n", expr, leaf.TimeRange)
 	switch v := expr.(type) {
 	case *metricsql.BinaryOpExpr:
 		return procBinaryOpExpr(v, leaf)
@@ -219,7 +221,7 @@ func procFuncExpr(expr *metricsql.FuncExpr, leaf Leaf) (Leaf, error) {
 	newLeaf := Leaf{}
 	for _, arg := range expr.Args {
 		var err error
-		newLeaf, err = procExpr(arg, leaf)
+		newLeaf, err = resolveExpr(arg, leaf)
 		if err != nil {
 			return Leaf{}, err
 		}
@@ -232,21 +234,21 @@ func procBinaryOpExpr(expr *metricsql.BinaryOpExpr, leaf Leaf) (Leaf, error) {
 	// TODO: should be vector not scalar
 	var leftLeaf, rightLeaf Leaf
 	var err error
-	leftLeaf, err = procExpr(expr.Left, leaf)
+	leftLeaf, err = resolveExpr(expr.Left, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
-	rightLeaf, err = procExpr(expr.Right, leaf)
-	if err != nil {
-		return Leaf{}, err
-	}
-	//todo filter parameter ?
-	leftLeaf, err = resolveLeaf(leftLeaf, logs.TempExportFilter{})
+	rightLeaf, err = resolveExpr(expr.Right, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
 	//todo filter parameter ?
-	rightLeaf, err = resolveLeaf(rightLeaf, logs.TempExportFilter{})
+	leftLeaf, err = resolveLeaf(leftLeaf, filter.TempExportFilter{})
+	if err != nil {
+		return Leaf{}, err
+	}
+	//todo filter parameter ?
+	rightLeaf, err = resolveLeaf(rightLeaf, filter.TempExportFilter{})
 	if err != nil {
 		return Leaf{}, err
 	}
@@ -322,7 +324,7 @@ func procEventExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		}
 	}
 	leaf.LeafType = LeafTypeEventLogRequest
-	leaf.LogRequest = LogRequest{EventSearchParams: logs.EventSearchParams{Namespace: namespace, Type: typ, Reason: reason, Object: object, Count: count}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{EventSearchParams: logStore.EventSearchParams{Namespace: namespace, Type: typ, Reason: reason, Object: object, Count: count}, Function: leaf.Function}
 	return leaf, nil
 }
 
@@ -337,7 +339,7 @@ func procNodeExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		}
 	}
 	leaf.LeafType = LeafTypeNodeLogRequest
-	leaf.LogRequest = LogRequest{NodeSearchParams: logs.NodeSearchParams{Node: logs.PatternedString(node), Process: logs.PatternedString(process)}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{NodeSearchParams: logStore.NodeSearchParams{Node: logStore.PatternedString(node), Process: logStore.PatternedString(process)}, Function: leaf.Function}
 	return leaf, nil
 }
 
@@ -365,7 +367,7 @@ func procPodExpr(expr *metricsql.MetricExpr, leaf Leaf) (Leaf, error) {
 		namespace = "*"
 	}
 	leaf.LeafType = LeafTypePodLogRequest
-	leaf.LogRequest = LogRequest{PodSearchParams: logs.PodSearchParams{Namespace: logs.PatternedString(namespace), Pod: logs.PatternedString(pod), Container: logs.PatternedString(container)}, Function: leaf.Function}
+	leaf.LogRequest = LogRequest{PodSearchParams: logStore.PodSearchParams{Namespace: logStore.PatternedString(namespace), Pod: logStore.PatternedString(pod), Container: logStore.PatternedString(container)}, Function: leaf.Function}
 	return leaf, nil
 
 }
@@ -379,7 +381,7 @@ func procRollupExpr(expr *metricsql.RollupExpr, leaf Leaf) (Leaf, error) {
 	if reflect.ValueOf(expr.Window).Type().String() != "*metricsql.DurationExpr" {
 		return Leaf{}, errors.New("not duration expr")
 	}
-	leaf, err := procExpr(expr.Expr, leaf)
+	leaf, err := resolveExpr(expr.Expr, leaf)
 	if err != nil {
 		return Leaf{}, err
 	}
