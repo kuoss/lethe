@@ -13,7 +13,6 @@ var (
 )
 
 func main() {
-	logger := logger.GetLogger()
 	logger.Infof("🌊 lethe starting... version: %s", Version)
 	config.LoadConfig()
 
