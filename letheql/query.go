@@ -3,11 +3,12 @@ package letheql
 import (
 	"errors"
 	"fmt"
-	"github.com/kuoss/lethe/logs/filter"
-	"github.com/kuoss/lethe/logs/logStore"
 	"log"
 	"reflect"
 	"time"
+
+	"github.com/kuoss/lethe/logs/filter"
+	"github.com/kuoss/lethe/logs/logStore"
 
 	"github.com/VictoriaMetrics/metricsql"
 	"github.com/kuoss/lethe/clock"

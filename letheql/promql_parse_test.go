@@ -2,10 +2,11 @@ package letheql
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/kuoss/lethe/logs/logStore"
 	"github.com/prometheus/prometheus/promql/parser"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPromqlParse(t *testing.T) {

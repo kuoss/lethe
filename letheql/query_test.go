@@ -1,9 +1,10 @@
 package letheql
 
 import (
-	"github.com/kuoss/lethe/logs/logStore"
 	"testing"
 	"time"
+
+	"github.com/kuoss/lethe/logs/logStore"
 
 	"github.com/stretchr/testify/assert"
 

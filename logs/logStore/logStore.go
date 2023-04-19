@@ -3,11 +3,12 @@ package logStore
 import (
 	"bufio"
 	"fmt"
-	"github.com/kuoss/lethe/logs/filter"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/kuoss/lethe/logs/filter"
 
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/storage/driver"

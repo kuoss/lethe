@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/kuoss/lethe/logs/rotator"
 	"net/http"
+
+	"github.com/kuoss/lethe/logs/rotator"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/util"

@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kuoss/lethe/logs/logStore"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/kuoss/lethe/logs/logStore"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/testutil"

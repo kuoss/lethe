@@ -1,10 +1,11 @@
 package letheql
 
 import (
-	"github.com/VictoriaMetrics/metricsql"
+	"strings"
+
+	// "github.com/VictoriaMetrics/metricsql"
 	"github.com/kuoss/lethe/logs/filter"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 type Engine struct {
@@ -46,12 +47,12 @@ func (e *Engine) newQuery(queryString string) (*query, error) {
 	}, nil
 }
 
-func (e *Engine) parseQuery(q *query) {
-	_, err := metricsql.Parse(q.q)
-	if err != nil {
-		return
-	}
-}
-func (e *Engine) exec(q *query) {
-	q.Exec()
-}
+// func (e *Engine) parseQuery(q *query) {
+// 	_, err := metricsql.Parse(q.q)
+// 	if err != nil {
+// 		return
+// 	}
+// }
+// func (e *Engine) exec(q *query) {
+// 	q.Exec()
+// }

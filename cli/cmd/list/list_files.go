@@ -3,6 +3,7 @@ package list
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/kuoss/lethe/logs/rotator"
 
 	cliutil "github.com/kuoss/lethe/cli/util"

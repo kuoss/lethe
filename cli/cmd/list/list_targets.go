@@ -3,9 +3,10 @@ package list
 import (
 	"bytes"
 	"fmt"
-	"github.com/kuoss/lethe/logs/rotator"
 	"regexp"
 	"time"
+
+	"github.com/kuoss/lethe/logs/rotator"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
 	"github.com/spf13/cobra"
