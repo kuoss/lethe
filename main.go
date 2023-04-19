@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/kuoss/lethe/config"
+	"github.com/kuoss/lethe/logger"
 	"github.com/kuoss/lethe/logs"
 )
 
@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	log.Println("🌊 lethe starting... version:", Version)
+	logger.Infof("🌊 lethe starting... version: %s", Version)
 	config.LoadConfig()
 
 	rotator := logs.NewRotator()
