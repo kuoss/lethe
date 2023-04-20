@@ -1,7 +1,7 @@
 name: pull-request
 on:
   pull_request:
-    types: [opened, reopend, synchronize]
+    types: [opened, reopened, synchronize]
 permissions:
   contents: read
   pull-requests: write
@@ -61,19 +61,21 @@ jobs:
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - name: go test failfast
-      run: go test ./... -v -failfast
+    - run: go test ./... -v -failfast
 
-  # https://about.codecov.io/blog/getting-started-with-code-coverage-for-golang/
   go-test-coverage:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - name: go test with coverage
-      run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+    - run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
+    # https://about.codecov.io/blog/getting-started-with-code-coverage-for-golang/
+    - uses: codecov/codecov-action@v3
+    # https://github.com/mattn/goveralls#github-actions
+    - run: go install github.com/mattn/goveralls@latest
+    - run: goveralls -service=github -coverprofile=coverage.out
+      env:
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   go-licenses:
     runs-on: ubuntu-latest
