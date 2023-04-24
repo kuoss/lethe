@@ -27,7 +27,10 @@ func Init() {
 	os.Setenv("TEST_MODE", "1")
 	changeWorkingDirectoryToProjectRoot()
 
-	config.LoadConfig()
+	err := config.LoadConfig()
+	if err != nil {
+		logger.Fatalf("error on LoadConfig: %s", err)
+	}
 	config.GetConfig().Set("retention.time", "3h")
 	config.GetConfig().Set("retention.size", "10m")
 	config.GetConfig().Set("retention.sizingStrategy", "files")

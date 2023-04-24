@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/logs/rotator"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
@@ -44,4 +43,5 @@ func listFiles(c *cobra.Command) error {
 	table.AppendBulk(data)
 	table.Render()
 	c.Print(buf.String())
+	return nil
 }
