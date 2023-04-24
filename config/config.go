@@ -3,12 +3,13 @@ package config
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/kuoss/common/logger"
 	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var config *viper.Viper
@@ -16,7 +17,7 @@ var writer io.Writer
 var limit = 1000
 var logRoot = "./tmp/log"
 
-func LoadConfig() {
+func LoadConfig() error {
 	config = viper.New()
 	config.SetConfigName("lethe")
 	config.SetConfigType("yaml")
@@ -24,14 +25,21 @@ func LoadConfig() {
 	config.AddConfigPath(filepath.Join("..", "etc"))
 	err := config.ReadInConfig()
 	if err != nil {
-		log.Fatal(fmt.Errorf("fatal error config logs: %w", err))
+		return fmt.Errorf("error on ReadInConfig: %w", err)
 	}
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		log.Fatal(fmt.Errorf("unable to decode into struct, %v", err))
+		return fmt.Errorf("error on Unmarshal: %w", err)
 	}
-
 	SetLogRoot(config.GetString("storage.rootdirectory"))
+
+	// show all settings in yaml format
+	yamlBytes, err := yaml.Marshal(config.AllSettings())
+	if err != nil {
+		return fmt.Errorf("error on Marshal: %w", err)
+	}
+	logger.Infof("settings:\n====================================\n" + string(yamlBytes) + "====================================")
+	return nil
 }
 
 func GetConfig() *viper.Viper {

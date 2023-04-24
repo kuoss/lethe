@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/logs/rotator"
 
 	cliutil "github.com/kuoss/lethe/cli/util"
@@ -21,7 +22,11 @@ func initListFiles() {
 }
 
 func listFiles(c *cobra.Command) {
-	files := rotator.NewRotator().ListFilesWithSize()
+	files, err := rotator.NewRotator().ListFiles()
+	if err != nil {
+		logger.Errorf("error on ListFiles: %s", err)
+		return
+	}
 
 	var data [][]string
 	var totalSize int64
