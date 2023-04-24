@@ -15,17 +15,16 @@ func initListFiles() {
 	listCmd.AddCommand(&cobra.Command{
 		Use:   "files",
 		Short: "List log files",
-		Run: func(cmd *cobra.Command, args []string) {
-			listFiles(cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return listFiles(cmd)
 		},
 	})
 }
 
-func listFiles(c *cobra.Command) {
+func listFiles(c *cobra.Command) error {
 	files, err := rotator.NewRotator().ListFiles()
 	if err != nil {
-		logger.Errorf("error on ListFiles: %s", err)
-		return
+		return fmt.Errorf("error on ListFiles: %w", err)
 	}
 
 	var data [][]string
