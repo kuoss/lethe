@@ -2,28 +2,30 @@ package rotator
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/util"
 )
 
 // DELETE
-func (rotator *Rotator) DeleteByAge() {
+func (rotator *Rotator) DeleteByAge() error {
 	retentionTime := config.GetConfig().GetString("retention.time")
 	duration, err := util.GetDurationFromAge(retentionTime)
 	if err != nil {
-		log.Fatalf("cannot parse duration=[%s] error=%s", retentionTime, err)
-		return
+		return fmt.Errorf("error on GetDurationFromAge: %w", err)
 	}
 	point := strings.Replace(clock.GetNow().Add(-duration).UTC().String()[0:13], " ", "_", 1)
-	files := rotator.ListFiles()
+	files, err := rotator.ListFiles()
+	if err != nil {
+		return fmt.Errorf("error on ListFiles: %w", err)
+	}
 	if len(files) < 1 {
-		fmt.Printf("DeleteByAge( < %s): no files. done.\n", point)
-		return
+		logger.Infof("DeleteByAge( < %s): no files. done.", point)
+		return nil
 	}
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].Name < files[j].Name
@@ -31,22 +33,27 @@ func (rotator *Rotator) DeleteByAge() {
 
 	for _, file := range files {
 		if file.Name < point {
-			fmt.Printf("DeleteByAge(%s < %s): %s\n", file.Name, point, file.FullPath)
+			logger.Infof("DeleteByAge(%s < %s): %s", file.Name, point, file.FullPath)
 			err := rotator.driver.Delete(file.FullPath)
 			if err != nil {
-				return
+				logger.Errorf("error on Delete: %s", err)
+				continue
 			}
 		}
 	}
-	fmt.Printf("DeleteByAge(%s): Done\n", point)
+	logger.Infof("DeleteByAge(%s): Done\n", point)
+	return nil
 }
 
-func (rotator *Rotator) DeleteBySize() {
+func (rotator *Rotator) DeleteBySize() error {
 	retentionSizeBytes, err := util.StringToBytes(config.GetConfig().GetString("retention.size"))
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error on StringToBytes: %w", err)
 	}
-	files := rotator.ListFilesWithSize()
+	files, err := rotator.ListFiles()
+	if err != nil {
+		return fmt.Errorf("error on ListFiles: %w", err)
+	}
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].Name < files[j].Name
 	})
@@ -54,14 +61,17 @@ func (rotator *Rotator) DeleteBySize() {
 	for _, file := range files {
 		usedBytes, err := rotator.GetUsedBytes(config.GetLogRoot())
 		if err != nil {
-			log.Fatalf("cannot get used bytes: %s", err)
-			return
+			return fmt.Errorf("error on GetUsedBytes: %w", err)
 		}
 		if usedBytes < retentionSizeBytes {
-			fmt.Printf("DeleteBySize(%d < %d): Done\n", usedBytes, retentionSizeBytes)
-			return
+			logger.Infof("DeleteBySize(%d < %d): DONE", usedBytes, retentionSizeBytes)
+			return nil
 		}
-		fmt.Printf("DeleteBySize(%d > %d): %s\n", usedBytes, retentionSizeBytes, file.FullPath)
-		_ = rotator.driver.Delete(file.FullPath)
+		logger.Infof("DeleteBySize(%d > %d): %s", usedBytes, retentionSizeBytes, file.FullPath)
+		err = rotator.driver.Delete(file.FullPath)
+		if err != nil {
+			logger.Errorf("error on Delte: %s", err)
+		}
 	}
+	return nil
 }

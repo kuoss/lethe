@@ -31,20 +31,21 @@ type LogDir struct {
 	LastForward string
 }
 
-func (rotator *Rotator) ListFiles() []LogFile {
-	var logFiles []LogFile
-
+func (rotator *Rotator) ListFiles() (logFiles []LogFile, err error) {
 	rootDirectory := rotator.driver.RootDirectory()
 	fileInfos, err := rotator.driver.Walk(rootDirectory)
 	if err != nil {
-		return logFiles
+		err = fmt.Errorf("error on Walk: %e", err)
+		return
 	}
-	for _, fileInfo := range fileInfos {
 
+	for _, fileInfo := range fileInfos {
 		logPath := storage.LogPath{RootDirectory: rootDirectory}
-		rel, err := filepath.Rel(logPath.RootDirectory, fileInfo.Path())
+		var rel string
+		rel, err = filepath.Rel(logPath.RootDirectory, fileInfo.Path())
 		if err != nil {
-			return nil
+			err = fmt.Errorf("error on Rel: %w", err)
+			return
 		}
 		logPath.SetFullPath(rel)
 
@@ -60,14 +61,7 @@ func (rotator *Rotator) ListFiles() []LogFile {
 			})
 		}
 	}
-	return logFiles
-}
-
-// Deprecated?
-func (rotator *Rotator) ListFilesWithSize() []LogFile {
-	logFiles := rotator.ListFiles()
-
-	return logFiles
+	return
 }
 
 func (rotator *Rotator) ListDirs() []LogDir {

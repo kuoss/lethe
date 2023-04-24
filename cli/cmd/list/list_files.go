@@ -14,14 +14,17 @@ func initListFiles() {
 	listCmd.AddCommand(&cobra.Command{
 		Use:   "files",
 		Short: "List log files",
-		Run: func(cmd *cobra.Command, args []string) {
-			listFiles(cmd)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return listFiles(cmd)
 		},
 	})
 }
 
-func listFiles(c *cobra.Command) {
-	files := rotator.NewRotator().ListFilesWithSize()
+func listFiles(c *cobra.Command) error {
+	files, err := rotator.NewRotator().ListFiles()
+	if err != nil {
+		return fmt.Errorf("error on ListFiles: %w", err)
+	}
 
 	var data [][]string
 	var totalSize int64
@@ -40,4 +43,5 @@ func listFiles(c *cobra.Command) {
 	table.AppendBulk(data)
 	table.Render()
 	c.Print(buf.String())
+	return nil
 }

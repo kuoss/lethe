@@ -14,6 +14,9 @@ test:
 test-win:
 	.\hack\test-failfast.bat
 
+cover:
+	hack/test-cover.sh
+
 checks:
 	hack/checks.sh
 

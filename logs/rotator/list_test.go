@@ -9,6 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	testutil.Init()
+}
+
 func TestListDirs(t *testing.T) {
 	testutil.SetTestLogFiles()
 
@@ -38,14 +42,14 @@ func TestListDirWithSize(t *testing.T) {
 func TestListFiles(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	got := NewRotator().ListFiles()
-
-	actual := fmt.Sprintf("%v", got)
-	expected := "[{tmp/log/node/node01/2009-11-10_21.log 2009-11-10_21.log node node01 2009-11-10_21.log .log 1057} {tmp/log/node/node01/2009-11-10_22.log 2009-11-10_22.log node node01 2009-11-10_22.log .log 177} {tmp/log/node/node02/2009-11-01_00.log 2009-11-01_00.log node node02 2009-11-01_00.log .log 0} {tmp/log/node/node02/2009-11-10_21.log 2009-11-10_21.log node node02 2009-11-10_21.log .log 1116} {tmp/log/pod/namespace01/2000-01-01_00.log 2000-01-01_00.log pod namespace01 2000-01-01_00.log .log 1031} {tmp/log/pod/namespace01/2009-11-10_21.log 2009-11-10_21.log pod namespace01 2009-11-10_21.log .log 279} {tmp/log/pod/namespace01/2009-11-10_22.log 2009-11-10_22.log pod namespace01 2009-11-10_22.log .log 1031} {tmp/log/pod/namespace01/2029-11-10_23.log 2029-11-10_23.log pod namespace01 2029-11-10_23.log .log 279} {tmp/log/pod/namespace02/0000-00-00_00.log 0000-00-00_00.log pod namespace02 0000-00-00_00.log .log 12} {tmp/log/pod/namespace02/2009-11-10_22.log 2009-11-10_22.log pod namespace02 2009-11-10_22.log .log 1125}]"
+	want := "[{tmp/log/node/node01/2009-11-10_21.log 2009-11-10_21.log node node01 2009-11-10_21.log .log 1057} {tmp/log/node/node01/2009-11-10_22.log 2009-11-10_22.log node node01 2009-11-10_22.log .log 177} {tmp/log/node/node02/2009-11-01_00.log 2009-11-01_00.log node node02 2009-11-01_00.log .log 0} {tmp/log/node/node02/2009-11-10_21.log 2009-11-10_21.log node node02 2009-11-10_21.log .log 1116} {tmp/log/pod/namespace01/2000-01-01_00.log 2000-01-01_00.log pod namespace01 2000-01-01_00.log .log 1031} {tmp/log/pod/namespace01/2009-11-10_21.log 2009-11-10_21.log pod namespace01 2009-11-10_21.log .log 279} {tmp/log/pod/namespace01/2009-11-10_22.log 2009-11-10_22.log pod namespace01 2009-11-10_22.log .log 1031} {tmp/log/pod/namespace01/2029-11-10_23.log 2029-11-10_23.log pod namespace01 2029-11-10_23.log .log 279} {tmp/log/pod/namespace02/0000-00-00_00.log 0000-00-00_00.log pod namespace02 0000-00-00_00.log .log 12} {tmp/log/pod/namespace02/2009-11-10_22.log 2009-11-10_22.log pod namespace02 2009-11-10_22.log .log 1125}]"
 	if runtime.GOOS == "windows" {
-		expected = "[{tmp\\log\\node\\node01\\2009-11-10_21.log 2009-11-10_21.log node node01 2009-11-10_21.log .log 1068} {tmp\\log\\node\\node01\\2009-11-10_22.log 2009-11-10_22.log node node01 2009-11-10_22.log .log 180} {tmp\\log\\node\\node02\\2009-11-01_00.log 2009-11-01_00.log node node02 2009-11-01_00.log .log 0} {tmp\\log\\node\\node02\\2009-11-10_21.log 2009-11-10_21.log node node02 2009-11-10_21.log .log 1128} {tmp\\log\\pod\\namespace01\\2000-01-01_00.log 2000-01-01_00.log pod namespace01 2000-01-01_00.log .log 1041} {tmp\\log\\pod\\namespace01\\2009-11-10_21.log 2009-11-10_21.log pod namespace01 2009-11-10_21.log .log 282} {tmp\\log\\pod\\namespace01\\2009-11-10_22.log 2009-11-10_22.log pod namespace01 2009-11-10_22.log .log 1041} {tmp\\log\\pod\\namespace01\\2029-11-10_23.log 2029-11-10_23.log pod namespace01 2029-11-10_23.log .log 282} {tmp\\log\\pod\\namespace02\\0000-00-00_00.log 0000-00-00_00.log pod namespace02 0000-00-00_00.log .log 14} {tmp\\log\\pod\\namespace02\\2009-11-10_22.log 2009-11-10_22.log pod namespace02 2009-11-10_22.log .log 1137}]"
+		want = "[{tmp\\log\\node\\node01\\2009-11-10_21.log 2009-11-10_21.log node node01 2009-11-10_21.log .log 1068} {tmp\\log\\node\\node01\\2009-11-10_22.log 2009-11-10_22.log node node01 2009-11-10_22.log .log 180} {tmp\\log\\node\\node02\\2009-11-01_00.log 2009-11-01_00.log node node02 2009-11-01_00.log .log 0} {tmp\\log\\node\\node02\\2009-11-10_21.log 2009-11-10_21.log node node02 2009-11-10_21.log .log 1128} {tmp\\log\\pod\\namespace01\\2000-01-01_00.log 2000-01-01_00.log pod namespace01 2000-01-01_00.log .log 1041} {tmp\\log\\pod\\namespace01\\2009-11-10_21.log 2009-11-10_21.log pod namespace01 2009-11-10_21.log .log 282} {tmp\\log\\pod\\namespace01\\2009-11-10_22.log 2009-11-10_22.log pod namespace01 2009-11-10_22.log .log 1041} {tmp\\log\\pod\\namespace01\\2029-11-10_23.log 2029-11-10_23.log pod namespace01 2029-11-10_23.log .log 282} {tmp\\log\\pod\\namespace02\\0000-00-00_00.log 0000-00-00_00.log pod namespace02 0000-00-00_00.log .log 14} {tmp\\log\\pod\\namespace02\\2009-11-10_22.log 2009-11-10_22.log pod namespace02 2009-11-10_22.log .log 1137}]"
 	}
-	assert.Equal(t, expected, actual)
+
+	got, err := NewRotator().ListFiles()
+	assert.NoError(t, err)
+	assert.Equal(t, want, fmt.Sprintf("%v", got))
 }
 
 func TestListTargets(t *testing.T) {

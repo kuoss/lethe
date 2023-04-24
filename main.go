@@ -14,7 +14,10 @@ var (
 
 func main() {
 	logger.Infof("🌊 lethe starting... version: %s", Version)
-	config.LoadConfig()
+	err := config.LoadConfig()
+	if err != nil {
+		logger.Fatalf("error on LoadConfig: %s", err)
+	}
 
 	rotator := rotator.NewRotator()
 	rotator.Start(time.Duration(20) * time.Minute) // 20 minutes

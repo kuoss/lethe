@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/storage/driver"
 	"github.com/kuoss/lethe/storage/driver/factory"
@@ -31,7 +32,17 @@ func (rotator *Rotator) routineLoop(interval time.Duration) {
 }
 
 func (rotator *Rotator) RunOnce() {
-	rotator.DeleteByAge()
-	rotator.DeleteBySize()
+	var err error
+
+	err = rotator.DeleteByAge()
+	if err != nil {
+		logger.Errorf("error on DeleteByAge: %s", err)
+	}
+
+	err = rotator.DeleteBySize()
+	if err != nil {
+		logger.Errorf("error on DeleteBySize: %s", err)
+	}
+
 	rotator.Cleansing()
 }

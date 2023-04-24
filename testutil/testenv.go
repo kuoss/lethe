@@ -9,6 +9,7 @@ import (
 
 	"runtime"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/config"
 )
 
@@ -26,7 +27,10 @@ func Init() {
 	os.Setenv("TEST_MODE", "1")
 	changeWorkingDirectoryToProjectRoot()
 
-	config.LoadConfig()
+	err := config.LoadConfig()
+	if err != nil {
+		logger.Fatalf("error on LoadConfig: %s", err)
+	}
 	config.GetConfig().Set("retention.time", "3h")
 	config.GetConfig().Set("retention.size", "10m")
 	config.GetConfig().Set("retention.sizingStrategy", "files")
@@ -72,46 +76,56 @@ func changeWorkingDirectoryToProjectRoot() {
 func SetTestLogFiles() {
 	// ClearTestLogFiles()
 	logDirectory := config.GetLogRoot()
-	fmt.Printf("copy to logDirectory: %s\n", logDirectory)
-	copyRecursively("./testutil/log", logDirectory)
+	logger.Infof("SetTestLogFiles: logDirectory=%s", logDirectory)
+	err := CopyRecursively("./testutil/log", logDirectory)
+	if err != nil {
+		logger.Errorf("error on CopyRecursively: %s", err)
+	}
 }
 
-func copyRecursively(src string, dest string) {
+func CopyRecursively(src string, dest string) error {
+	logger.Infof("CopyRecursively... src=%s, dest=%s", src, dest)
+
 	f, err := os.Open(src)
 	if err != nil {
-		log.Fatalf("Cannot open [%s]: %s", src, err)
+		return fmt.Errorf("error on Open: %w", err)
 	}
 	file, err := f.Stat()
 	if err != nil {
-		log.Fatalf("Cannot stat [%s]: %s", file, err)
+		return fmt.Errorf("error on Stat: %w", err)
 	}
 	if !file.IsDir() {
-		log.Fatalf("Source [%s] is not a directory: %s", file.Name(), err)
+		return fmt.Errorf("src[%s] is not a dir", file.Name())
 	}
-	// log.Println("make directory:", dest)
 	err = os.MkdirAll(dest, 0755)
 	if err != nil {
-		log.Fatalf("Cannot make directory [%s]: %s", dest, err)
+		return fmt.Errorf("error on MkdirAll: %w", err)
 	}
 	files, err := os.ReadDir(src)
 	if err != nil {
-		log.Fatalf("Cannot read directory [%s]: %s", dest, err)
+		return fmt.Errorf("error on ReadDir: %w", err)
 	}
 	for _, f := range files {
 		srcFile := src + "/" + f.Name()
 		destFile := dest + "/" + f.Name()
+		// dir
 		if f.IsDir() {
-			copyRecursively(srcFile, destFile)
+			err := CopyRecursively(srcFile, destFile)
+			if err != nil {
+				logger.Errorf("error on CopyRecursively: %s", err)
+			}
 			continue
 		}
-		// log.Println("copy file:", srcFile, destFile)
+		// file
 		content, err := os.ReadFile(srcFile)
 		if err != nil {
-			log.Fatalf("Cannot read file [%s]: %s", srcFile, err)
+			logger.Errorf("error on ReadFile: %s", err)
+			continue
 		}
 		err = os.WriteFile(destFile, content, 0755)
 		if err != nil {
-			log.Fatalf("Cannot write file [%s]: %s", destFile, err)
+			logger.Errorf("error on WriteFile: %s", err)
 		}
 	}
+	return nil
 }

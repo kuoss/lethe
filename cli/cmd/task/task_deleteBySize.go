@@ -1,6 +1,7 @@
 package task
 
 import (
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/logs/rotator"
 	"github.com/spf13/cobra"
 )
@@ -18,5 +19,8 @@ func initDeleteBySize() {
 }
 
 func DeleteBySize(cmd *cobra.Command) {
-	rotator.NewRotator().DeleteBySize()
+	err := rotator.NewRotator().DeleteBySize()
+	if err != nil {
+		logger.Errorf("error on DeleteByAge: %s", err)
+	}
 }

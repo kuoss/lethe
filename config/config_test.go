@@ -8,8 +8,10 @@ import (
 )
 
 func Test_LoadConfig(t *testing.T) {
-	LoadConfig()
+	err := LoadConfig()
 	assert.NotNil(t, config)
+	assert.NotZero(t, config)
+	assert.NoError(t, err)
 }
 
 func Test_GetConfig(t *testing.T) {
