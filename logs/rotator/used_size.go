@@ -5,7 +5,7 @@ import (
 )
 
 func (rotator *Rotator) GetUsedBytes(path string) (int, error) {
-	if config.GetConfig().GetString("retention.sizingStrategy") == "disk" {
+	if config.Viper().GetString("retention.sizingStrategy") == "disk" {
 		return rotator.GetDiskUsedBytes(path)
 	}
 	return rotator.GetFilesUsedBytes(path)

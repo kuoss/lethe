@@ -12,7 +12,7 @@ func Test_task_deleteByAge_10d(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "20d")
+	config.Viper().Set("retention.time", "20d")
 	execute("task", "delete-by-age")
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -33,7 +33,7 @@ func Test_task_deleteByAge_1d(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "2d")
+	config.Viper().Set("retention.time", "2d")
 	execute("task", "delete-by-age")
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -54,7 +54,7 @@ func Test_task_deleteByAge_1h(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "1h")
+	config.Viper().Set("retention.time", "1h")
 	execute("task", "delete-by-age")
 
 	// assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -75,7 +75,7 @@ func Test_task_deleteBySize_1m(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.size", "1m")
+	config.Viper().Set("retention.size", "1m")
 	execute("task", "delete-by-size")
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -96,7 +96,7 @@ func Test_task_deleteBySize_1k(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.size", "1k")
+	config.Viper().Set("retention.size", "1k")
 	execute("task", "delete-by-size")
 
 	// assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")

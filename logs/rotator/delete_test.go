@@ -12,7 +12,7 @@ func Test_DeleteByAge_10d(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "20d")
+	config.Viper().Set("retention.time", "20d")
 	err := NewRotator().DeleteByAge()
 	assert.NoError(t, err)
 
@@ -34,8 +34,8 @@ func Test_DeleteByAge_1d(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "2d")
-	config.GetConfig().Set("retention.size", "100m")
+	config.Viper().Set("retention.time", "2d")
+	config.Viper().Set("retention.size", "100m")
 	err := NewRotator().DeleteByAge()
 	assert.NoError(t, err)
 
@@ -56,8 +56,8 @@ func Test_DeleteByAge_1d(t *testing.T) {
 func Test_DeleteByAge_1h(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "1h")
-	config.GetConfig().Set("retention.size", "100m")
+	config.Viper().Set("retention.time", "1h")
+	config.Viper().Set("retention.size", "100m")
 	err := NewRotator().DeleteByAge()
 	assert.NoError(t, err)
 
@@ -78,7 +78,7 @@ func Test_DeleteByAge_1h(t *testing.T) {
 func Test_DeleteBySize_1m(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.size", "1m")
+	config.Viper().Set("retention.size", "1m")
 	err := NewRotator().DeleteBySize()
 	assert.NoError(t, err)
 
@@ -100,7 +100,7 @@ func Test_DeleteBySize_3k(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.size", "3k")
+	config.Viper().Set("retention.size", "3k")
 	err := NewRotator().DeleteBySize()
 	assert.NoError(t, err)
 
@@ -122,7 +122,7 @@ func Test_DeleteBySize_2k(t *testing.T) {
 	testutil.Init()
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.size", "2k")
+	config.Viper().Set("retention.size", "2k")
 	err := NewRotator().DeleteBySize()
 	assert.NoError(t, err)
 

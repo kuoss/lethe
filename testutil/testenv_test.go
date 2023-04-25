@@ -22,6 +22,6 @@ func Test_Init(t *testing.T) {
 func Test_SetTestLogFiles(t *testing.T) {
 	SetTestLogFiles()
 
-	logDirectory := config.GetLogRoot()
+	logDirectory := config.GetLogDataPath()
 	assert.DirExists(t, logDirectory)
 }

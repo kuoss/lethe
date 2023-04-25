@@ -15,7 +15,7 @@ type Rotator struct {
 }
 
 func NewRotator() *Rotator {
-	d, _ := factory.Get(config.GetConfig().GetString("storage.driver"), map[string]interface{}{"RootDirectory": config.GetLogRoot()})
+	d, _ := factory.Get(config.Viper().GetString("storage.driver"), map[string]interface{}{"RootDirectory": config.GetLogDataPath()})
 	return &Rotator{driver: d}
 }
 
