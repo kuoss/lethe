@@ -11,8 +11,8 @@ import (
 func Test_RoutineDelete_100m_50k(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "100m")
-	config.GetConfig().Set("retention.size", "50k")
+	config.Viper().Set("retention.time", "100m")
+	config.Viper().Set("retention.size", "50k")
 	NewRotator().RunOnce()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -33,8 +33,8 @@ func Test_RoutineDelete_100m_50k(t *testing.T) {
 func Test_RoutineDelete_100m_3k(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "100m")
-	config.GetConfig().Set("retention.size", "3k")
+	config.Viper().Set("retention.time", "100m")
+	config.Viper().Set("retention.size", "3k")
 	NewRotator().RunOnce()
 
 	assert.NoFileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")
@@ -54,8 +54,8 @@ func Test_RoutineDelete_100m_3k(t *testing.T) {
 func Test_RoutineDelete_1d(t *testing.T) {
 	testutil.SetTestLogFiles()
 
-	config.GetConfig().Set("retention.time", "1d")
-	config.GetConfig().Set("retention.size", "100g")
+	config.Viper().Set("retention.time", "1d")
+	config.Viper().Set("retention.size", "100g")
 	NewRotator().RunOnce()
 
 	assert.FileExists(t, "./tmp/log/node/node01/2009-11-10_21.log")

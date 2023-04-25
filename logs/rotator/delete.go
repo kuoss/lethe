@@ -13,7 +13,7 @@ import (
 
 // DELETE
 func (rotator *Rotator) DeleteByAge() error {
-	retentionTime := config.GetConfig().GetString("retention.time")
+	retentionTime := config.Viper().GetString("retention.time")
 	duration, err := util.GetDurationFromAge(retentionTime)
 	if err != nil {
 		return fmt.Errorf("error on GetDurationFromAge: %w", err)
@@ -46,7 +46,7 @@ func (rotator *Rotator) DeleteByAge() error {
 }
 
 func (rotator *Rotator) DeleteBySize() error {
-	retentionSizeBytes, err := util.StringToBytes(config.GetConfig().GetString("retention.size"))
+	retentionSizeBytes, err := util.StringToBytes(config.Viper().GetString("retention.size"))
 	if err != nil {
 		return fmt.Errorf("error on StringToBytes: %w", err)
 	}
@@ -59,7 +59,7 @@ func (rotator *Rotator) DeleteBySize() error {
 	})
 
 	for _, file := range files {
-		usedBytes, err := rotator.GetUsedBytes(config.GetLogRoot())
+		usedBytes, err := rotator.GetUsedBytes(config.GetLogDataPath())
 		if err != nil {
 			return fmt.Errorf("error on GetUsedBytes: %w", err)
 		}

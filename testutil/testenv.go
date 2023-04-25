@@ -31,11 +31,11 @@ func Init() {
 	if err != nil {
 		logger.Fatalf("error on LoadConfig: %s", err)
 	}
-	config.GetConfig().Set("retention.time", "3h")
-	config.GetConfig().Set("retention.size", "10m")
-	config.GetConfig().Set("retention.sizingStrategy", "files")
+	config.Viper().Set("retention.time", "3h")
+	config.Viper().Set("retention.size", "10m")
+	config.Viper().Set("retention.sizingStrategy", "files")
 	config.SetLimit(1000)
-	config.SetLogRoot(logRoot)
+	config.SetLogDataPath(logRoot)
 
 	setenvIntialDiskAvailableBytes()
 	fmt.Println("Test environment initialized...")
@@ -45,7 +45,7 @@ func setenvIntialDiskAvailableBytes() {
 	if os.Getenv("TEST_INITIAL_DISK_AVAILABLE_BYTES") != "" {
 		return
 	}
-	logDirectory := config.GetLogRoot()
+	logDirectory := config.GetLogDataPath()
 	_ = os.MkdirAll(logDirectory, 0755)
 	avail, err := getDiskAvailableBytes(logDirectory)
 	if err != nil {
@@ -75,7 +75,7 @@ func changeWorkingDirectoryToProjectRoot() {
 
 func SetTestLogFiles() {
 	// ClearTestLogFiles()
-	logDirectory := config.GetLogRoot()
+	logDirectory := config.GetLogDataPath()
 	logger.Infof("SetTestLogFiles: logDirectory=%s", logDirectory)
 	err := CopyRecursively("./testutil/log", logDirectory)
 	if err != nil {

@@ -12,29 +12,37 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var config *viper.Viper
-var writer io.Writer
-var limit = 1000
-var logRoot = "./tmp/log"
+var (
+	vip              *viper.Viper
+	logDataPath      string
+	webListenAddress string
+	writer           io.Writer = os.Stdout
+	limit            int       = 1000
+)
 
 func LoadConfig() error {
-	config = viper.New()
-	config.SetConfigName("lethe")
-	config.SetConfigType("yaml")
-	config.AddConfigPath(filepath.Join(".", "etc"))
-	config.AddConfigPath(filepath.Join("..", "etc"))
-	err := config.ReadInConfig()
+	vip = viper.New()
+
+	vip.SetDefault("storage.log_data_path", "./tmp/log")
+	vip.SetDefault("web.listen_address", ":6060")
+
+	vip.SetConfigName("lethe")
+	vip.SetConfigType("yaml")
+	vip.AddConfigPath(filepath.Join(".", "etc"))
+	vip.AddConfigPath(filepath.Join("..", "etc"))
+	err := vip.ReadInConfig()
 	if err != nil {
 		return fmt.Errorf("error on ReadInConfig: %w", err)
 	}
-	err = viper.Unmarshal(&config)
+	err = viper.Unmarshal(&vip)
 	if err != nil {
 		return fmt.Errorf("error on Unmarshal: %w", err)
 	}
-	SetLogRoot(config.GetString("storage.rootdirectory"))
+	SetLogDataPath(vip.GetString("storage.log_data_path"))
+	SetWebListenAddress(vip.GetString("web.listen_address"))
 
 	// show all settings in yaml format
-	yamlBytes, err := yaml.Marshal(config.AllSettings())
+	yamlBytes, err := yaml.Marshal(vip.AllSettings())
 	if err != nil {
 		return fmt.Errorf("error on Marshal: %w", err)
 	}
@@ -42,11 +50,10 @@ func LoadConfig() error {
 	return nil
 }
 
-func GetConfig() *viper.Viper {
-	return config
+func Viper() *viper.Viper {
+	return vip
 }
 
-// FOR CLI
 func SetWriter(w io.Writer) {
 	writer = w
 }
@@ -66,10 +73,18 @@ func SetLimit(newLimit int) {
 	limit = newLimit
 }
 
-func GetLogRoot() string {
-	return logRoot
+func GetLogDataPath() string {
+	return logDataPath
 }
 
-func SetLogRoot(newLogRoot string) {
-	logRoot = newLogRoot
+func SetLogDataPath(newLogDataPath string) {
+	logDataPath = newLogDataPath
+}
+
+func GetWebListenAddress() string {
+	return webListenAddress
+}
+
+func SetWebListenAddress(newWebListenAddress string) {
+	webListenAddress = newWebListenAddress
 }

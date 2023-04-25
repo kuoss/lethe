@@ -102,7 +102,7 @@ type LogStore struct {
 }
 
 func New() *LogStore {
-	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogRoot()})
+	d, _ := factory.Get("filesystem", map[string]interface{}{"RootDirectory": config.GetLogDataPath()})
 	return &LogStore{driver: d}
 }
 

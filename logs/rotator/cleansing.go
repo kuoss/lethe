@@ -15,7 +15,7 @@ func (rotator *Rotator) Cleansing() {
 }
 
 func (rotator *Rotator) cleansingLogFiles(prefix string) {
-	files, err := filepath.Glob(fmt.Sprintf("%s/%s.*", config.GetLogRoot(), prefix))
+	files, err := filepath.Glob(fmt.Sprintf("%s/%s.*", config.GetLogDataPath(), prefix))
 	if err != nil {
 		fmt.Printf("error on cleansingLogFiles(%s): %s", prefix, err)
 		return
