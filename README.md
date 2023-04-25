@@ -1,5 +1,6 @@
 # lethe
 
+[![release](https://github.com/kuoss/lethe/actions/workflows/release.yml/badge.svg)](https://github.com/kuoss/lethe/actions)
 [![pull-request](https://github.com/kuoss/lethe/actions/workflows/pull-request.yml/badge.svg)](https://github.com/lethe/venti/actions)
 [![Coverage Status](https://coveralls.io/repos/github/kuoss/lethe/badge.svg?branch=main)](https://coveralls.io/github/kuoss/lethe?branch=main)
 [![codecov](https://codecov.io/gh/kuoss/lethe/branch/main/graph/badge.svg?token=EXPE6OS8HJ)](https://codecov.io/gh/kuoss/lethe)
