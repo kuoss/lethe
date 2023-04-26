@@ -40,7 +40,3 @@ mock-logs:
 
 mock-delete:
 	hack/mock/delete.sh
-
-
-parser:
-	hack/parser.sh
