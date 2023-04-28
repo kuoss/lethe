@@ -1,2 +1,5 @@
 bin
 tmp
+
+# Ignore parser debug
+y.output
