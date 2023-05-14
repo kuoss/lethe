@@ -14,9 +14,9 @@ queryService --> logService
 queryService --> fileService
 queryService --> letheql
 logService --> fileService
-fileService --> storage_driver
+fileService --> storageDriver
 
-storage_driver <|-- filesystem_driver
+storageDriver <|-- filesystemDriver
 
 class main {
     config
@@ -41,14 +41,18 @@ class handler {
 }
 
 class queryService {
+    letheql
+    logService
     ExecuteQuery()
 }
 
 class logService {
+    fileService
     ListTargets()
 }
 
 class fileService {
+    storageDriver
     ListDirs()
     DeleteByAge()
     DeleteBySize()
