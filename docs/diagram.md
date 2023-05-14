@@ -34,7 +34,10 @@ class handler {
     queryService
     logService
     fileService
-    Run()
+    Metadata()
+    Query()
+    QueryRange()
+    Targets()
 }
 
 class queryService {
