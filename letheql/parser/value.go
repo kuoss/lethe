@@ -27,7 +27,7 @@ const (
 	ValueTypeNone   ValueType = "none"
 	ValueTypeVector ValueType = "vector"
 	ValueTypeScalar ValueType = "scalar"
-	ValueTypeMatrix ValueType = "matrix"
+	ValueTypeMatrix ValueType = "matrix" // logs
 	ValueTypeString ValueType = "string"
 )
 

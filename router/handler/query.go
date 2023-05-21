@@ -1,0 +1,154 @@
+package handler
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/kuoss/lethe/letheql/model"
+	"github.com/kuoss/lethe/util"
+)
+
+func (h *Handler) Query(c *gin.Context) {
+	query := c.Query("query")
+	logFormat := c.Query("logFormat")
+	log.Println("QueryHandler", "query=", query)
+
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "error",
+			"error":  "empty query",
+		})
+		return
+	}
+
+	queryData, err := letheql.ProcQuery(query, model.TimeRange{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "error",
+			"error":  fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if queryData.ResultType == letheql.ValueTypeLogs {
+		if logFormat == "json" {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "success",
+				"data": gin.H{
+					"resultType": "logs",
+					"result":     queryData.Logs,
+				},
+			})
+			return
+		}
+		var stringLogs []string
+		for _, logLine := range queryData.Logs {
+			stringLogs = append(stringLogs, logLine.CompactRaw())
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"data": gin.H{
+				"resultType": "logs",
+				"result":     stringLogs,
+			},
+		})
+		return
+	}
+
+	if queryData.Scalar == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"data": gin.H{
+				"resultType": "vector",
+				"result":     []int{},
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data": gin.H{
+			"resultType": "vector",
+			"result": []gin.H{
+				{
+					"value": queryData.Scalar,
+				},
+			},
+		},
+	})
+}
+
+func (h *Handler) QueryRange(c *gin.Context) {
+	query := c.Query("query")
+	logFormat := c.Query("logFormat")
+	start := c.Query("start")
+	end := c.Query("end")
+
+	log.Println("query_range...", query, start, end)
+	if query == "" || start == "" || end == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "error",
+			"error":  "empty query",
+		})
+		return
+	}
+	startTime := util.FloatStringToTime(start)
+	endTime := util.FloatStringToTime(end)
+	queryData, err := letheql.ProcQuery(query, model.TimeRange{Start: startTime, End: endTime})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "error",
+			"error":  fmt.Sprintf("%s", err),
+		})
+		return
+	}
+	fmt.Println("queryData.ResultType=", queryData.ResultType)
+	if queryData.ResultType == letheql.ValueTypeLogs {
+		if logFormat == "json" {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "success",
+				"data": gin.H{
+					"resultType": "logs",
+					"result":     queryData.Logs,
+				},
+			})
+			return
+		}
+		var stringLogs []string
+		for _, logLine := range queryData.Logs {
+			stringLogs = append(stringLogs, logLine.CompactRaw())
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"data": gin.H{
+				"resultType": "logs",
+				"result":     stringLogs,
+			},
+		})
+		return
+	}
+	if queryData.Scalar == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"data": gin.H{
+				"resultType": "vector",
+				"result":     []int{},
+			},
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data": gin.H{
+			"resultType": "vector",
+			"result": []gin.H{
+				{
+					"value": queryData.Scalar,
+				},
+			},
+		},
+	})
+}
