@@ -23,13 +23,13 @@ func main() {
 	// config
 	cfg, err := config.New(Version)
 	if err != nil {
-		logger.Fatalf("config.New err: %s", err.Error())
+		logger.Fatalf("new config err: %s", err.Error())
 	}
 
 	// services
 	fileService, err := fileservice.New(cfg)
 	if err != nil {
-		logger.Fatalf("fileSvc.New err: %s", err.Error())
+		logger.Fatalf("new fileservice err: %s", err.Error())
 	}
 	logService := logservice.New(fileService)
 	queryService := queryservice.New(logService)
@@ -38,10 +38,10 @@ func main() {
 	rotator := rotator.New(cfg, fileService)
 	rotator.Start(time.Duration(20) * time.Minute) // 20 minutes
 
-	// run router
+	// run handler
 	h := handler.New(cfg, fileService, queryService)
 	err = h.Run()
 	if err != nil {
-		logger.Fatalf("run err: %s", err.Error())
+		logger.Fatalf("handler run err: %s", err.Error())
 	}
 }
