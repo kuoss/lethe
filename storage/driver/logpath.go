@@ -75,8 +75,3 @@ func (l *LogPath) Target() string {
 func (l *LogPath) Filename() string {
 	return l.file
 }
-
-// // deprecated
-// func (l *LogPath) SetSubpath(subpath string) {
-// 	l.subPath = subpath
-// }
