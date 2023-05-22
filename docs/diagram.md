@@ -10,7 +10,6 @@ router --> handler
 rotator --> storage_fileService
 
 handler --> storage_fileService
-handler --> storage_logService
 handler --> storage_queryService
 
 storage_querier --> storage_logService
