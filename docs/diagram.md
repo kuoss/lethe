@@ -25,7 +25,7 @@ storage_driver <|-- storage_filesystemDriver
 
 class main {
     config
-    handler
+    router
     rotator
     main()
 }
