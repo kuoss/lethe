@@ -11,7 +11,7 @@ github.com/go-playground/locales,https://github.com/go-playground/locales/blob/v
 github.com/go-playground/universal-translator,https://github.com/go-playground/universal-translator/blob/v0.18.0/LICENSE,MIT
 github.com/go-playground/validator/v10,https://github.com/go-playground/validator/blob/v10.11.0/LICENSE,MIT
 github.com/gogo/protobuf,https://github.com/gogo/protobuf/blob/v1.3.2/LICENSE,BSD-3-Clause
-github.com/golang/protobuf,https://github.com/golang/protobuf/blob/v1.5.3/LICENSE,BSD-3-Clause
+github.com/golang/protobuf/proto,https://github.com/golang/protobuf/blob/v1.5.3/LICENSE,BSD-3-Clause
 github.com/grafana/regexp,https://github.com/grafana/regexp/blob/6b5c0a4cb7fd/LICENSE,BSD-3-Clause
 github.com/hashicorp/hcl,https://github.com/hashicorp/hcl/blob/v1.0.0/LICENSE,MPL-2.0
 github.com/kuoss/common/logger,https://github.com/kuoss/common/blob/v0.1.3/LICENSE,Apache-2.0
@@ -24,10 +24,10 @@ github.com/mitchellh/mapstructure,https://github.com/mitchellh/mapstructure/blob
 github.com/pelletier/go-toml,https://github.com/pelletier/go-toml/blob/v1.9.4/LICENSE,Apache-2.0
 github.com/pkg/errors,https://github.com/pkg/errors/blob/v0.9.1/LICENSE,BSD-2-Clause
 github.com/pmezard/go-difflib/difflib,https://github.com/pmezard/go-difflib/blob/v1.0.0/LICENSE,BSD-3-Clause
-github.com/prometheus/client_golang/prometheus,https://github.com/prometheus/client_golang/blob/v1.15.0/LICENSE,Apache-2.0
-github.com/prometheus/client_model/go,https://github.com/prometheus/client_model/blob/v0.3.0/LICENSE,Apache-2.0
-github.com/prometheus/common,https://github.com/prometheus/common/blob/v0.42.0/LICENSE,Apache-2.0
-github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg,https://github.com/prometheus/common/blob/v0.42.0/internal/bitbucket.org/ww/goautoneg/README.txt,BSD-3-Clause
+github.com/prometheus/client_golang/prometheus,https://github.com/prometheus/client_golang/blob/v1.15.1/LICENSE,Apache-2.0
+github.com/prometheus/client_model/go,https://github.com/prometheus/client_model/blob/v0.4.0/LICENSE,Apache-2.0
+github.com/prometheus/common,https://github.com/prometheus/common/blob/v0.43.0/LICENSE,Apache-2.0
+github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg,https://github.com/prometheus/common/blob/v0.43.0/internal/bitbucket.org/ww/goautoneg/README.txt,BSD-3-Clause
 github.com/prometheus/procfs,https://github.com/prometheus/procfs/blob/v0.9.0/LICENSE,Apache-2.0
 github.com/prometheus/prometheus,https://github.com/prometheus/prometheus/blob/v0.43.0/LICENSE,Apache-2.0
 github.com/sirupsen/logrus,https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE,MIT
