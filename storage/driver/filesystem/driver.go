@@ -216,29 +216,3 @@ func (d *driver) WalkDir(subpath string) ([]string, error) {
 	}
 	return dirs, nil
 }
-
-//todo if listing every file for acquire target info makes performance issue, the consider interface only directories, not file
-/*
-func (d *driver) WalkDirWithDepth(from string, depth int) ([]string, error) {
-	dirs := []string{}
-
-	err := filepath.WalkDir(from, func(path string, d fs.DirEntry, err error) error {
-
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
-		}
-		rel, _ := filepath.Rel(from, path)
-		if strings.Count(rel, string(os.PathSeparator)) > depth {
-			return filepath.SkipDir
-		}
-		dirs = append(dirs, path)
-		return nil
-	})
-	if err != nil {
-		fmt.Printf("error walking the path %q: %v\n", from, err)
-		return dirs, err
-	}
-	return dirs, nil
-}
-*/

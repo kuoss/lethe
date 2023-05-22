@@ -68,6 +68,11 @@ func TestList(t *testing.T) {
 			"",
 		},
 		{
+			".",
+			[]string{"pod", "node"},
+			"",
+		},
+		{
 			"hello",
 			nil,
 			"list err: Path not found: hello",
@@ -123,7 +128,7 @@ func TestListLogDirsWithSize(t *testing.T) {
 		{Fullpath: "tmp/init/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 2, FirstFile: "2009-11-01_00.log", LastFile: "2009-11-10_21.log", Size: 1116, LastForward: ""},
 		{Fullpath: "tmp/init/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 4, FirstFile: "2000-01-01_00.log", LastFile: "2029-11-10_23.log", Size: 2620, LastForward: ""},
 		{Fullpath: "tmp/init/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 2, FirstFile: "0000-00-00_00.log", LastFile: "2009-11-10_22.log", Size: 1137, LastForward: ""}}
-	got := fileService.listLogDirsWithSize()
+	got := fileService.ListLogDirsWithSize()
 	assert.Equal(t, want, got)
 }
 

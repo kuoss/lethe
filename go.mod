@@ -11,7 +11,6 @@ require (
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.8.2
-	github.com/thoas/go-funk v0.9.3
 	golang.org/x/sys v0.7.0
 )
 

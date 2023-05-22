@@ -3,26 +3,26 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kuoss/lethe/util"
-	"github.com/thoas/go-funk"
 )
 
 func (h *Handler) Metadata(c *gin.Context) {
-	dirs := h.fileService.ListDirs()
-	targets := funk.Map(dirs, func(x string) string {
-		typ := util.SubstrBefore(x, "/")
-		value := util.SubstrAfter(x, "/")
+	targets := []string{}
+	dirs := h.fileService.ListTargets()
+
+	for _, d := range dirs {
 		var key string
-		switch typ {
+		switch d.LogType {
 		case "pod":
 			key = "namespace"
 		case "node":
 			key = "node"
 		}
-		return fmt.Sprintf(`%s{%s="%s"}`, typ, key, value)
-	})
+		value := filepath.Base(d.Subpath)
+		targets = append(targets, fmt.Sprintf(`%s{%s="%s"}`, d.LogType, key, value))
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"data": gin.H{

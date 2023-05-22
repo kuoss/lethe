@@ -66,7 +66,7 @@ func (s *FileService) ListLogDirs() []LogDir {
 	return logDirs
 }
 
-func (s *FileService) listLogDirsWithSize() []LogDir {
+func (s *FileService) ListLogDirsWithSize() []LogDir {
 	logDirs := s.ListLogDirs()
 	for i, logDir := range logDirs {
 		var size int64
@@ -93,7 +93,7 @@ func (s *FileService) listLogDirsWithSize() []LogDir {
 }
 
 func (s *FileService) ListTargets() []LogDir {
-	logDirs := s.listLogDirsWithSize()
+	logDirs := s.ListLogDirsWithSize()
 	for i, logDir := range logDirs {
 		if logDir.LastFile == "" {
 			continue

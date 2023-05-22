@@ -14,7 +14,8 @@ import (
 
 type evaluator struct {
 	logService *logservice.LogService
-	ctx        context.Context
+
+	ctx context.Context
 
 	startTimestamp int64 // Start time in milliseconds.
 	endTimestamp   int64 // End time in milliseconds.
@@ -63,8 +64,6 @@ func (ev *evaluator) Eval(expr parser.Expr) (v parser.Value, ws model.Warnings, 
 }
 
 func (ev *evaluator) eval(expr parser.Expr) (parser.Value, model.Warnings) {
-	fmt.Println("===========================", expr.String())
-	fmt.Printf("============ %#v\n\n", expr)
 
 	if err := contextDone(ev.ctx, "expression evaluation"); err != nil {
 		ev.error(err)
@@ -109,7 +108,6 @@ func (ev *evaluator) logSelector(ls *model.LogSelector) (parser.Value, model.War
 }
 
 func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, model.Warnings) {
-	fmt.Println("===== evalBinaryExpr")
 
 	// currently we can handle 'filter operator + string' form only
 	if !expr.Op.IsFilterOperator() {
@@ -126,18 +124,14 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 
 		switch nl := newLHS.(type) {
 		case *model.LogSelector:
-			fmt.Println("==================== MUST")
-			fmt.Printf("LogSelector: %#v", nl)
 			expr.LHS = nl
 			return ev.evalWithWarnings(expr, &warnings)
 		}
 	case *parser.VectorSelector:
-		fmt.Println("==================== MUST")
 		newLHS, warnings := ev.vectorSelector(lhs)
 		expr.LHS = newLHS
 		return ev.evalWithWarnings(expr, &warnings)
 	case *model.LogSelector:
-		fmt.Println("==================== MUST")
 		lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
 			Op:    expr.Op,
 			Value: rhs.Val,

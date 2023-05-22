@@ -12,5 +12,8 @@ func (factory *filesystemDriverFactory) Create(params map[string]interface{}) (s
 }
 
 func init() {
-	factory.Register(driverName, &filesystemDriverFactory{})
+	err := factory.Register(driverName, &filesystemDriverFactory{})
+	if err != nil {
+		panic(err)
+	}
 }

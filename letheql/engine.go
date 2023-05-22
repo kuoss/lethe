@@ -18,10 +18,8 @@ type Engine struct {
 	logService *logservice.LogService
 }
 
-func New(logService *logservice.LogService) *Engine {
-	return &Engine{
-		logService: logService,
-	}
+func NewEngine(logService *logservice.LogService) *Engine {
+	return &Engine{logService}
 }
 
 func (ng *Engine) NewInstantQuery(_ context.Context, q storage.Queryable, qs string, ts time.Time) (Query, error) {
@@ -71,78 +69,22 @@ func (ng *Engine) exec(ctx context.Context, q *query) (v parser.Value, ws model.
 	ctx, cancel := context.WithTimeout(ctx, ng.logService.Config().Timeout())
 	q.cancel = cancel
 	defer q.cancel()
-
 	switch s := q.Statement().(type) {
 	case *parser.EvalStmt:
-		fmt.Println("engine: exec 4")
 		return ng.execEvalStmt(ctx, q, s)
 	case parser.TestStmt:
 		return nil, nil, s(ctx)
 	}
-	panic(fmt.Errorf("queryengine.exec: unhandled statement of type %T", q.Statement()))
+	panic(fmt.Errorf("letheql.exec: unhandled statement of type %T", q.Statement()))
 }
 
 func (ng *Engine) execEvalStmt(ctx context.Context, query *query, s *parser.EvalStmt) (parser.Value, model.Warnings, error) {
-	fmt.Println("engine: execEvalStmt 1")
 	mint, maxt := ng.findMinMaxTime(s)
-	fmt.Println("engine: execEvalStmt 2")
 	querier, err := query.queryable.Querier(ctx, mint, maxt)
 	if err != nil {
 		return nil, nil, fmt.Errorf("querier err: %w", err)
 	}
 	defer querier.Close()
-
-	fmt.Println("engine: execEvalStmt 3")
-	if s.Start == s.End && s.Interval == 0 {
-		start := timeMilliseconds(s.Start)
-		evaluator := &evaluator{
-			logService:     ng.logService,
-			start:          s.Start,
-			end:            s.Start,
-			startTimestamp: start,
-			endTimestamp:   start,
-			interval:       1,
-			ctx:            ctx,
-		}
-		val, warnings, err := evaluator.Eval(s.Expr)
-		if err != nil {
-			return nil, warnings, err
-		}
-
-		var mat Matrix
-
-		switch result := val.(type) {
-		case Matrix:
-			mat = result
-		case String:
-			return result, warnings, nil
-		default:
-			panic(fmt.Errorf("queryengine.exec: invalid expression type %q", val.Type()))
-		}
-
-		query.matrix = mat
-		switch s.Expr.Type() {
-		case parser.ValueTypeVector:
-			// Convert matrix with one value per series into vector.
-			vector := make(Vector, len(mat))
-			for i, s := range mat {
-				// Point might have a different timestamp, force it to the evaluation
-				// timestamp as that is when we ran the evaluation.
-				if len(s.Histograms) > 0 {
-					vector[i] = Sample{Metric: s.Metric, H: s.Histograms[0].H, T: start}
-				} else {
-					vector[i] = Sample{Metric: s.Metric, F: s.Floats[0].F, T: start}
-				}
-			}
-			return vector, warnings, nil
-		case parser.ValueTypeScalar:
-			return Scalar{V: mat[0].Floats[0].F, T: start}, warnings, nil
-		case parser.ValueTypeMatrix:
-			return mat, warnings, nil
-		default:
-			panic(fmt.Errorf("queryengine.exec: unexpected expression type %q", s.Expr.Type()))
-		}
-	}
 
 	// Range evaluation.
 	evaluator := &evaluator{
@@ -158,19 +100,15 @@ func (ng *Engine) execEvalStmt(ctx context.Context, query *query, s *parser.Eval
 	if err != nil {
 		return nil, warnings, err
 	}
-
-	mat, ok := val.(Matrix)
-	if !ok {
-		panic(fmt.Errorf("queryengine.exec: invalid expression type %q", val.Type()))
+	switch result := val.(type) {
+	case model.Log:
+		return result, warnings, nil
+	case String:
+		return result, warnings, nil
+	default:
+		panic(fmt.Errorf("promql.Engine.exec: invalid expression type %q", val.Type()))
 	}
-	query.matrix = mat
-
-	if err := contextDone(ctx, "expression evaluation"); err != nil {
-		return nil, warnings, err
-	}
-	return mat, warnings, nil
 }
-
 func (ng *Engine) findMinMaxTime(s *parser.EvalStmt) (int64, int64) {
 	var minTimestamp, maxTimestamp int64 = math.MaxInt64, math.MinInt64
 	// Whenever a MatrixSelector is evaluated, evalRange is set to the corresponding range.

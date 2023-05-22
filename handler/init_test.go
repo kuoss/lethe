@@ -1,20 +1,19 @@
-package letheql
+package handler
 
 import (
-	"context"
-	"time"
+	"net/http"
+	"net/http/httptest"
 
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/config"
-	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/kuoss/lethe/storage/fileservice"
 	"github.com/kuoss/lethe/storage/logservice"
+	"github.com/kuoss/lethe/storage/queryservice"
 	"github.com/kuoss/lethe/util/testutil"
 )
 
 var (
-	engine1    *Engine
-	evaluator1 *evaluator
+	handler1 *Handler
 )
 
 func init() {
@@ -32,16 +31,16 @@ func init() {
 		panic(err)
 	}
 	logService := logservice.New(fileService)
-	engine1 = NewEngine(logService)
+	queryService := queryservice.New(logService)
+	handler1 = New(cfg, fileService, queryService)
+}
 
-	now := clock.Now()
-	evaluator1 = &evaluator{
-		logService:     logService,
-		ctx:            context.TODO(),
-		start:          now.Add(-4 * time.Hour),
-		end:            now,
-		startTimestamp: 0,
-		endTimestamp:   0,
-		interval:       0,
+func testGET(url string) (code int, body string) {
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		panic(err)
 	}
+	handler1.router.ServeHTTP(w, req)
+	return w.Code, w.Body.String()
 }

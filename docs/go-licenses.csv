@@ -1,5 +1,3 @@
-github.com/VictoriaMetrics/metrics,https://github.com/VictoriaMetrics/metrics/blob/v1.18.1/LICENSE,MIT
-github.com/VictoriaMetrics/metricsql,https://github.com/VictoriaMetrics/metricsql/blob/v0.43.0/LICENSE,Apache-2.0
 github.com/beorn7/perks/quantile,https://github.com/beorn7/perks/blob/v1.0.1/LICENSE,MIT
 github.com/cespare/xxhash/v2,https://github.com/cespare/xxhash/blob/v2.2.0/LICENSE.txt,MIT
 github.com/davecgh/go-spew/spew,https://github.com/davecgh/go-spew/blob/v1.1.1/LICENSE,ISC
@@ -26,7 +24,7 @@ github.com/mitchellh/mapstructure,https://github.com/mitchellh/mapstructure/blob
 github.com/pelletier/go-toml,https://github.com/pelletier/go-toml/blob/v1.9.4/LICENSE,Apache-2.0
 github.com/pkg/errors,https://github.com/pkg/errors/blob/v0.9.1/LICENSE,BSD-2-Clause
 github.com/pmezard/go-difflib/difflib,https://github.com/pmezard/go-difflib/blob/v1.0.0/LICENSE,BSD-3-Clause
-github.com/prometheus/client_golang/prometheus,https://github.com/prometheus/client_golang/blob/v1.14.0/LICENSE,Apache-2.0
+github.com/prometheus/client_golang/prometheus,https://github.com/prometheus/client_golang/blob/v1.15.0/LICENSE,Apache-2.0
 github.com/prometheus/client_model/go,https://github.com/prometheus/client_model/blob/v0.3.0/LICENSE,Apache-2.0
 github.com/prometheus/common,https://github.com/prometheus/common/blob/v0.42.0/LICENSE,Apache-2.0
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg,https://github.com/prometheus/common/blob/v0.42.0/internal/bitbucket.org/ww/goautoneg/README.txt,BSD-3-Clause
@@ -40,17 +38,14 @@ github.com/spf13/pflag,https://github.com/spf13/pflag/blob/v1.0.5/LICENSE,BSD-3-
 github.com/spf13/viper,https://github.com/spf13/viper/blob/v1.11.0/LICENSE,MIT
 github.com/stretchr/testify,https://github.com/stretchr/testify/blob/v1.8.2/LICENSE,MIT
 github.com/subosito/gotenv,https://github.com/subosito/gotenv/blob/v1.2.0/LICENSE,MIT
-github.com/thoas/go-funk,https://github.com/thoas/go-funk/blob/v0.9.2/LICENSE,MIT
 github.com/ugorji/go/codec,https://github.com/ugorji/go/blob/codec/v1.2.7/codec/LICENSE,MIT
-github.com/valyala/fastrand,https://github.com/valyala/fastrand/blob/v1.1.0/LICENSE,MIT
-github.com/valyala/histogram,https://github.com/valyala/histogram/blob/v1.2.0/LICENSE,MIT
 go.uber.org/atomic,https://github.com/uber-go/atomic/blob/v1.10.0/LICENSE.txt,MIT
 go.uber.org/goleak,https://github.com/uber-go/goleak/blob/v1.2.1/LICENSE,MIT
 golang.org/x/crypto/sha3,https://cs.opensource.google/go/x/crypto/+/v0.7.0:LICENSE,BSD-3-Clause
-golang.org/x/exp,https://cs.opensource.google/go/x/exp/+/24139beb:LICENSE,BSD-3-Clause
-golang.org/x/sys/unix,https://cs.opensource.google/go/x/sys/+/v0.6.0:LICENSE,BSD-3-Clause
-golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.8.0:LICENSE,BSD-3-Clause
-google.golang.org/protobuf,https://github.com/protocolbuffers/protobuf-go/blob/v1.29.0/LICENSE,BSD-3-Clause
+golang.org/x/exp,https://cs.opensource.google/go/x/exp/+/10a50721:LICENSE,BSD-3-Clause
+golang.org/x/sys/unix,https://cs.opensource.google/go/x/sys/+/v0.7.0:LICENSE,BSD-3-Clause
+golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.9.0:LICENSE,BSD-3-Clause
+google.golang.org/protobuf,https://github.com/protocolbuffers/protobuf-go/blob/v1.30.0/LICENSE,BSD-3-Clause
 gopkg.in/ini.v1,https://github.com/go-ini/ini/blob/v1.67.0/LICENSE,Apache-2.0
 gopkg.in/yaml.v2,https://github.com/go-yaml/yaml/blob/v2.4.0/LICENSE,Apache-2.0
 gopkg.in/yaml.v3,https://github.com/go-yaml/yaml/blob/v3.0.1/LICENSE,MIT

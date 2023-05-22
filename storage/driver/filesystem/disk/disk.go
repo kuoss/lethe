@@ -11,7 +11,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func getDiskAvailableBytes(path string) (string, error) {
+func GetDiskAvailableBytes(path string) (string, error) {
 	// get absolute path
 	absPath, err := filepath.Abs(path)
 	if err != nil {

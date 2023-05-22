@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
@@ -26,7 +25,6 @@ import (
 	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/prometheus/prometheus/model/histogram"
 	"github.com/prometheus/prometheus/model/labels"
-	"github.com/prometheus/prometheus/tsdb/chunkenc"
 )
 
 func (Matrix) Type() parser.ValueType { return parser.ValueTypeMatrix }
@@ -355,142 +353,4 @@ func (r *Result) String() string {
 		return ""
 	}
 	return r.Value.String()
-}
-
-// StorageSeries simulates promql.Series as storage.Series.
-type StorageSeries struct {
-	series Series
-}
-
-// NewStorageSeries returns a StorageSeries from a Series.
-func NewStorageSeries(series Series) *StorageSeries {
-	return &StorageSeries{
-		series: series,
-	}
-}
-
-func (ss *StorageSeries) Labels() labels.Labels {
-	return ss.series.Metric
-}
-
-// Iterator returns a new iterator of the data of the series. In case of
-// multiple samples with the same timestamp, it returns the float samples first.
-func (ss *StorageSeries) Iterator(it chunkenc.Iterator) chunkenc.Iterator {
-	if ssi, ok := it.(*storageSeriesIterator); ok {
-		ssi.reset(ss.series)
-		return ssi
-	}
-	return newStorageSeriesIterator(ss.series)
-}
-
-type storageSeriesIterator struct {
-	floats               []FPoint
-	histograms           []HPoint
-	iFloats, iHistograms int
-	currT                int64
-	currF                float64
-	currH                *histogram.FloatHistogram
-}
-
-func newStorageSeriesIterator(series Series) *storageSeriesIterator {
-	return &storageSeriesIterator{
-		floats:      series.Floats,
-		histograms:  series.Histograms,
-		iFloats:     -1,
-		iHistograms: 0,
-		currT:       math.MinInt64,
-	}
-}
-
-func (ssi *storageSeriesIterator) reset(series Series) {
-	ssi.floats = series.Floats
-	ssi.histograms = series.Histograms
-	ssi.iFloats = -1
-	ssi.iHistograms = 0
-	ssi.currT = math.MinInt64
-	ssi.currF = 0
-	ssi.currH = nil
-}
-
-func (ssi *storageSeriesIterator) Seek(t int64) chunkenc.ValueType {
-	if ssi.iFloats >= len(ssi.floats) && ssi.iHistograms >= len(ssi.histograms) {
-		return chunkenc.ValNone
-	}
-	for ssi.currT < t {
-		if ssi.Next() == chunkenc.ValNone {
-			return chunkenc.ValNone
-		}
-	}
-	if ssi.currH != nil {
-		return chunkenc.ValFloatHistogram
-	}
-	return chunkenc.ValFloat
-}
-
-func (ssi *storageSeriesIterator) At() (t int64, v float64) {
-	return ssi.currT, ssi.currF
-}
-
-func (ssi *storageSeriesIterator) AtHistogram() (int64, *histogram.Histogram) {
-	panic(errors.New("storageSeriesIterator: AtHistogram not supported"))
-}
-
-func (ssi *storageSeriesIterator) AtFloatHistogram() (int64, *histogram.FloatHistogram) {
-	return ssi.currT, ssi.currH
-}
-
-func (ssi *storageSeriesIterator) AtT() int64 {
-	return ssi.currT
-}
-
-func (ssi *storageSeriesIterator) Next() chunkenc.ValueType {
-	if ssi.currH != nil {
-		ssi.iHistograms++
-	} else {
-		ssi.iFloats++
-	}
-	var (
-		pickH, pickF        = false, false
-		floatsExhausted     = ssi.iFloats >= len(ssi.floats)
-		histogramsExhausted = ssi.iHistograms >= len(ssi.histograms)
-	)
-
-	switch {
-	case floatsExhausted:
-		if histogramsExhausted { // Both exhausted!
-			return chunkenc.ValNone
-		}
-		pickH = true
-	case histogramsExhausted: // and floats not exhausted.
-		pickF = true
-	// From here on, we have to look at timestamps.
-	case ssi.histograms[ssi.iHistograms].T < ssi.floats[ssi.iFloats].T:
-		// Next histogram comes before next float.
-		pickH = true
-	default:
-		// In all other cases, we pick float so that we first iterate
-		// through floats if the timestamp is the same.
-		pickF = true
-	}
-
-	switch {
-	case pickF:
-		p := ssi.floats[ssi.iFloats]
-		ssi.currT = p.T
-		ssi.currF = p.F
-		ssi.currH = nil
-		return chunkenc.ValFloat
-	case pickH:
-		p := ssi.histograms[ssi.iHistograms]
-		ssi.currT = p.T
-		ssi.currF = 0
-		ssi.currH = p.H
-		return chunkenc.ValFloatHistogram
-	default:
-		panic("storageSeriesIterater.Next failed to pick value type")
-	}
-}
-
-func (ssi *storageSeriesIterator) Err() error {
-	return nil
 }

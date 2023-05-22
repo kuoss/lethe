@@ -36,7 +36,10 @@ func TestFileWriter(t *testing.T) {
 		committed: false,
 		cancelled: false,
 	}
-	fw.Write(([]byte)("hello"))
+	s := "hello"
+	n, err := fw.Write([]byte(s))
+	assert.NoError(t, err)
+	assert.Equal(t, len(s), n)
 	fw.Close()
 
 	content, err := os.ReadFile("tmp/storage_driver_filesystem_filewriter_test/greet.txt")

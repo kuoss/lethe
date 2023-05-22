@@ -1,20 +1,15 @@
-package letheql
+package queryservice
 
 import (
-	"context"
-	"time"
-
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/config"
-	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/kuoss/lethe/storage/fileservice"
 	"github.com/kuoss/lethe/storage/logservice"
 	"github.com/kuoss/lethe/util/testutil"
 )
 
 var (
-	engine1    *Engine
-	evaluator1 *evaluator
+	queryService *QueryService
 )
 
 func init() {
@@ -32,16 +27,5 @@ func init() {
 		panic(err)
 	}
 	logService := logservice.New(fileService)
-	engine1 = NewEngine(logService)
-
-	now := clock.Now()
-	evaluator1 = &evaluator{
-		logService:     logService,
-		ctx:            context.TODO(),
-		start:          now.Add(-4 * time.Hour),
-		end:            now,
-		startTimestamp: 0,
-		endTimestamp:   0,
-		interval:       0,
-	}
+	queryService = New(logService)
 }

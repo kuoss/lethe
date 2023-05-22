@@ -89,8 +89,6 @@ func (s *LogService) getFiles(sel *model.LogSelector, targets []string, warnings
 			*warnings = append(*warnings, fmt.Errorf("list err: %w", err))
 			continue
 		}
-		fmt.Println("all files=", all)
-		fmt.Println("sel.TimeRange=", sel.TimeRange)
 		for _, file := range all {
 			if isFileInTimeRange(file, &sel.TimeRange) {
 				files = append(files, file)
