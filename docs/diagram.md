@@ -36,8 +36,8 @@ class rotator {
 }
 
 class handler {
-    queryService
     fileService
+    queryService
     Metadata()
     Query()
     QueryRange()
@@ -69,7 +69,8 @@ class storage_fileService {
 
 
 class letheql_engine {
-    newQuery()
+    NewInstantQuery()
+    NewRangeQuery()
     exec()
 }
 
