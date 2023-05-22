@@ -60,13 +60,14 @@ jobs:
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - run: go test -race -covermode atomic -coverprofile=coverage.out ./...
+    - run: go test -race -covermode atomic -coverprofile=coverprofile ./...
+    # workaround to avoid go tool cover error
+    - run: cat coverprofile | grep -v yaccpar > coverage.out
     - uses: codecov/codecov-action@v3
-    # error parsing coverage: inconsistent NumStmt: changed from 1 to 2 --- https://github.com/golang/go/issues/45361
-    #- run: go install github.com/mattn/goveralls@latest
-    #- run: goveralls -coverprofile=coverage.out -service=github
-    #  env:
-    #    COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: go install github.com/mattn/goveralls@latest
+    - run: goveralls -coverprofile=coverage.out -service=github
+     env:
+       COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   go-licenses:
     runs-on: ubuntu-latest
