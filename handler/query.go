@@ -13,6 +13,13 @@ func (h *Handler) Query(c *gin.Context) {
 	h.query(c, qs, model.TimeRange{})
 }
 
+func (h *Handler) QueryRange(c *gin.Context) {
+	qs := c.Query("query")
+	start := c.Query("start")
+	end := c.Query("end")
+	h.query(c, qs, model.TimeRange{Start: util.FloatStringToTime(start), End: util.FloatStringToTime(end)})
+}
+
 func (h *Handler) query(c *gin.Context, qs string, tr model.TimeRange) {
 	result := h.queryService.Query(c.Request.Context(), qs, tr)
 
@@ -61,14 +68,4 @@ func (h *Handler) query(c *gin.Context, qs string, tr model.TimeRange) {
 		obj["warnings"] = result.Warnings
 	}
 	c.JSON(http.StatusOK, obj)
-}
-
-func (h *Handler) QueryRange(c *gin.Context) {
-	qs := c.Query("query")
-	start := c.Query("start")
-	end := c.Query("end")
-	h.query(c, qs, model.TimeRange{
-		Start: util.FloatStringToTime(start),
-		End:   util.FloatStringToTime(end),
-	})
 }
