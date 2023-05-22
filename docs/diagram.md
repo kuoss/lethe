@@ -37,7 +37,6 @@ class rotator {
 
 class handler {
     queryService
-    logService
     fileService
     Metadata()
     Query()
