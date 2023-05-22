@@ -2,6 +2,7 @@ package fileservice
 
 import (
 	"fmt"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -64,12 +65,12 @@ func TestList(t *testing.T) {
 	}{
 		{
 			"",
-			[]string{"pod", "node"},
+			[]string{"node", "pod"},
 			"",
 		},
 		{
 			".",
-			[]string{"pod", "node"},
+			[]string{"node", "pod"},
 			"",
 		},
 		{
@@ -89,7 +90,7 @@ func TestList(t *testing.T) {
 		},
 		{
 			"pod/namespace01",
-			[]string{"pod/namespace01/2029-11-10_23.log", "pod/namespace01/2009-11-10_22.log", "pod/namespace01/2000-01-01_00.log", "pod/namespace01/2009-11-10_21.log"},
+			[]string{"pod/namespace01/2000-01-01_00.log", "pod/namespace01/2009-11-10_21.log", "pod/namespace01/2009-11-10_22.log", "pod/namespace01/2029-11-10_23.log"},
 			"",
 		},
 		{
@@ -106,6 +107,7 @@ func TestList(t *testing.T) {
 			} else {
 				assert.EqualError(t, err, tc.wantError)
 			}
+			sort.Strings(got)
 			assert.Equal(t, tc.want, got)
 		})
 	}
