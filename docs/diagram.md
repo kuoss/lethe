@@ -76,5 +76,6 @@ class letheql_engine {
 
 class letheql_evaluator {
     Eval()
+    eval()
 }
 ```
