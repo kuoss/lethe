@@ -2,21 +2,27 @@
 classDiagram
 
 main --> config
-main --> handler
+main --> router
 main --> rotator
 
-handler --> fileService
-handler --> logService
-handler --> queryService
-rotator --> fileService
+router --> handler
 
-queryService --> logService
-queryService --> fileService
-queryService --> letheql
-logService --> fileService
-fileService --> storageDriver
+rotator --> storage_fileService
 
-storageDriver <|-- filesystemDriver
+handler --> storage_fileService
+handler --> storage_logService
+handler --> storage_queryService
+
+storage_querier --> storage_logService
+
+storage_queryService --> storage_querier
+storage_queryService --> letheql_engine
+storage_logService --> storage_fileService
+storage_fileService --> storage_driver
+
+letheql_engine --> letheql_evaluator
+
+storage_driver <|-- storage_filesystemDriver
 
 class main {
     config
@@ -40,26 +46,36 @@ class handler {
     Targets()
 }
 
-class queryService {
-    letheql
-    logService
+class storage_querier {
+    Select()
+}
+
+class storage_queryService {
+    engine
+    querier
     ExecuteQuery()
 }
 
-class logService {
+class storage_logService {
     fileService
     ListTargets()
+    SelectLog()
 }
 
-class fileService {
-    storageDriver
+class storage_fileService {
+    driver
     ListDirs()
     DeleteByAge()
     DeleteBySize()
 }
 
 
-class letheql {
-    ProcQuery()
+class letheql_engine {
+    newQuery()
+    exec()
+}
+
+class letheql_evaluator {
+    Eval()
 }
 ```
