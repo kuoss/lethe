@@ -60,7 +60,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - run: go test ./... -race -covermode atomic -coverprofile=coverprofile
+    - run: go test ./... -race -covermode=atomic -coverprofile=coverprofile
     - run: cat coverprofile | grep -v yaccpar > coverage.out
     - uses: codecov/codecov-action@v3
     - run: go install github.com/mattn/goveralls@latest
