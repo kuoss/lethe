@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/kuoss/lethe/storage/logservice"
@@ -37,6 +38,7 @@ func (ng *Engine) NewInstantQuery(_ context.Context, q storage.Queryable, qs str
 }
 
 func (ng *Engine) NewRangeQuery(_ context.Context, q storage.Queryable, qs string, start, end time.Time, interval time.Duration) (Query, error) {
+	logger.Infof("newRangeQuery qs: %s", qs)
 	expr, err := parser.ParseExpr(qs)
 	if err != nil {
 		return nil, err

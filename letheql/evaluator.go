@@ -113,12 +113,9 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 	if !expr.Op.IsFilterOperator() {
 		ev.error(fmt.Errorf("evalBinaryExpr err: not filter operator: %s", expr.Op))
 	}
-	rhs, ok := expr.RHS.(*parser.StringLiteral)
-	if !ok {
-		ev.error(fmt.Errorf("not StringLiteral rhs: %#v", expr.RHS))
-	}
 
 	switch lhs := expr.LHS.(type) {
+
 	case *parser.BinaryExpr:
 		newLHS, warnings := ev.eval(lhs)
 
@@ -127,16 +124,22 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 			expr.LHS = nl
 			return ev.evalWithWarnings(expr, &warnings)
 		}
+
 	case *parser.VectorSelector:
 		newLHS, warnings := ev.vectorSelector(lhs)
 		expr.LHS = newLHS
 		return ev.evalWithWarnings(expr, &warnings)
+
 	case *model.LogSelector:
-		lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
-			Op:    expr.Op,
-			Value: rhs.Val,
-		})
-		return lhs, nil
+		switch rhs := expr.RHS.(type) {
+		case *parser.StringLiteral:
+			lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
+				Op:    expr.Op,
+				Value: rhs.Val,
+			})
+			return lhs, nil
+		}
+
 	}
 	panic(fmt.Errorf("evalBinaryExpr err: unhandles lhs: %s, rhs: %s", expr.LHS, expr.RHS))
 }
