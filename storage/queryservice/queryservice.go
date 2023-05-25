@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/clock"
 	"github.com/kuoss/lethe/letheql"
 	"github.com/kuoss/lethe/letheql/model"
@@ -38,5 +39,9 @@ func (s *QueryService) Query(ctx context.Context, qs string, tr model.TimeRange)
 	if err != nil {
 		return &letheql.Result{Err: err}
 	}
-	return qry.Exec(ctx)
+	res := qry.Exec(ctx)
+	if res.Err != nil {
+		logger.Errorf("exec err: %s", res.Err.Error())
+	}
+	return res
 }

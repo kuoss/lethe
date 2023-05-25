@@ -81,6 +81,7 @@ func (ev *evaluator) eval(expr parser.Expr) (parser.Value, model.Warnings) {
 
 	case *model.LogSelector:
 		return ev.logSelector(e)
+
 	}
 	panic(fmt.Errorf("eval: unhandled expr: %#v", expr))
 }
@@ -118,7 +119,6 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 
 	case *parser.BinaryExpr:
 		newLHS, warnings := ev.eval(lhs)
-
 		switch nl := newLHS.(type) {
 		case *model.LogSelector:
 			expr.LHS = nl
@@ -138,8 +138,16 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 				Value: rhs.Val,
 			})
 			return lhs, nil
+		case *parser.StepInvariantExpr:
+			val, ws := ev.eval(rhs.Expr)
+			lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
+				Op:    expr.Op,
+				Value: val.String(),
+			})
+			return lhs, ws
+		default:
+			ev.error(fmt.Errorf("unknown type rhs: %#v", rhs))
 		}
-
 	}
-	panic(fmt.Errorf("evalBinaryExpr err: unhandles lhs: %s, rhs: %s", expr.LHS, expr.RHS))
+	panic(fmt.Errorf("evalBinaryExpr unhandles op:[%s], lhs:[%s], rhs:[%s]", expr.Op, expr.LHS, expr.RHS))
 }
