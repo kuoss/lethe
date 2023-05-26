@@ -3,30 +3,30 @@ package factory
 import (
 	"fmt"
 
-	"github.com/kuoss/lethe/storage/driver"
+	storagedriver "github.com/kuoss/lethe/storage/driver"
 )
 
 var driverFactories = make(map[string]StorageDriverFactory)
 
 type StorageDriverFactory interface {
-	Create(parameters map[string]interface{}) (driver.StorageDriver, error)
+	Create(parameters map[string]interface{}) (storagedriver.Driver, error)
 }
 
-func Register(name string, factory StorageDriverFactory) {
+func Register(name string, factory StorageDriverFactory) error {
 	if factory == nil {
-		panic("Must not provide nil StorageDriverFactory")
+		return fmt.Errorf("factory is nil")
 	}
-	_, registered := driverFactories[name]
-	if registered {
-		panic(fmt.Sprintf("StorageDriverFactory named %s already registered", name))
+	if _, exist := driverFactories[name]; exist {
+		return fmt.Errorf("factory name duplicated: %s", name)
 	}
 	driverFactories[name] = factory
+	return nil
 }
 
-func Get(name string, parameters map[string]interface{}) (driver.StorageDriver, error) {
+func Get(name string, parameters map[string]interface{}) (storagedriver.Driver, error) {
 	driverFactory, ok := driverFactories[name]
 	if !ok {
-		return nil, fmt.Errorf("invalid StorageDriver named %s", name)
+		return nil, fmt.Errorf("invalid driver name: %s", name)
 	}
 	return driverFactory.Create(parameters)
 }

@@ -1,9 +1,9 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/kuoss/lethe/testutil"
 	commonModel "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/stretchr/testify/assert"
@@ -11,13 +11,13 @@ import (
 
 func TestParser(t *testing.T) {
 
-	testCases := map[string]struct {
+	testCases := []struct {
 		input     string
 		wantError string
 		want      Expr
 	}{
 		// BinaryExpr - single FilterOperator
-		testutil.TC(): {
+		{
 			`pod|="hello"`,
 			"",
 			&BinaryExpr{
@@ -30,7 +30,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"`,
 			"",
 			&BinaryExpr{
@@ -43,7 +43,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod!="hello"`,
 			"",
 			&BinaryExpr{
@@ -56,7 +56,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod!~"hel.*"`,
 			"",
 			&BinaryExpr{
@@ -69,7 +69,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod |= "hello"`,
 			"",
 			&BinaryExpr{
@@ -82,7 +82,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 7, End: 14}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{} |= "hello"`,
 			"",
 			&BinaryExpr{
@@ -97,7 +97,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 9, End: 16}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{} |~ "hello.*"`,
 			"",
 			&BinaryExpr{
@@ -110,7 +110,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 9, End: 18}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} |= "hello"`,
 			"",
 			&BinaryExpr{
@@ -125,7 +125,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 32, End: 39}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} |~ "hel.*"`,
 			"",
 			&BinaryExpr{
@@ -141,7 +141,7 @@ func TestParser(t *testing.T) {
 				ReturnBool: false},
 		},
 		// BinaryExpr - multi FilterOperator (nested)
-		testutil.TC(): {
+		{
 			`pod|="hello"!="world"`,
 			"",
 			&BinaryExpr{
@@ -160,7 +160,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"|="world"`,
 			"",
 			&BinaryExpr{
@@ -179,7 +179,7 @@ func TestParser(t *testing.T) {
 					PosRange: PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"!~"wor.*"`,
 			"",
 			&BinaryExpr{
@@ -200,7 +200,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// NumberLiteral
-		testutil.TC(): {
+		{
 			`42`,
 			"",
 			&NumberLiteral{
@@ -208,7 +208,7 @@ func TestParser(t *testing.T) {
 				PosRange: PositionRange{Start: 0, End: 2}},
 		},
 
-		testutil.TC(): {
+		{
 			`"hello"`,
 			"",
 			&StringLiteral{
@@ -217,7 +217,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// VectorSelector
-		testutil.TC(): {
+		{
 			`pod`,
 			"",
 			&VectorSelector{
@@ -226,7 +226,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 3}},
 		},
-		testutil.TC(): {
+		{
 			`pod{}`,
 			"",
 			&VectorSelector{
@@ -235,7 +235,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 5}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"}`,
 			"",
 			&VectorSelector{
@@ -245,7 +245,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 28}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="not-exists"}`,
 			"",
 			&VectorSelector{
@@ -255,7 +255,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 27}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx"}`,
 			"",
 			&VectorSelector{
@@ -266,7 +266,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 40}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx-*"}`,
 			"",
 			&VectorSelector{
@@ -277,7 +277,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 42}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",container="nginx"}`,
 			"",
 			&VectorSelector{
@@ -288,7 +288,7 @@ func TestParser(t *testing.T) {
 					MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: PositionRange{Start: 0, End: 46}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace*",container="nginx"}`,
 			"",
 			&VectorSelector{
@@ -301,7 +301,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// MatrixSelector
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx-*"}[3m]`,
 			"",
 			&MatrixSelector{
@@ -316,7 +316,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// Call
-		testutil.TC(): {
+		{
 			`count_over_time(pod{namespace="namespace01",pod="nginx-*"}[3m])`,
 			"",
 			&Call{
@@ -336,7 +336,7 @@ func TestParser(t *testing.T) {
 						Range: 180000000000, EndPos: 62}},
 				PosRange: PositionRange{Start: 0, End: 63}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m])`,
 			"",
 			&Call{
@@ -355,7 +355,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// BinaryExpr
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) > 10`,
 			"",
 			&BinaryExpr{
@@ -377,7 +377,7 @@ func TestParser(t *testing.T) {
 					Val:      10,
 					PosRange: PositionRange{Start: 29, End: 31}}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) < 10`,
 			"",
 			&BinaryExpr{
@@ -399,7 +399,7 @@ func TestParser(t *testing.T) {
 					Val:      10,
 					PosRange: PositionRange{Start: 29, End: 31}}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) == 21`,
 			"",
 			&BinaryExpr{
@@ -425,7 +425,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// ######## ERROR
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "`,
 			"1:30: parse error: unterminated quoted string",
 			&VectorSelector{
@@ -436,7 +436,7 @@ func TestParser(t *testing.T) {
 				PosRange: PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} hello`,
 			"1:30: parse error: unexpected identifier \"hello\"",
 			&VectorSelector{
@@ -447,7 +447,7 @@ func TestParser(t *testing.T) {
 				PosRange: PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "hello`,
 			"1:30: parse error: unterminated quoted string",
 			&VectorSelector{
@@ -458,7 +458,7 @@ func TestParser(t *testing.T) {
 				PosRange: PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "hello"`,
 			"1:30: parse error: unexpected string \"\\\"hello\\\"\"",
 			&VectorSelector{
@@ -470,8 +470,8 @@ func TestParser(t *testing.T) {
 			},
 		},
 	}
-	for name, tc := range testCases {
-		t.Run(name+" "+tc.input, func(t *testing.T) {
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
 			expr, err := ParseExpr(tc.input)
 			if tc.wantError == "" {
 				assert.NoError(t, err)

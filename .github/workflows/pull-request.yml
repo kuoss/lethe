@@ -53,19 +53,18 @@ jobs:
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - run: go test ./... -v -failfast
+    - run: go test ./... -race -failfast
 
   go-test-coverage:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-go@v4
     - uses: actions/checkout@v3
-    - run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
-    # https://about.codecov.io/blog/getting-started-with-code-coverage-for-golang/
+    - run: go test ./... -race -covermode=atomic -coverprofile=coverprofile
+    - run: cat coverprofile | grep -v yaccpar > coverage.out
     - uses: codecov/codecov-action@v3
-    # https://github.com/mattn/goveralls#github-actions
     - run: go install github.com/mattn/goveralls@latest
-    - run: goveralls -service=github -coverprofile=coverage.out
+    - run: goveralls -coverprofile=coverage.out -service=github
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

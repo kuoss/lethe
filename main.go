@@ -5,26 +5,43 @@ import (
 
 	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/config"
-	"github.com/kuoss/lethe/logs/rotator"
+	"github.com/kuoss/lethe/handler"
+	"github.com/kuoss/lethe/rotator"
+	"github.com/kuoss/lethe/storage/fileservice"
+	"github.com/kuoss/lethe/storage/logservice"
+	"github.com/kuoss/lethe/storage/queryservice"
 )
 
 var (
-	Version = "unknown"
+	Version = "development"
 )
 
 func main() {
+
 	logger.Infof("🌊 lethe starting... version: %s", Version)
-	err := config.LoadConfig()
+
+	// config
+	cfg, err := config.New(Version)
 	if err != nil {
-		logger.Fatalf("error on LoadConfig: %s", err)
+		logger.Fatalf("new config err: %s", err.Error())
 	}
 
-	rotator := rotator.NewRotator()
+	// services
+	fileService, err := fileservice.New(cfg)
+	if err != nil {
+		logger.Fatalf("new fileservice err: %s", err.Error())
+	}
+	logService := logservice.New(fileService)
+	queryService := queryservice.New(logService)
+
+	// start rotator
+	rotator := rotator.New(cfg, fileService)
 	rotator.Start(time.Duration(20) * time.Minute) // 20 minutes
 
-	router := NewRouter()
-	err = router.Run(config.GetWebListenAddress())
+	// run handler
+	h := handler.New(cfg, fileService, queryService)
+	err = h.Run()
 	if err != nil {
-		logger.Fatalf("error on Run: %s", err)
+		logger.Fatalf("handler run err: %s", err.Error())
 	}
 }

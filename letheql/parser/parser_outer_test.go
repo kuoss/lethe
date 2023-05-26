@@ -1,10 +1,10 @@
 package parser_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/kuoss/lethe/letheql/parser"
-	"github.com/kuoss/lethe/testutil"
 	commonModel "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/stretchr/testify/assert"
@@ -12,13 +12,13 @@ import (
 
 func TestParser(t *testing.T) {
 
-	testCases := map[string]struct {
+	testCases := []struct {
 		input     string
 		wantError string
 		want      parser.Expr
 	}{
 		// BinaryExpr - single FilterOperator
-		testutil.TC(): {
+		{
 			`pod|="hello"`,
 			"",
 			&parser.BinaryExpr{
@@ -31,7 +31,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"`,
 			"",
 			&parser.BinaryExpr{
@@ -44,7 +44,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod!="hello"`,
 			"",
 			&parser.BinaryExpr{
@@ -57,7 +57,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod!~"hel.*"`,
 			"",
 			&parser.BinaryExpr{
@@ -70,7 +70,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod |= "hello"`,
 			"",
 			&parser.BinaryExpr{
@@ -83,7 +83,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 7, End: 14}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{} |= "hello"`,
 			"",
 			&parser.BinaryExpr{
@@ -98,7 +98,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 9, End: 16}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{} |~ "hello.*"`,
 			"",
 			&parser.BinaryExpr{
@@ -111,7 +111,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 9, End: 18}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} |= "hello"`,
 			"",
 			&parser.BinaryExpr{
@@ -126,7 +126,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 32, End: 39}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} |~ "hel.*"`,
 			"",
 			&parser.BinaryExpr{
@@ -142,7 +142,7 @@ func TestParser(t *testing.T) {
 				ReturnBool: false},
 		},
 		// BinaryExpr - multi FilterOperator (nested)
-		testutil.TC(): {
+		{
 			`pod|="hello"!="world"`,
 			"",
 			&parser.BinaryExpr{
@@ -161,7 +161,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"|="world"`,
 			"",
 			&parser.BinaryExpr{
@@ -180,7 +180,7 @@ func TestParser(t *testing.T) {
 					PosRange: parser.PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
-		testutil.TC(): {
+		{
 			`pod|~"hel.*"!~"wor.*"`,
 			"",
 			&parser.BinaryExpr{
@@ -201,7 +201,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// NumberLiteral
-		testutil.TC(): {
+		{
 			`42`,
 			"",
 			&parser.NumberLiteral{
@@ -209,7 +209,7 @@ func TestParser(t *testing.T) {
 				PosRange: parser.PositionRange{Start: 0, End: 2}},
 		},
 
-		testutil.TC(): {
+		{
 			`"hello"`,
 			"",
 			&parser.StringLiteral{
@@ -218,7 +218,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// VectorSelector
-		testutil.TC(): {
+		{
 			`pod`,
 			"",
 			&parser.VectorSelector{
@@ -227,7 +227,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 3}},
 		},
-		testutil.TC(): {
+		{
 			`pod{}`,
 			"",
 			&parser.VectorSelector{
@@ -236,7 +236,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 5}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"}`,
 			"",
 			&parser.VectorSelector{
@@ -246,7 +246,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 28}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="not-exists"}`,
 			"",
 			&parser.VectorSelector{
@@ -256,7 +256,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 27}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx"}`,
 			"",
 			&parser.VectorSelector{
@@ -267,7 +267,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 40}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx-*"}`,
 			"",
 			&parser.VectorSelector{
@@ -278,7 +278,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 42}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",container="nginx"}`,
 			"",
 			&parser.VectorSelector{
@@ -289,7 +289,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
 				PosRange: parser.PositionRange{Start: 0, End: 46}},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace*",container="nginx"}`,
 			"",
 			&parser.VectorSelector{
@@ -302,7 +302,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// MatrixSelector
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01",pod="nginx-*"}[3m]`,
 			"",
 			&parser.MatrixSelector{
@@ -317,7 +317,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// Call
-		testutil.TC(): {
+		{
 			`count_over_time(pod{namespace="namespace01",pod="nginx-*"}[3m])`,
 			"",
 			&parser.Call{
@@ -337,7 +337,7 @@ func TestParser(t *testing.T) {
 						Range: 180000000000, EndPos: 62}},
 				PosRange: parser.PositionRange{Start: 0, End: 63}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m])`,
 			"",
 			&parser.Call{
@@ -356,7 +356,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// BinaryExpr
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) > 10`,
 			"",
 			&parser.BinaryExpr{
@@ -378,7 +378,7 @@ func TestParser(t *testing.T) {
 					Val:      10,
 					PosRange: parser.PositionRange{Start: 29, End: 31}}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) < 10`,
 			"",
 			&parser.BinaryExpr{
@@ -400,7 +400,7 @@ func TestParser(t *testing.T) {
 					Val:      10,
 					PosRange: parser.PositionRange{Start: 29, End: 31}}},
 		},
-		testutil.TC(): {
+		{
 			`count_over_time(pod{}[3m]) == 21`,
 			"",
 			&parser.BinaryExpr{
@@ -426,7 +426,7 @@ func TestParser(t *testing.T) {
 		},
 
 		// ######## ERROR
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "`,
 			"1:30: parse error: unterminated quoted string",
 			&parser.VectorSelector{
@@ -437,7 +437,7 @@ func TestParser(t *testing.T) {
 				PosRange: parser.PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} hello`,
 			"1:30: parse error: unexpected identifier \"hello\"",
 			&parser.VectorSelector{
@@ -448,7 +448,7 @@ func TestParser(t *testing.T) {
 				PosRange: parser.PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "hello`,
 			"1:30: parse error: unterminated quoted string",
 			&parser.VectorSelector{
@@ -459,7 +459,7 @@ func TestParser(t *testing.T) {
 				PosRange: parser.PositionRange{Start: 0, End: 28},
 			},
 		},
-		testutil.TC(): {
+		{
 			`pod{namespace="namespace01"} "hello"`,
 			"1:30: parse error: unexpected string \"\\\"hello\\\"\"",
 			&parser.VectorSelector{
@@ -471,8 +471,8 @@ func TestParser(t *testing.T) {
 			},
 		},
 	}
-	for name, tc := range testCases {
-		t.Run(name+" "+tc.input, func(t *testing.T) {
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
 			expr, err := parser.ParseExpr(tc.input)
 			if tc.wantError == "" {
 				assert.NoError(t, err)

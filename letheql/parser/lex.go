@@ -83,7 +83,7 @@ func (i ItemType) IsComparisonOperator() bool {
 
 func (i ItemType) IsFilterOperator() bool {
 	switch i {
-	case NEQ_REGEX, PIPE_EQL, PIPE_REGEX:
+	case NEQ, NEQ_REGEX, PIPE_EQL, PIPE_REGEX:
 		return true
 	default:
 		return false
@@ -158,20 +158,22 @@ var ItemTypeStr = map[ItemType]string{
 	TIMES:         "x",
 	SPACE:         "<space>",
 
-	SUB:       "-",
-	ADD:       "+",
-	MUL:       "*",
-	MOD:       "%",
-	DIV:       "/",
-	EQLC:      "==",
-	NEQ:       "!=",
-	LTE:       "<=",
-	LSS:       "<",
-	GTE:       ">=",
-	GTR:       ">",
-	EQL_REGEX: "=~",
-	NEQ_REGEX: "!~",
-	POW:       "^",
+	SUB:        "-",
+	ADD:        "+",
+	MUL:        "*",
+	MOD:        "%",
+	DIV:        "/",
+	EQLC:       "==",
+	NEQ:        "!=",
+	LTE:        "<=",
+	LSS:        "<",
+	GTE:        ">=",
+	GTR:        ">",
+	EQL_REGEX:  "=~",
+	NEQ_REGEX:  "!~",
+	PIPE_EQL:   "|=",
+	PIPE_REGEX: "|~",
+	POW:        "^",
 }
 
 func init() {

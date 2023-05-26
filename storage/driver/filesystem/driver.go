@@ -9,38 +9,27 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"time"
+	"strings"
 
-	"github.com/kuoss/lethe/storage"
 	storagedriver "github.com/kuoss/lethe/storage/driver"
-	"github.com/kuoss/lethe/storage/driver/factory"
 )
 
 const (
-	driverName           = "filesystem"
-	defaultRootDirectory = "/tmp/log"
+	driverName = "filesystem"
 )
 
-type DriverParameters struct {
+type Params struct {
 	RootDirectory string
-}
-
-func init() {
-	factory.Register(driverName, &filesystemDriverFactory{})
 }
 
 type driver struct {
 	rootDirectory string
 }
 
-func New(params DriverParameters) storagedriver.StorageDriver {
-	//return &driver{rootDirectory: defaultRootDirectory}
-	if params.RootDirectory != "" {
-		return &driver{rootDirectory: params.RootDirectory}
-	}
-
-	return &driver{rootDirectory: defaultRootDirectory}
+func New(params Params) storagedriver.Driver {
+	return &driver{rootDirectory: params.RootDirectory}
 }
+
 func (d *driver) RootDirectory() string {
 	return d.rootDirectory
 }
@@ -49,12 +38,12 @@ func (d *driver) Name() string {
 	return driverName
 }
 
-func (d *driver) fullPath(subPath string) string {
-	return path.Join(d.rootDirectory, subPath)
+func (d *driver) fullPath(subpath string) string {
+	return path.Join(d.rootDirectory, subpath)
 }
 
-func (d *driver) GetContent(path string) ([]byte, error) {
-	rc, err := d.Reader(path)
+func (d *driver) GetContent(subpath string) ([]byte, error) {
+	rc, err := d.Reader(subpath)
 	if err != nil {
 		return nil, err
 	}
@@ -68,41 +57,44 @@ func (d *driver) GetContent(path string) ([]byte, error) {
 	return p, nil
 }
 
-func (d *driver) PutContent(subPath string, content []byte) error {
-	writer, err := d.Writer(subPath)
+func (d *driver) PutContent(subpath string, content []byte) error {
+	writer, err := d.Writer(subpath)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
 	_, err = io.Copy(writer, bytes.NewReader(content))
 	if err != nil {
-		_ = writer.Cancel()
-		return err
+		err2 := writer.Cancel()
+		if err2 != nil {
+			return fmt.Errorf("copy err: %w, cancel err: %w", err, err2)
+		}
+		return fmt.Errorf("copy err: %w", err)
 	}
-	return writer.Commit()
+	err = writer.Commit()
+	if err != nil {
+		return fmt.Errorf("commit err: %w", err)
+	}
+	return nil
 }
 
-func (d *driver) Reader(path string) (io.ReadCloser, error) {
-	file, err := os.OpenFile(path, os.O_RDONLY, 0644)
+func (d *driver) Reader(subpath string) (io.ReadCloser, error) {
+	file, err := os.OpenFile(d.fullPath(subpath), os.O_RDONLY, 0644)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, storage.PathNotFoundError{Path: path}
-		}
-		return nil, err
+		return nil, storagedriver.PathNotFoundError{Path: subpath, Err: fmt.Errorf("openFile err: %w", err)}
 	}
-	//TODO seek
-
+	// TODO: seek
 	return file, nil
 }
 
-func (d *driver) Writer(subPath string) (storagedriver.FileWriter, error) {
-	fullPath := d.fullPath(subPath)
-	parentDir := path.Dir(fullPath)
-	if err := os.MkdirAll(parentDir, 0777); err != nil {
+func (d *driver) Writer(subpath string) (storagedriver.FileWriter, error) {
+	fullpath := d.fullPath(subpath)
+	dir := path.Dir(fullpath)
+	if err := os.MkdirAll(dir, 0777); err != nil {
 		return nil, err
 	}
 
-	fp, err := os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE, 0666)
+	fp, err := os.OpenFile(fullpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -113,255 +105,114 @@ func (d *driver) Writer(subPath string) (storagedriver.FileWriter, error) {
 	return writer, nil
 }
 
-func (d *driver) Stat(path string) (storagedriver.FileInfo, error) {
-	fi, err := os.Stat(path)
+func (d *driver) Stat(subpath string) (storagedriver.FileInfo, error) {
+	fullpath := d.fullPath(subpath)
+	fi, err := os.Stat(fullpath)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, storage.PathNotFoundError{Path: path}
-		}
-		return nil, err
+		return nil, storagedriver.PathNotFoundError{Path: subpath, Err: fmt.Errorf("stat err: %w", err)}
 	}
-
-	return fileInfo{
-		path:     path,
-		FileInfo: fi,
+	return FileInfo{
+		fullpath:   fullpath,
+		osFileInfo: fi,
 	}, nil
 }
 
-func (d *driver) List(path string) ([]string, error) {
-
-	dir, err := os.Open(path)
+func (d *driver) List(subpath string) ([]string, error) {
+	fullpath := d.fullPath(subpath)
+	dir, err := os.Open(fullpath)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, storage.PathNotFoundError{Path: path}
-		}
-		return nil, err
+		return nil, storagedriver.PathNotFoundError{Path: subpath, Err: fmt.Errorf("open err: %w", err)}
 	}
 	defer dir.Close()
 
 	fileNames, err := dir.Readdirnames(0)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("readdirnames err: %w", err)
 	}
 
 	keys := make([]string, 0, len(fileNames))
 	for _, fileName := range fileNames {
-		keys = append(keys, filepath.Join(path, fileName))
+		keys = append(keys, filepath.Join(subpath, fileName))
 	}
 	return keys, nil
 }
 
-func (d *driver) Move(sourcePath, destPath string) error {
+func (d *driver) Move(sourcePath, targetPath string) error {
+	if len(strings.Split(sourcePath, string(os.PathSeparator))) < 1 {
+		return fmt.Errorf("moving 0-1 depth directory is not allowed")
+	}
 	source := d.fullPath(sourcePath)
-	dest := d.fullPath(destPath)
+	target := d.fullPath(targetPath)
 
-	if _, err := os.Stat(source); os.IsNotExist(err) {
-		return storage.PathNotFoundError{Path: sourcePath}
+	if _, err := os.Stat(source); err != nil {
+		return storagedriver.PathNotFoundError{Path: sourcePath, Err: fmt.Errorf("stat err: %w", err)}
 	}
 
-	if err := os.MkdirAll(path.Dir(dest), 0755); err != nil {
-		return err
+	if err := os.MkdirAll(path.Dir(target), 0755); err != nil {
+		return fmt.Errorf("mkdirAll err: %w", err)
 	}
 
 	// TODO check windows
 	//Rename replaces it
-	err := os.Rename(source, dest)
+	err := os.Rename(source, target)
 	return err
 }
 
-func (d *driver) Delete(path string) error {
-	_, err := os.Stat(path)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	} else if err != nil {
-		return storage.PathNotFoundError{Path: path}
+func (d *driver) Delete(subpath string) error {
+	if len(strings.Split(subpath, string(os.PathSeparator))) < 2 {
+		return fmt.Errorf("deleting 0-1 depth directory is not allowed")
 	}
-	err = os.RemoveAll(path)
-	return err
+	fullpath := d.fullPath(subpath)
+	_, err := os.Stat(fullpath)
+	if err != nil {
+		return storagedriver.PathNotFoundError{Path: subpath, Err: fmt.Errorf("stat err: %w", err)}
+	}
+	err = os.RemoveAll(fullpath)
+	if err != nil {
+		return fmt.Errorf("removeAll err: %w", err)
+	}
+	return nil
 }
 
 // return only files
-func (d *driver) Walk(from string) ([]storagedriver.FileInfo, error) {
-
-	var infos []storagedriver.FileInfo
-
-	err := filepath.Walk(from, func(path string, info os.FileInfo, err error) error {
+func (d *driver) Walk(subpath string) ([]storagedriver.FileInfo, error) {
+	fullpath := d.fullPath(subpath)
+	infos := []storagedriver.FileInfo{}
+	err := filepath.Walk(fullpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
+			return fmt.Errorf("walkFunc err: %w", err)
 		}
 		if !info.IsDir() {
-			infos = append(infos, fileInfo{
-				FileInfo: info,
-				path:     path,
-			})
+			infos = append(infos, FileInfo{info, path})
 		}
 		return nil
 	})
-
 	if err != nil {
-		fmt.Printf("error walking the path %q: %v\n", from, err)
-		return []storagedriver.FileInfo{}, err
+		return infos, fmt.Errorf("walk err: %w", err)
 	}
 	return infos, nil
 }
 
 // WalkDir method return only directories
-func (d *driver) WalkDir(from string) ([]string, error) {
+func (d *driver) WalkDir(subpath string) ([]string, error) {
+	fullpath := d.fullPath(subpath)
 	dirs := []string{}
-
-	err := filepath.WalkDir(from, func(path string, dir fs.DirEntry, err error) error {
-
+	err := filepath.WalkDir(fullpath, func(path string, dir fs.DirEntry, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
+			return fmt.Errorf("walkDirFunc err: %w", err)
 		}
-		//fmt.Printf("visited logs or dir: %q\n", path)
-		if dir.IsDir() {
-			rel, _ := filepath.Rel(from, path)
-			if err != nil {
-				return err
-			}
-			dirs = append(dirs, rel)
+		if !dir.IsDir() {
+			return nil
 		}
+		subpath, err := filepath.Rel(fullpath, path)
+		if err != nil {
+			return fmt.Errorf("rel err: %w", err)
+		}
+		dirs = append(dirs, subpath)
 		return nil
 	})
 	if err != nil {
-		fmt.Printf("error walking the path %q: %v\n", from, err)
-		return dirs, err
+		return dirs, fmt.Errorf("walkdir err: %w", err)
 	}
 	return dirs, nil
-}
-
-//todo if listing every file for acquire target info makes performance issue, the consider interface only directories, not file
-/*
-func (d *driver) WalkDirWithDepth(from string, depth int) ([]string, error) {
-	dirs := []string{}
-
-	err := filepath.WalkDir(from, func(path string, d fs.DirEntry, err error) error {
-
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
-		}
-		rel, _ := filepath.Rel(from, path)
-		if strings.Count(rel, string(os.PathSeparator)) > depth {
-			return filepath.SkipDir
-		}
-		dirs = append(dirs, path)
-		return nil
-	})
-	if err != nil {
-		fmt.Printf("error walking the path %q: %v\n", from, err)
-		return dirs, err
-	}
-	return dirs, nil
-}
-
-*/
-
-// For object-storage backend
-type fileWriter struct {
-	file      *os.File
-	size      int64
-	bw        *bufio.Writer
-	closed    bool
-	committed bool
-	cancelled bool
-}
-
-func (fw *fileWriter) Write(p []byte) (int, error) {
-	if fw.closed {
-		return 0, fmt.Errorf("already closed")
-	} else if fw.committed {
-		return 0, fmt.Errorf("already committed")
-	} else if fw.cancelled {
-		return 0, fmt.Errorf("already cancelled")
-	}
-	n, err := fw.bw.Write(p)
-	fw.size += int64(n)
-	return n, err
-}
-
-func (fw *fileWriter) Size() int64 {
-	return fw.size
-}
-
-func (fw *fileWriter) Close() error {
-	if fw.closed {
-		return fmt.Errorf("already closed")
-	}
-
-	if err := fw.bw.Flush(); err != nil {
-		return err
-	}
-
-	if err := fw.file.Sync(); err != nil {
-		return err
-	}
-
-	if err := fw.file.Close(); err != nil {
-		return err
-	}
-	fw.closed = true
-	return nil
-}
-
-func (fw *fileWriter) Cancel() error {
-	if fw.closed {
-		return fmt.Errorf("already closed")
-	}
-
-	fw.cancelled = true
-	fw.file.Close()
-	return os.Remove(fw.file.Name())
-}
-
-func (fw *fileWriter) Commit() error {
-	if fw.closed {
-		return fmt.Errorf("already closed")
-	} else if fw.committed {
-		return fmt.Errorf("already committed")
-	} else if fw.cancelled {
-		return fmt.Errorf("already cancelled")
-	}
-
-	if err := fw.bw.Flush(); err != nil {
-		return err
-	}
-
-	if err := fw.file.Sync(); err != nil {
-		return err
-	}
-
-	fw.committed = true
-	return nil
-}
-
-// for compile
-var _ storagedriver.FileInfo = fileInfo{}
-
-type fileInfo struct {
-	os.FileInfo
-	path string
-}
-
-func (fi fileInfo) Path() string {
-	return fi.path
-}
-
-func (fi fileInfo) Size() int64 {
-	if fi.IsDir() {
-		return 0
-	}
-
-	return fi.FileInfo.Size()
-}
-
-func (fi fileInfo) ModTime() time.Time {
-	return fi.FileInfo.ModTime()
-}
-
-func (fi fileInfo) IsDir() bool {
-	return fi.FileInfo.IsDir()
 }
