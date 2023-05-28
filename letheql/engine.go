@@ -54,7 +54,7 @@ func (ng *Engine) NewRangeQuery(_ context.Context, q storage.Queryable, qs strin
 
 func (ng *Engine) newQuery(q storage.Queryable, expr parser.Expr, start, end time.Time, interval time.Duration) (*query, error) {
 	es := &parser.EvalStmt{
-		Expr:     PreprocessExpr(expr, start, end),
+		Expr:     expr,
 		Start:    start,
 		End:      end,
 		Interval: interval,
@@ -194,108 +194,6 @@ func contextErr(err error, env string) error {
 	default:
 		return err
 	}
-}
-
-func PreprocessExpr(expr parser.Expr, start, end time.Time) parser.Expr {
-	isStepInvariant := preprocessExprHelper(expr, start, end)
-	if isStepInvariant {
-		return newStepInvariantExpr(expr)
-	}
-	return expr
-}
-
-func preprocessExprHelper(expr parser.Expr, start, end time.Time) bool {
-	switch n := expr.(type) {
-	case *parser.VectorSelector:
-		switch n.StartOrEnd {
-		case parser.START:
-			n.Timestamp = makeInt64Pointer(timestamp.FromTime(start))
-		case parser.END:
-			n.Timestamp = makeInt64Pointer(timestamp.FromTime(end))
-		}
-		return n.Timestamp != nil
-
-	case *parser.AggregateExpr:
-		return preprocessExprHelper(n.Expr, start, end)
-
-	case *parser.BinaryExpr:
-		isInvariant1, isInvariant2 := preprocessExprHelper(n.LHS, start, end), preprocessExprHelper(n.RHS, start, end)
-		if isInvariant1 && isInvariant2 {
-			return true
-		}
-
-		if isInvariant1 {
-			n.LHS = newStepInvariantExpr(n.LHS)
-		}
-		if isInvariant2 {
-			n.RHS = newStepInvariantExpr(n.RHS)
-		}
-
-		return false
-
-	case *parser.Call:
-		_, ok := AtModifierUnsafeFunctions[n.Func.Name]
-		isStepInvariant := !ok
-		isStepInvariantSlice := make([]bool, len(n.Args))
-		for i := range n.Args {
-			isStepInvariantSlice[i] = preprocessExprHelper(n.Args[i], start, end)
-			isStepInvariant = isStepInvariant && isStepInvariantSlice[i]
-		}
-
-		if isStepInvariant {
-			// The function and all arguments are step invariant.
-			return true
-		}
-
-		for i, isi := range isStepInvariantSlice {
-			if isi {
-				n.Args[i] = newStepInvariantExpr(n.Args[i])
-			}
-		}
-		return false
-
-	case *parser.MatrixSelector:
-		return preprocessExprHelper(n.VectorSelector, start, end)
-
-	case *parser.SubqueryExpr:
-		// Since we adjust offset for the @ modifier evaluation,
-		// it gets tricky to adjust it for every subquery step.
-		// Hence we wrap the inside of subquery irrespective of
-		// @ on subquery (given it is also step invariant) so that
-		// it is evaluated only once w.r.t. the start time of subquery.
-		isInvariant := preprocessExprHelper(n.Expr, start, end)
-		if isInvariant {
-			n.Expr = newStepInvariantExpr(n.Expr)
-		}
-		switch n.StartOrEnd {
-		case parser.START:
-			n.Timestamp = makeInt64Pointer(timestamp.FromTime(start))
-		case parser.END:
-			n.Timestamp = makeInt64Pointer(timestamp.FromTime(end))
-		}
-		return n.Timestamp != nil
-
-	case *parser.ParenExpr:
-		return preprocessExprHelper(n.Expr, start, end)
-
-	case *parser.UnaryExpr:
-		return preprocessExprHelper(n.Expr, start, end)
-
-	case *parser.StringLiteral, *parser.NumberLiteral:
-		return true
-	}
-
-	panic(fmt.Sprintf("found unexpected node %#v", expr))
-}
-
-func makeInt64Pointer(val int64) *int64 {
-	valp := new(int64)
-	*valp = val
-	return valp
-}
-
-func newStepInvariantExpr(expr parser.Expr) parser.Expr {
-	return &parser.StepInvariantExpr{Expr: expr}
 }
 
 func subqueryTimes(path []parser.Node) (time.Duration, time.Duration, *int64) {

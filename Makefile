@@ -20,6 +20,9 @@ cover:
 misspell:
 	hack/misspell.sh
 
+gocyclo:
+	hack/gocyclo.sh
+
 checks:
 	hack/checks.sh
 

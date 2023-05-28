@@ -21,8 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - run: curl -L https://git.io/misspell | bash
-    - run: find . -type f -name '*.*' | xargs ./bin/misspell -error
+    - run: make misspell
+
+  gocyclo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: make gocyclo
 
   goimports:
     runs-on: ubuntu-latest
