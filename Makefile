@@ -17,6 +17,9 @@ test-win:
 cover:
 	hack/test-cover.sh
 
+misspell:
+	hack/misspell.sh
+
 checks:
 	hack/checks.sh
 
