@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 cd $(dirname $0)/../
 
 which gocyclo || go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
