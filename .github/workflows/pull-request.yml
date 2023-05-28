@@ -17,6 +17,12 @@ jobs:
         gofmt-path: '.'
         gofmt-flags: '-l -d'
 
+  misspell:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: curl -L https://git.io/misspell | bash
+    - run: find . -type f -name '*.*' | xargs ./bin/misspell -error
 
   goimports:
     runs-on: ubuntu-latest
