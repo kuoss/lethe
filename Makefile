@@ -17,6 +17,12 @@ test-win:
 cover:
 	hack/test-cover.sh
 
+misspell:
+	hack/misspell.sh
+
+gocyclo:
+	hack/gocyclo.sh
+
 checks:
 	hack/checks.sh
 

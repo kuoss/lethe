@@ -17,6 +17,18 @@ jobs:
         gofmt-path: '.'
         gofmt-flags: '-l -d'
 
+  misspell:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: make misspell
+
+  gocyclo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
+    - run: make gocyclo
 
   goimports:
     runs-on: ubuntu-latest

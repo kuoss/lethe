@@ -4,6 +4,7 @@ cd $(dirname $0)/..
 set -xeuo pipefail
 go mod tidy
 go fmt ./...
+./hack/misspell.sh
 go vet ./...
 which goimports || go install golang.org/x/tools/cmd/goimports@latest
 goimports -local -v -w .

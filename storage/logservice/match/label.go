@@ -15,7 +15,7 @@ func getLabelMatchFuncs(sel *model.LogSelector) ([]MatchFunc, error) {
 	case "pod":
 		return getLabelMatchFuncsDetail(sel, "pod", "container")
 	}
-	return nil, fmt.Errorf("unknwon logType: %s", sel.Name)
+	return nil, fmt.Errorf("unknown logType: %s", sel.Name)
 }
 
 func getLabelMatchFuncsDetail(sel *model.LogSelector, names ...string) ([]MatchFunc, error) {
