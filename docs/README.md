@@ -12,13 +12,13 @@ pod{namespace=~"(kube-system|ingress-nginx)",container="controller",image=~".*in
 ```
 
 
-Label filter operators
+Label filter operators:
 * `=`: exactly equal
 * `!=`: not equal
 * `=~`: regex matches
 * `!~`: regex does not match
 
-Line filter operators
+Line filter operators:
 * `|=`: Line contains string
 * `!=`: Line does not contain string
 * `|~`: Line contains a match to the regex
