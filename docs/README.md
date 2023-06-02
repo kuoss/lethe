@@ -11,6 +11,19 @@ pod{namespace=~"(kube-system|ingress-nginx)",container="controller",image=~".*in
 ```
 
 
+Label 필터 연산자
+* `=` 같음
+* `!=` 같지 않음
+* `=~` 정규표현식에 맞음
+* `!~` 정규표현식에 맞지 않음
+
+Line 필터 연산자
+* `|=` 같음
+* `!=` 같지 않음
+* `|~` 정규표현식에 맞음
+* `!~` 정규표현식에 맞지 않음
+
+
 ## HTTP API
 
 query with curl
