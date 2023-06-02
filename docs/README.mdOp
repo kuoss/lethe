@@ -11,17 +11,17 @@ pod{namespace=~"(kube-system|ingress-nginx)",container="controller",image=~".*in
 ```
 
 
-Label 필터 연산자
-* `=` 같음
-* `!=` 같지 않음
-* `=~` 정규표현식에 맞음
-* `!~` 정규표현식에 맞지 않음
+label filter operators
+* `=`: exactly equal
+* `!=`: not equal
+* `=~`: regex matches
+* `!~`: regex does not match
 
-Line 필터 연산자
-* `|=` 같음
-* `!=` 같지 않음
-* `|~` 정규표현식에 맞음
-* `!~` 정규표현식에 맞지 않음
+line filter operators
+* `|=`: Line contains string
+* `!=`: Line does not contain string
+* `|~`: Line contains a match to the regex
+* `!~`: Line does not contain a match to the regex
 
 
 ## HTTP API
