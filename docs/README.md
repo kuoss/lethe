@@ -1,5 +1,6 @@
 ## letheql
 
+Examples
 ```
 pod{namespace="kube-system"}
 pod{namespace="kube-system"} |= "hello"
