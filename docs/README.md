@@ -1,7 +1,19 @@
-API docs
+## letheql
+
+```
+pod{namespace="kube-system"}
+pod{namespace="kube-system"} |= "hello"
+pod{namespace="kube-system"} |= "hello" != "world"
+pod{namespace="kube-system"} |~ "err|ERR" != "Liveness"
+
+pod{namespace="ingress-nginx",container="controller",image=~".*ingress-nginx.*"}
+pod{namespace=~"(kube-system|ingress-nginx)",container="controller",image=~".*ingress-nginx.*"}
+```
+
+
+## HTTP API
 
 query with curl
-
 ```shell
 $ curl -G -s http://localhost:8080/api/v1/query \
 -d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' | jq
@@ -15,9 +27,7 @@ $ curl -G -s http://localhost:8080/api/v1/query \
 }
 ```
 
-
 query_range with curl
-
 ```shell
 $ curl -G -s http://localhost:8080/api/v1/query_range \
 -d 'query=pod{namespace="cert-manager",pod="cert-manager-.*"}' \
