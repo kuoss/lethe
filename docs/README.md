@@ -2,13 +2,14 @@
 
 Examples
 ```
+pod{namespace="ingress-nginx"}
+pod{namespace="ingress-nginx",container="controller"}
+pod{namespace=~"(kube-system|ingress-nginx)",container="controller"}
+
 pod{namespace="kube-system"}
 pod{namespace="kube-system"} |= "hello"
 pod{namespace="kube-system"} |= "hello" != "world"
 pod{namespace="kube-system"} |~ "err|ERR" != "Liveness"
-
-pod{namespace="ingress-nginx",container="controller"}
-pod{namespace=~"(kube-system|ingress-nginx)",container="controller"}
 ```
 
 
