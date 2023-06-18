@@ -1,60 +1,99 @@
 package config
 
 import (
+	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
-var (
-	config1 *Config
-)
-
-func init() {
-	var err error
-	config1, err = New("test")
+func TestDefaultNew(t *testing.T) {
+	cfg, err := New("DEFAULT")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
+	expected := &Config{
+		limit:                   1000,
+		logDataPath:             "./tmp/log",
+		retentionSize:           100 * 1024 * 1024,
+		retentionTime:           15 * 24 * time.Hour,
+		retentionSizingStrategy: "file",
+		timeout:                 20 * time.Second,
+		version:                 "DEFAULT",
+		webListenAddress:        ":6060",
+	}
+	assert.Equal(t, expected, cfg)
 }
 
-func TestNew(t *testing.T) {
-	assert.NotEmpty(t, config1)
+var customConfigYaml = `
+retention:
+  time: 1d
+  size: 200m
+storage:
+  driver: filesystem
+  log_data_path: /data/log
+`
+
+func TestNewFromFile(t *testing.T) {
+
+	appFS := afero.NewOsFs()
+	err := afero.WriteFile(appFS, filepath.Join("..", "etc", "lethe.yaml"), []byte(customConfigYaml), 0644)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(filepath.Join("..", "etc", "lethe.yaml"))
+
+	path := filepath.Join("..", "etc", "lethe.yaml")
+	_, err = appFS.Stat(path)
+
+	if os.IsNotExist(err) {
+		t.Errorf("file %q does not exist.\n", path)
+	}
+
+	cfg, err := New("FROMFILE")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := &Config{
+		limit:                   1000,
+		logDataPath:             "/data/log",
+		retentionSize:           200 * 1024 * 1024,
+		retentionTime:           24 * time.Hour,
+		retentionSizingStrategy: "file",
+		timeout:                 20 * time.Second,
+		version:                 "FROMFILE",
+		webListenAddress:        ":6060",
+	}
+	assert.Equal(t, expected, cfg)
+
 }
 
-func TestLimit(t *testing.T) {
-	assert.Equal(t, 1000, config1.Limit())
-}
+func TestExportedFunction(t *testing.T) {
+	cfg, err := New("DEFAULT")
+	if err != nil {
+		t.Error(err)
+	}
 
-func TestLogDataPath(t *testing.T) {
-	assert.Equal(t, "/data/log", config1.LogDataPath())
-	config1.SetLogDataPath("tmp/hello")
-	assert.Equal(t, "tmp/hello", config1.LogDataPath())
-	config1.SetLogDataPath("/data/log")
-}
+	assert.Equal(t, 1000, cfg.Limit())
 
-func TestRetentionSize(t *testing.T) {
-	assert.Equal(t, 100*1024*1024, config1.RetentionSize()) // 100 MiB
-	config1.SetRetentionSize(1 * 1024 * 1024)               // 1 MiB
-	assert.Equal(t, 1*1024*1024, config1.RetentionSize())   // 1 MiB
-	config1.SetRetentionSize(100 * 1024 * 1024)             // 100 MiB
-}
-func TestRetentionTime(t *testing.T) {
-	assert.Equal(t, 24*time.Hour, config1.RetentionTime())    // 1 day
-	config1.SetRetentionTime(15 * 24 * time.Hour)             // 15 days
-	assert.Equal(t, 15*24*time.Hour, config1.RetentionTime()) // 15 days
-	config1.SetRetentionTime(24 * time.Hour)                  // 1 day
-}
+	assert.Equal(t, "./tmp/log", cfg.LogDataPath())
+	cfg.SetLogDataPath("tmp/hello")
+	assert.Equal(t, "tmp/hello", cfg.LogDataPath())
+	cfg.SetLogDataPath("/data/log")
 
-func TestRetentionSizingStrategy(t *testing.T) {
-	assert.Equal(t, "file", config1.RetentionSizingStrategy())
-}
+	assert.Equal(t, 100*1024*1024, cfg.RetentionSize()) // 100 MiB
+	cfg.SetRetentionSize(1 * 1024 * 1024)               // 1 MiB
+	assert.Equal(t, 1*1024*1024, cfg.RetentionSize())   // 1 MiB
+	cfg.SetRetentionSize(100 * 1024 * 1024)             // 100 MiB
 
-func TestVersion(t *testing.T) {
-	assert.Equal(t, "test", config1.Version())
-}
+	assert.Equal(t, 15*24*time.Hour, cfg.RetentionTime()) // 15 day
+	cfg.SetRetentionTime(1 * 24 * time.Hour)              // 1 days
+	assert.Equal(t, 1*24*time.Hour, cfg.RetentionTime())  // 1 days
+	cfg.SetRetentionTime(15 * 24 * time.Hour)             // 15 day
 
-func TestWebListenAddress(t *testing.T) {
-	assert.Equal(t, ":6060", config1.WebListenAddress())
+	assert.Equal(t, "file", cfg.RetentionSizingStrategy())
+	assert.Equal(t, "DEFAULT", cfg.Version())
+	assert.Equal(t, ":6060", cfg.WebListenAddress())
 }
