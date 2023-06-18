@@ -29,54 +29,42 @@ func New(version string) (*Config, error) {
 	v.AddConfigPath(filepath.Join(".", "etc"))
 	v.AddConfigPath(filepath.Join("..", "etc"))
 
+	// Set default values
+	v.SetDefault("storage.log_data_path", "./tmp/log")
+	v.SetDefault("retention.time", "15d")
+	v.SetDefault("retention.sizingStrategy", "file")
+	v.SetDefault("web.listen_address", ":6060")
+
 	err := v.ReadInConfig()
 	if err != nil {
 		return &Config{}, fmt.Errorf("readInConfig err: %w", err)
 	}
-	err = viper.Unmarshal(&v)
+
+	err = v.Unmarshal(&v)
 	if err != nil {
 		return &Config{}, fmt.Errorf("unmarshal err: %w", err)
-	}
-
-	logDataPath := v.GetString("storage.log_data_path")
-	if logDataPath == "" {
-		logDataPath = "./tmp/log"
 	}
 
 	retentionSize, err := util.StringToBytes(v.GetString("retention.size"))
 	if err != nil {
 		return &Config{}, fmt.Errorf("stringToBytes err: %w", err)
 	}
+
 	retentionTimeString := v.GetString("retention.time")
-	if retentionTimeString == "" {
-		retentionTimeString = "15d"
-	}
 	retentionTime, err := util.GetDurationFromAge(retentionTimeString)
 	if err != nil {
 		return &Config{}, fmt.Errorf("getDurationFromAge err: %w", err)
 	}
 
-	retentionSizingStrategy := v.GetString("retention.sizingStrategy")
-	if retentionSizingStrategy == "" {
-		retentionSizingStrategy = "file"
-	}
-
-	timeout := 20 * time.Second
-
-	webListenAddress := v.GetString("web.listen_address")
-	if webListenAddress == "" {
-		webListenAddress = ":6060"
-	}
-
 	cfg := Config{
 		limit:                   1000,
-		logDataPath:             logDataPath,
-		retentionSize:           retentionSize,
-		retentionTime:           retentionTime,
-		retentionSizingStrategy: retentionSizingStrategy,
-		timeout:                 timeout,
+		logDataPath:             v.GetString("storage.log_data_path"),
+		retentionSize:           retentionSize, // fixme: we should decide default value
+		retentionTime:           retentionTime, // fixme: we should decide default value
+		retentionSizingStrategy: v.GetString("retention.sizingStrategy"),
+		timeout:                 20 * time.Second,
 		version:                 version,
-		webListenAddress:        webListenAddress,
+		webListenAddress:        v.GetString("web.listen_address"),
 	}
 
 	logger.Infof("====================================")
