@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kuoss/common/logger"
 	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/kuoss/lethe/util"
 	"github.com/spf13/viper"
@@ -35,9 +34,28 @@ func New(version string) (*Config, error) {
 	v.SetDefault("retention.sizingStrategy", "file")
 	v.SetDefault("web.listen_address", ":6060")
 
+	// fixme: decide default value
+	v.SetDefault("retention.time", "15d")
+	v.SetDefault("retention.size", "100m")
+
 	err := v.ReadInConfig()
 	if err != nil {
-		return &Config{}, fmt.Errorf("readInConfig err: %w", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found;
+			return &Config{
+				limit:                   1000,
+				logDataPath:             "./tmp/log",
+				retentionSize:           100 * 1024 * 1024,   // fixme: we should decide default value
+				retentionTime:           15 * 24 * time.Hour, // fixme: we should decide default value
+				retentionSizingStrategy: "file",
+				timeout:                 20 * time.Second,
+				version:                 version,
+				webListenAddress:        ":6060",
+			}, nil
+		} else {
+			// Config file was found but another error was produced
+			return &Config{}, fmt.Errorf("readInConfig err: %w", err)
+		}
 	}
 
 	err = v.Unmarshal(&v)
@@ -56,7 +74,7 @@ func New(version string) (*Config, error) {
 		return &Config{}, fmt.Errorf("getDurationFromAge err: %w", err)
 	}
 
-	cfg := Config{
+	return &Config{
 		limit:                   1000,
 		logDataPath:             v.GetString("storage.log_data_path"),
 		retentionSize:           retentionSize, // fixme: we should decide default value
@@ -65,12 +83,7 @@ func New(version string) (*Config, error) {
 		timeout:                 20 * time.Second,
 		version:                 version,
 		webListenAddress:        v.GetString("web.listen_address"),
-	}
-
-	logger.Infof("====================================")
-	logger.Infof("%+v", cfg)
-	logger.Infof("====================================")
-	return &cfg, nil
+	}, nil
 }
 
 func (c *Config) Limit() int {
