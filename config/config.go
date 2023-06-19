@@ -30,13 +30,12 @@ func New(version string) (*Config, error) {
 
 	// Set default values
 	v.SetDefault("storage.log_data_path", "./tmp/log")
-	v.SetDefault("retention.time", "15d")
 	v.SetDefault("retention.sizingStrategy", "file")
 	v.SetDefault("web.listen_address", ":6060")
-
+	v.SetDefault("timeout", 20*time.Second)
 	// fixme: decide default value
 	v.SetDefault("retention.time", "15d")
-	v.SetDefault("retention.size", "100m")
+	v.SetDefault("retention.size", "1000g")
 
 	err := v.ReadInConfig()
 	if err != nil {
@@ -80,7 +79,7 @@ func New(version string) (*Config, error) {
 		retentionSize:           retentionSize, // fixme: we should decide default value
 		retentionTime:           retentionTime, // fixme: we should decide default value
 		retentionSizingStrategy: v.GetString("retention.sizingStrategy"),
-		timeout:                 20 * time.Second,
+		timeout:                 v.GetDuration("timeout"),
 		version:                 version,
 		webListenAddress:        v.GetString("web.listen_address"),
 	}, nil
