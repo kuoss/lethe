@@ -25,6 +25,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf("new config err: %s", err.Error())
 	}
+	logger.Infof("%+v", cfg)
 
 	// services
 	fileService, err := fileservice.New(cfg)
