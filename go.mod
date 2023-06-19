@@ -8,6 +8,7 @@ require (
 	github.com/kuoss/common v0.1.3
 	github.com/prometheus/common v0.43.0
 	github.com/prometheus/prometheus v0.43.0
+	github.com/spf13/afero v1.8.2
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.8.2
@@ -47,7 +48,6 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
