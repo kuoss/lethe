@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kuoss/common/logger"
 	_ "github.com/kuoss/lethe/storage/driver/filesystem"
 	"github.com/kuoss/lethe/util"
 	"github.com/spf13/viper"
@@ -29,37 +30,23 @@ func New(version string) (*Config, error) {
 	v.AddConfigPath(filepath.Join("..", "etc"))
 
 	// Set default values
-	v.SetDefault("storage.log_data_path", "./tmp/log")
+	v.SetDefault("version", "test")
+	v.SetDefault("limit", 1000)
+	v.SetDefault("storage.log_data_path", "/var/data/log")
 	v.SetDefault("retention.sizingStrategy", "file")
 	v.SetDefault("web.listen_address", ":6060")
 	v.SetDefault("timeout", 20*time.Second)
-	// fixme: decide default value
 	v.SetDefault("retention.time", "15d")
 	v.SetDefault("retention.size", "1000g")
 
 	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found;
-			return &Config{
-				limit:                   1000,
-				logDataPath:             "./tmp/log",
-				retentionSize:           100 * 1024 * 1024,   // fixme: we should decide default value
-				retentionTime:           15 * 24 * time.Hour, // fixme: we should decide default value
-				retentionSizingStrategy: "file",
-				timeout:                 20 * time.Second,
-				version:                 version,
-				webListenAddress:        ":6060",
-			}, nil
+			logger.Infof("Configuration lethe.yaml is not provided\n")
 		} else {
 			// Config file was found but another error was produced
 			return &Config{}, fmt.Errorf("readInConfig err: %w", err)
 		}
-	}
-
-	err = v.Unmarshal(&v)
-	if err != nil {
-		return &Config{}, fmt.Errorf("unmarshal err: %w", err)
 	}
 
 	retentionSize, err := util.StringToBytes(v.GetString("retention.size"))
@@ -76,8 +63,8 @@ func New(version string) (*Config, error) {
 	return &Config{
 		limit:                   1000,
 		logDataPath:             v.GetString("storage.log_data_path"),
-		retentionSize:           retentionSize, // fixme: we should decide default value
-		retentionTime:           retentionTime, // fixme: we should decide default value
+		retentionSize:           retentionSize, // 1000g
+		retentionTime:           retentionTime, // 15d
 		retentionSizingStrategy: v.GetString("retention.sizingStrategy"),
 		timeout:                 v.GetDuration("timeout"),
 		version:                 version,

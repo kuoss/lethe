@@ -17,8 +17,8 @@ func TestDefaultNew(t *testing.T) {
 	}
 	expected := &Config{
 		limit:                   1000,
-		logDataPath:             "./tmp/log",
-		retentionSize:           100 * 1024 * 1024,
+		logDataPath:             "/var/data/log",
+		retentionSize:           1000 * 1024 * 1024 * 1024,
 		retentionTime:           15 * 24 * time.Hour,
 		retentionSizingStrategy: "file",
 		timeout:                 20 * time.Second,
@@ -113,22 +113,22 @@ func TestNewFromFilePartial(t *testing.T) {
 }
 
 func TestExportedFunction(t *testing.T) {
-	cfg, err := New("DEFAULT")
+	cfg, err := New("test")
 	if err != nil {
 		t.Error(err)
 	}
 
 	assert.Equal(t, 1000, cfg.Limit())
 
-	assert.Equal(t, "./tmp/log", cfg.LogDataPath())
+	assert.Equal(t, "/var/data/log", cfg.LogDataPath())
 	cfg.SetLogDataPath("tmp/hello")
 	assert.Equal(t, "tmp/hello", cfg.LogDataPath())
 	cfg.SetLogDataPath("/data/log")
 
-	assert.Equal(t, 100*1024*1024, cfg.RetentionSize()) // 100 MiB
-	cfg.SetRetentionSize(1 * 1024 * 1024)               // 1 MiB
-	assert.Equal(t, 1*1024*1024, cfg.RetentionSize())   // 1 MiB
-	cfg.SetRetentionSize(100 * 1024 * 1024)             // 100 MiB
+	assert.Equal(t, 1000*1024*1024*1024, cfg.RetentionSize()) // 1000 GiB
+	cfg.SetRetentionSize(1 * 1024 * 1024)                     // 1 MiB
+	assert.Equal(t, 1*1024*1024, cfg.RetentionSize())         // 1 MiB
+	cfg.SetRetentionSize(100 * 1024 * 1024)                   // 100 MiB
 
 	assert.Equal(t, 15*24*time.Hour, cfg.RetentionTime()) // 15 day
 	cfg.SetRetentionTime(1 * 24 * time.Hour)              // 1 days
@@ -136,6 +136,6 @@ func TestExportedFunction(t *testing.T) {
 	cfg.SetRetentionTime(15 * 24 * time.Hour)             // 15 day
 
 	assert.Equal(t, "file", cfg.RetentionSizingStrategy())
-	assert.Equal(t, "DEFAULT", cfg.Version())
+	assert.Equal(t, "test", cfg.Version())
 	assert.Equal(t, ":6060", cfg.WebListenAddress())
 }
