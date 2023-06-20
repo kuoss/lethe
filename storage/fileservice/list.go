@@ -75,10 +75,9 @@ func (s *FileService) ListLogDirsWithSize() []LogDir {
 			continue
 		}
 		logDirs[i].Size = size
-
-		files, err := s.driver.Walk(logDir.Fullpath)
+		files, err := s.driver.Walk(logDir.Subpath)
 		if err != nil {
-			logger.Warnf("readDir err: %s, path:%s", err.Error(), logDir.Fullpath)
+			logger.Warnf("walk err: %s, path: %s", err.Error(), logDir.Fullpath)
 			continue
 		}
 
