@@ -2,9 +2,6 @@ package fileservice
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/kuoss/common/logger"
 )
 
@@ -14,7 +11,7 @@ func (s *FileService) Clean() {
 }
 
 func (s *FileService) removeFilesWithPrefix(prefix string) {
-	files, err := filepath.Glob(fmt.Sprintf("%s/%s.*", s.config.LogDataPath(), prefix))
+	files, err := s.driver.Walk(fmt.Sprintf("%s/%s.*", s.config.LogDataPath(), prefix))
 	if err != nil {
 		logger.Warnf("glob err: %s, prefix: %s", err.Error(), prefix)
 		return
@@ -25,7 +22,7 @@ func (s *FileService) removeFilesWithPrefix(prefix string) {
 	logger.Warnf("cleansing files prefix: %s", prefix)
 	for _, file := range files {
 		logger.Infof("remove file: %s", file)
-		err := os.Remove(file)
+		err := s.driver.Delete(file.Fullpath())
 		if err != nil {
 			logger.Warnf("remove err: %s, file: %s", err.Error(), file)
 		}
