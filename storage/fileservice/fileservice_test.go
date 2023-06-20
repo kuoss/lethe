@@ -50,4 +50,6 @@ func TestNewFile(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.DirExists(t, filepath.Join(".", "tmp", "writer"))
+
+	err = os.RemoveAll(filepath.Join(".", "tmp", "writer"))
 }
