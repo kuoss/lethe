@@ -216,3 +216,12 @@ func (d *driver) WalkDir(subpath string) ([]string, error) {
 	}
 	return dirs, nil
 }
+
+func (d *driver) Mkdir(subpath string) error {
+	fullpath := d.fullPath(subpath)
+	dir := path.Dir(fullpath)
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return err
+	}
+	return nil
+}
