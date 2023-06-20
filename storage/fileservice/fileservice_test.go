@@ -2,6 +2,7 @@ package fileservice
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/kuoss/lethe/config"
@@ -37,4 +38,16 @@ func TestNewTemp(t *testing.T) {
 	// clean up
 	err = os.RemoveAll(dataPath)
 	assert.NoError(t, err)
+}
+
+func TestNewFile(t *testing.T) {
+	cfg, err := config.New("test")
+	assert.NoError(t, err)
+
+	cfg.SetLogDataPath(filepath.Join(".", "tmp", "writer"))
+
+	_, err = New(cfg)
+
+	assert.NoError(t, err)
+	assert.DirExists(t, filepath.Join(".", "tmp", "writer"))
 }
