@@ -2,7 +2,6 @@ package fileservice
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/kuoss/common/logger"
@@ -77,16 +76,17 @@ func (s *FileService) ListLogDirsWithSize() []LogDir {
 		}
 		logDirs[i].Size = size
 
-		files, err := os.ReadDir(logDir.Fullpath)
+		files, err := s.driver.Walk(logDir.Fullpath)
 		if err != nil {
 			logger.Warnf("readDir err: %s, path:%s", err.Error(), logDir.Fullpath)
 			continue
 		}
+
 		fileCount := len(files)
 		logDirs[i].FileCount = fileCount
 		if fileCount > 0 {
-			logDirs[i].FirstFile = files[0].Name()
-			logDirs[i].LastFile = files[fileCount-1].Name()
+			logDirs[i].FirstFile = filepath.Base(files[0].Fullpath())
+			logDirs[i].LastFile = filepath.Base(files[fileCount-1].Fullpath())
 		}
 	}
 	return logDirs
