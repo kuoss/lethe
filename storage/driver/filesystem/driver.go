@@ -219,7 +219,7 @@ func (d *driver) WalkDir(subpath string) ([]string, error) {
 
 func (d *driver) Mkdir(subpath string) error {
 
-	if err := os.MkdirAll(subpath, 0777); err != nil {
+	if err := os.MkdirAll(subpath, 0755); err != nil {
 		return err
 	}
 	return nil
