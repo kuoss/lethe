@@ -16,5 +16,6 @@ type Driver interface {
 	Delete(string) error
 	Walk(string) ([]FileInfo, error)
 	WalkDir(string) ([]string, error)
+	Mkdir(string) error
 	RootDirectory() string
 }

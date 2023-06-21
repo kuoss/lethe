@@ -51,3 +51,6 @@ func (*driver) Writer(string) (storagedriver.FileWriter, error) {
 func (*driver) RootDirectory() string {
 	return ""
 }
+func (d *driver) Mkdir(string) error {
+	return nil
+}
