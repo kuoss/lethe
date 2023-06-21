@@ -40,7 +40,7 @@ func TestNewTemp(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestNewFile(t *testing.T) {
+func TestNewLogDataPath(t *testing.T) {
 	cfg, err := config.New("test")
 	assert.NoError(t, err)
 
