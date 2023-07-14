@@ -1,11 +1,12 @@
 package match
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/prometheus/prometheus/model/labels"
-	"strings"
-	"testing"
 )
 
 func FuzzNodeLabelMatchEqual(f *testing.F) {
