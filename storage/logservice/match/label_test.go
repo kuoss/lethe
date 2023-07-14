@@ -33,8 +33,7 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 		f.Fail()
 	}
 
-	var verfityFunc MatchFunc
-	verfityFunc = funcs[0]
+	verfityFunc := funcs[0]
 
 	testcases := []string{"label_value", "non_label_value"}
 	for _, tc := range testcases {
@@ -75,8 +74,7 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 		f.Fail()
 	}
 
-	var verfityFunc MatchFunc
-	verfityFunc = funcs[0]
+	verfityFunc := funcs[0]
 
 	testcases := []string{"label_value", "non_label_value"}
 	for _, tc := range testcases {
@@ -117,8 +115,7 @@ func FuzzNodeLabelMatchRegexOnlyContains(f *testing.F) {
 		f.Fail()
 	}
 
-	var verfityFunc MatchFunc
-	verfityFunc = funcs[0]
+	verfityFunc := funcs[0]
 
 	testcases := []string{"foobar", "foobaar", "regardless"}
 	for _, tc := range testcases {
@@ -156,8 +153,7 @@ func FuzzNodeLabelMatchRegexNotEqualOnlyContains(f *testing.F) {
 		f.Fail()
 	}
 
-	var verfityFunc MatchFunc
-	verfityFunc = funcs[0]
+	verfityFunc := funcs[0]
 
 	testcases := []string{"foobar", "foobaar", "regardless"}
 	for _, tc := range testcases {
