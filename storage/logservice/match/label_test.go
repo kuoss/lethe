@@ -41,9 +41,12 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, label string) {
 		isMatch := verfityFunc(label)
-		if label == "label_value" && isMatch == true {
-			// as we expected
-		}
+		/*
+			if label == "label_value" && isMatch == true {
+				// as we expected
+				// comment this branch for lint
+			}
+		*/
 		if label != "label_value" && isMatch == true {
 			t.Errorf("%q label is matched with ", label)
 		}
@@ -82,9 +85,12 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, label string) {
 		isMatch := verfityFunc(label)
-		if label != "label_value" && isMatch == true {
-			// as we expected
-		}
+		/*
+			if label != "label_value" && isMatch == true {
+				// as we expected
+				// comment this branch for lint
+			}
+		*/
 		if label != "label_value" && isMatch == false {
 			t.Errorf("label is not matched with %q", label)
 		}
