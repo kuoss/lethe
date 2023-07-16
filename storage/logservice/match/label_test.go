@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/kuoss/lethe/letheql/model"
-	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/prometheus/prometheus/model/labels"
 )
 
@@ -21,13 +20,6 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 				Value: "label_value",
 			},
 		},
-		LineMatchers: []*model.LineMatcher{
-			&model.LineMatcher{
-				Op:    parser.PIPE_REGEX,
-				Value: "line_value",
-			},
-		},
-		TimeRange: model.TimeRange{},
 	}
 
 	funcs, err := getLabelMatchFuncs(nodeSel)
@@ -61,13 +53,6 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 				Value: "label_value",
 			},
 		},
-		LineMatchers: []*model.LineMatcher{
-			&model.LineMatcher{
-				Op:    parser.PIPE_REGEX,
-				Value: "line_value",
-			},
-		},
-		TimeRange: model.TimeRange{},
 	}
 
 	funcs, err := getLabelMatchFuncs(nodeSel)
@@ -101,13 +86,6 @@ func FuzzNodeLabelMatchRegexOnlyContains(f *testing.F) {
 				Value: ".+bar",
 			},
 		},
-		LineMatchers: []*model.LineMatcher{
-			&model.LineMatcher{
-				Op:    parser.PIPE_REGEX,
-				Value: "line_value",
-			},
-		},
-		TimeRange: model.TimeRange{},
 	}
 
 	funcs, err := getLabelMatchFuncs(nodeSel)
@@ -139,13 +117,6 @@ func FuzzNodeLabelMatchRegexNotEqualOnlyContains(f *testing.F) {
 				Value: ".+bar",
 			},
 		},
-		LineMatchers: []*model.LineMatcher{
-			&model.LineMatcher{
-				Op:    parser.PIPE_REGEX,
-				Value: "line_value",
-			},
-		},
-		TimeRange: model.TimeRange{},
 	}
 
 	funcs, err := getLabelMatchFuncs(nodeSel)
