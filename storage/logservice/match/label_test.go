@@ -1,7 +1,9 @@
 package match
 
 import (
-	"strings"
+	"github.com/stretchr/testify/assert"
+	"regexp"
+
 	"testing"
 
 	"github.com/kuoss/lethe/letheql/model"
@@ -41,14 +43,10 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, label string) {
 		isMatch := verfityFunc(label)
-		/*
-			if label == "label_value" && isMatch == true {
-				// as we expected
-				// comment this branch for lint
-			}
-		*/
-		if label != "label_value" && isMatch == true {
-			t.Errorf("%q label is matched with ", label)
+		if label == "lable_value" {
+			assert.True(t, isMatch)
+		} else {
+			assert.False(t, isMatch)
 		}
 	})
 }
@@ -85,14 +83,10 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, label string) {
 		isMatch := verfityFunc(label)
-		/*
-			if label != "label_value" && isMatch == true {
-				// as we expected
-				// comment this branch for lint
-			}
-		*/
-		if label != "label_value" && isMatch == false {
-			t.Errorf("label is not matched with %q", label)
+		if label == "lable_value" {
+			assert.False(t, isMatch)
+		} else {
+			assert.True(t, isMatch)
 		}
 	})
 }
@@ -127,11 +121,11 @@ func FuzzNodeLabelMatchRegexOnlyContains(f *testing.F) {
 	for _, tc := range testcases {
 		f.Add(tc)
 	}
+	re := regexp.MustCompile("^.+bar$")
 	f.Fuzz(func(t *testing.T, label string) {
-		isMatch := verfityFunc(label)
-		if !strings.Contains(label, "bar") && isMatch == true {
-			t.Errorf("label is matched with %q unexpectedly", label)
-		}
+		got := verfityFunc(label)
+		want := re.MatchString(label)
+		assert.Equal(t, got, want)
 	})
 }
 
@@ -165,10 +159,10 @@ func FuzzNodeLabelMatchRegexNotEqualOnlyContains(f *testing.F) {
 	for _, tc := range testcases {
 		f.Add(tc)
 	}
+	re := regexp.MustCompile("^.+bar$")
 	f.Fuzz(func(t *testing.T, label string) {
-		isMatch := verfityFunc(label)
-		if !strings.Contains(label, "bar") && isMatch == false {
-			t.Errorf("label is matched with %q unexpectedly", label)
-		}
+		got := verfityFunc(label)
+		want := !re.MatchString(label)
+		assert.Equal(t, got, want)
 	})
 }
