@@ -3,7 +3,6 @@ package match
 import (
 	"github.com/stretchr/testify/assert"
 	"regexp"
-
 	"testing"
 
 	"github.com/kuoss/lethe/letheql/model"
@@ -11,31 +10,31 @@ import (
 )
 
 func FuzzNodeLabelMatchEqual(f *testing.F) {
-	nodeSel := &model.LogSelector{
-		Name: "node",
-		LabelMatchers: []*labels.Matcher{
-			&labels.Matcher{
-				Type:  labels.MatchEqual,
-				Name:  "process",
-				Value: "label_value",
+
+	f.Add("needle", "haystack")
+
+	f.Fuzz(func(t *testing.T, needle, haystack string) {
+		nodeSel := &model.LogSelector{
+			Name: "node",
+			LabelMatchers: []*labels.Matcher{
+				&labels.Matcher{
+					Type:  labels.MatchEqual,
+					Name:  "process",
+					Value: needle,
+				},
 			},
-		},
-	}
+		}
 
-	funcs, err := getLabelMatchFuncs(nodeSel)
-	if err != nil {
-		f.Fail()
-	}
+		funcs, err := getLabelMatchFuncs(nodeSel)
+		if err != nil {
+			f.Fail()
+		}
 
-	verfityFunc := funcs[0]
+		verfityFunc := funcs[0]
 
-	testcases := []string{"label_value", "non_label_value"}
-	for _, tc := range testcases {
-		f.Add(tc)
-	}
-	f.Fuzz(func(t *testing.T, label string) {
-		isMatch := verfityFunc(label)
-		if label == "lable_value" {
+		isMatch := verfityFunc(haystack)
+
+		if needle == haystack {
 			assert.True(t, isMatch)
 		} else {
 			assert.False(t, isMatch)
@@ -44,34 +43,33 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 }
 
 func FuzzNodeLabelMatchNotEqual(f *testing.F) {
-	nodeSel := &model.LogSelector{
-		Name: "node",
-		LabelMatchers: []*labels.Matcher{
-			&labels.Matcher{
-				Type:  labels.MatchNotEqual,
-				Name:  "process",
-				Value: "label_value",
+	f.Add("needle", "haystack")
+
+	f.Fuzz(func(t *testing.T, needle, haystack string) {
+		nodeSel := &model.LogSelector{
+			Name: "node",
+			LabelMatchers: []*labels.Matcher{
+				&labels.Matcher{
+					Type:  labels.MatchNotEqual,
+					Name:  "process",
+					Value: needle,
+				},
 			},
-		},
-	}
+		}
 
-	funcs, err := getLabelMatchFuncs(nodeSel)
-	if err != nil {
-		f.Fail()
-	}
+		funcs, err := getLabelMatchFuncs(nodeSel)
+		if err != nil {
+			f.Fail()
+		}
 
-	verfityFunc := funcs[0]
+		verfityFunc := funcs[0]
 
-	testcases := []string{"label_value", "non_label_value"}
-	for _, tc := range testcases {
-		f.Add(tc)
-	}
-	f.Fuzz(func(t *testing.T, label string) {
-		isMatch := verfityFunc(label)
-		if label == "lable_value" {
-			assert.False(t, isMatch)
-		} else {
+		isMatch := verfityFunc(haystack)
+
+		if needle != haystack {
 			assert.True(t, isMatch)
+		} else {
+			assert.False(t, isMatch)
 		}
 	})
 }
