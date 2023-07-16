@@ -1,9 +1,10 @@
 package match
 
 import (
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/prometheus/prometheus/model/labels"
@@ -27,7 +28,7 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 
 		funcs, err := getLabelMatchFuncs(nodeSel)
 		if err != nil {
-			f.Fail()
+			t.Fail()
 		}
 
 		verfityFunc := funcs[0]
@@ -59,7 +60,7 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 
 		funcs, err := getLabelMatchFuncs(nodeSel)
 		if err != nil {
-			f.Fail()
+			t.Fail()
 		}
 
 		verfityFunc := funcs[0]
