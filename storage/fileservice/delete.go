@@ -49,6 +49,8 @@ func (s *FileService) DeleteBySize() error {
 		logger.Infof("retentionSize is 0 (DeleteBySize skipped)")
 		return nil
 	}
+
+	// ListFiles use driver.Walk
 	files, err := s.ListFiles()
 	if err != nil {
 		return fmt.Errorf("listFiles err: %w", err)
@@ -57,21 +59,30 @@ func (s *FileService) DeleteBySize() error {
 		return files[i].Name < files[j].Name
 	})
 
+	// calculate sum of all files size
+	var used int = 0
 	for _, file := range files {
-		usedBytes, err := s.GetUsedBytes(".")
-		if err != nil {
-			return fmt.Errorf("getUsedBytes err: %w", err)
+		used += int(file.Size)
+	}
+
+	var deleteSize int = 0
+	var deleteFiles []LogFile
+	for _, file := range files {
+		if used-deleteSize < retentionSize {
+			break
 		}
-		if usedBytes < retentionSize {
-			logger.Infof("DeleteBySize(%d < %d): DONE", usedBytes, retentionSize)
-			return nil
-		}
-		logger.Infof("DeleteBySize(%d > %d): %s", usedBytes, retentionSize, file.Fullpath)
-		err = s.driver.Delete(file.Subpath)
+		deleteFiles = append(deleteFiles, file)
+		deleteSize += int(file.Size)
+	}
+	logger.Infof("DeleteBySize: try to flush %d files, %d bytes", len(deleteFiles), deleteSize)
+	for _, file := range deleteFiles {
+		err := s.driver.Delete(file.Subpath)
 		if err != nil {
 			logger.Errorf("delete err: %s", err.Error())
 		}
+		logger.Infof("DeleteBySize(%d > %d): %s(%d)", used, retentionSize, file.Fullpath, file.Size)
 	}
+	logger.Infof("DeleteBySize(%d < %d): DONE", used, retentionSize)
 	return nil
 }
 
