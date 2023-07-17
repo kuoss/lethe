@@ -36,7 +36,7 @@ func TestDirSize(t *testing.T) {
 		wantError string
 	}{
 		{"", 0, ""},
-		{"hello", 0, "Path not found: hello"},
+		{"hello", 0, "Path not found: hello, err: open err: open tmp/init/hello: no such file or directory"},
 		{"node", 0, ""},
 		{"pod", 0, ""},
 		{"node/node01", 1234, ""},
@@ -44,8 +44,8 @@ func TestDirSize(t *testing.T) {
 		{"pod/namespace01", 2620, ""},
 		{"pod/namespace02", 1137, ""},
 	}
-	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run("", func(t *testing.T) {
 			got, err := fileService.dirSize(tc.path)
 			if tc.wantError == "" {
 				assert.NoError(t, err)
@@ -76,7 +76,7 @@ func TestList(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"list err: Path not found: hello",
+			"list err: Path not found: hello, err: open err: open tmp/init/hello: no such file or directory",
 		},
 		{
 			"node",
@@ -99,8 +99,8 @@ func TestList(t *testing.T) {
 			"list err: readdirnames err: readdirent tmp/init/pod/namespace01/2029-11-10_23.log: not a directory",
 		},
 	}
-	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run("", func(t *testing.T) {
 			got, err := fileService.List(tc.subpath)
 			if tc.wantError == "" {
 				assert.NoError(t, err)
