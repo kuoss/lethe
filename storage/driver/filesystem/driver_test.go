@@ -291,7 +291,7 @@ func TestList(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"Path not found: hello",
+			"Path not found: hello, err: open err: open tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
 		},
 		{
 			"pod",
@@ -330,7 +330,7 @@ func TestMove(t *testing.T) {
 		},
 		{
 			"hello", "",
-			"Path not found: hello",
+			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
 		},
 		{
 			"", "hello",
@@ -338,11 +338,11 @@ func TestMove(t *testing.T) {
 		},
 		{
 			"hello", "hello",
-			"Path not found: hello",
+			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
 		},
 		{
 			"pod/namespace01/hello.log", "pod/namespace01/hello.log",
-			"Path not found: pod/namespace01/hello.log",
+			"Path not found: pod/namespace01/hello.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/hello.log: no such file or directory",
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log", "pod/namespace01/2009-11-10_00.log", // move
@@ -350,11 +350,11 @@ func TestMove(t *testing.T) {
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log", "pod/namespace01/2009-11-10_00.log", // duplicate
-			"Path not found: pod/namespace01/2009-11-10_21.log",
+			"Path not found: pod/namespace01/2009-11-10_21.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log: no such file or directory",
 		},
 	}
-	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run("", func(t *testing.T) {
 			err := driver1.Move(tc.a, tc.b)
 			if tc.wantError == "" {
 				assert.NoError(t, err)
@@ -389,7 +389,7 @@ func TestDelete(t *testing.T) {
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log", // duplicate
-			"Path not found: pod/namespace01/2009-11-10_21.log",
+			"Path not found: pod/namespace01/2009-11-10_21.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log: no such file or directory",
 		},
 	}
 	for i, tc := range testCases {
