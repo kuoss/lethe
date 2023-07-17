@@ -7,7 +7,6 @@ import (
 	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/util/testutil"
 	"github.com/stretchr/testify/require"
-	// "github.com/stretchr/testify/require"
 )
 
 var (
