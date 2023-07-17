@@ -230,7 +230,7 @@ func TestStat(t *testing.T) {
 		{
 			"hello",
 			"",
-			"Path not found: hello",
+			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
 		},
 		{
 			"node",
@@ -250,7 +250,7 @@ func TestStat(t *testing.T) {
 		{
 			"pod/namespace01/hello.log",
 			"",
-			"Path not found: pod/namespace01/hello.log",
+			"Path not found: pod/namespace01/hello.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/hello.log: no such file or directory",
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log",
