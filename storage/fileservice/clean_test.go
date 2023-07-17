@@ -43,5 +43,4 @@ func TestClean(t *testing.T) {
 	fileService_clean.Clean()
 	require.NoFileExists(t, "tmp/storage_fileservice_clean_test/kube.1")
 	require.NoFileExists(t, "tmp/storage_fileservice_clean_test/host.1")
-
 }

@@ -14,7 +14,7 @@ func (s *FileService) Clean() {
 func (s *FileService) removeFilesWithPrefix(prefix string) {
 	files, err := s.driver.List("")
 	if err != nil {
-		logger.Warnf("glob err: %s, prefix: %s", err.Error(), prefix)
+		logger.Warnf("list err: %s, prefix: %s", err.Error(), prefix)
 		return
 	}
 	if len(files) < 1 {
