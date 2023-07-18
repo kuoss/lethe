@@ -8,5 +8,5 @@ type PathNotFoundError struct {
 }
 
 func (err PathNotFoundError) Error() string {
-	return fmt.Sprintf("Path not found: %s", err.Path)
+	return fmt.Sprintf("Path not found: %s, err: %s", err.Path, err.Err)
 }

@@ -159,13 +159,14 @@ func (d *driver) Move(sourcePath, targetPath string) error {
 }
 
 func (d *driver) Delete(subpath string) error {
-	if len(strings.Split(subpath, string(os.PathSeparator))) < 2 {
-		return fmt.Errorf("deleting 0-1 depth directory is not allowed")
-	}
 	fullpath := d.fullPath(subpath)
-	_, err := os.Stat(fullpath)
+	fileInfo, err := os.Stat(fullpath)
 	if err != nil {
 		return storagedriver.PathNotFoundError{Path: subpath, Err: fmt.Errorf("stat err: %w", err)}
+	}
+	depth := len(strings.Split(subpath, string(os.PathSeparator)))
+	if depth < 2 && fileInfo.IsDir() {
+		return fmt.Errorf("deleting 0-1 depth directory is not allowed")
 	}
 	err = os.RemoveAll(fullpath)
 	if err != nil {
