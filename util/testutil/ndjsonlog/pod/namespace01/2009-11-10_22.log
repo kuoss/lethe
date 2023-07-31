@@ -1,0 +1,11 @@
+{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lerom ipsum"}
+{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","conatiner":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","conatiner":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","conatiner":"httpd","log":"hello from sidecar"}
+{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"}
+{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"lerom from sidecar"}
+{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"}
+{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"}
