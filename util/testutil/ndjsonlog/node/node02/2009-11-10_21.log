@@ -1,0 +1,12 @@
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"containerd",message:"hello world"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"containerd",message:"lerom ipsum"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"containerd",message:"hello world"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"dockerd",message:"hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"dockerd",message:"lerom from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"dockerd",message:"hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
+{time:"2009-11-10T21:58:00.000000Z",node:"node02",process:"kubelet",message:"I0525 20:00:45.752587   17221 scope.go:110] \"RemoveContainer\" hello from sidecar"}
