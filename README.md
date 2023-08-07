@@ -8,3 +8,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/kuoss/lethe.svg)](https://github.com/kuoss/lethe/stargazers)
 [![contribuiton welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)](https://github.com/kuoss/lethe/blob/main/CONTRIBUTING.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kuoss/lethe)](https://goreportcard.com/report/github.com/kuoss/lethe)
+
+## Contributors
+
+<a href="https://github.com/kuoss/lethe/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=kuoss/lethe" />
+</a>
