@@ -6,7 +6,8 @@ RUN go mod download -x
 RUN go build -ldflags="-X 'main.Version=$VERSION'" -o /app/bin/lethe
 RUN cp -a ./etc                                       /app/etc
 
-FROM alpine:3.18
+# 2023-11 latest
+FROM alpine:3.18.4
 COPY --from=base /app /app
 RUN set -x && apk add --no-cache coreutils util-linux curl grep
 
