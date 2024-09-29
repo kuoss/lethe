@@ -555,11 +555,11 @@ var testExpr = []struct {
 		fail:   true,
 		errMsg: "set operator \"unless\" not allowed in binary scalar expression",
 	},
-	// {
-	// 	input: "1 !~ 1",
-	// 	fail:  true,
-	// 	errMsg: `unexpected character after '!': '~'`,
-	// },
+	{
+		input:  "1 !~ 1",
+		fail:   true,
+		errMsg: `unexpected character after '!': '~'`,
+	},
 	{
 		input:  "1 =~ 1",
 		fail:   true,
@@ -2029,7 +2029,7 @@ var testExpr = []struct {
 	{
 		input:  `foo[5y1hs]`,
 		fail:   true,
-		errMsg: "unknown unit \"hs\" in duration \"5y1hs\"",
+		errMsg: "not a valid duration string: \"5y1hs\"",
 	},
 	{
 		input:  `foo[5m1h]`,

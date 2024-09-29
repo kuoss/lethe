@@ -1,3 +1,4 @@
+PROMETHEUS_VER := v2.42.0
 VERSION := v0.2.1
 IMAGE := ghcr.io/kuoss/lethe:$(VERSION)
 
@@ -46,3 +47,18 @@ mock-logs:
 
 mock-delete:
 	hack/mock/delete.sh
+
+## letheql
+.PHONY: parser
+parser:
+	git clone -b $(PROMETHEUS_VER) --depth=1 https://github.com/prometheus/prometheus.git
+	rm -rf letheql/parser
+	mv prometheus/promql/parser letheql/
+	rm -rf prometheus
+
+.PHONY: goyacc
+goyacc:
+	which goyacc || go install golang.org/x/tools/cmd/goyacc@v0.6.0
+	goyacc -o letheql/parser/generated_parser.y.go letheql/parser/generated_parser.y
+	rm -f letheql/parser/y.output
+	go test -failfast letheql/parser/

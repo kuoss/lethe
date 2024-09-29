@@ -445,6 +445,8 @@ var tests = []struct {
 			{
 				input: `=~`, fail: true,
 			}, {
+				input: `!~`, fail: true,
+			}, {
 				input: `!(`, fail: true,
 			}, {
 				input: "1a", fail: true,
