@@ -471,6 +471,26 @@ var testExpr = []struct {
 		},
 	},
 	{
+		input: "1 !~ 1",
+		expected: &BinaryExpr{
+			Op: NEQ_REGEX,
+			LHS: &NumberLiteral{
+				Val: 1,
+				PosRange: PositionRange{
+					Start: 0,
+					End:   1,
+				},
+			},
+			RHS: &NumberLiteral{
+				Val: 1,
+				PosRange: PositionRange{
+					Start: 5,
+					End:   6,
+				},
+			},
+		},
+	},
+	{
 		input:  "",
 		fail:   true,
 		errMsg: "no expression found in input",
@@ -554,11 +574,6 @@ var testExpr = []struct {
 		input:  "1 unless 1",
 		fail:   true,
 		errMsg: "set operator \"unless\" not allowed in binary scalar expression",
-	},
-	{
-		input:  "1 !~ 1",
-		fail:   true,
-		errMsg: `unexpected character after '!': '~'`,
 	},
 	{
 		input:  "1 =~ 1",

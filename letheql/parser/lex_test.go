@@ -279,6 +279,9 @@ var tests = []struct {
 			}, {
 				input:    `@`,
 				expected: []Item{{AT, 0, `@`}},
+			}, {
+				input:    `!~`,
+				expected: []Item{{NEQ_REGEX, 0, `!~`}},
 			},
 		},
 	},
@@ -444,8 +447,6 @@ var tests = []struct {
 		tests: []testCase{
 			{
 				input: `=~`, fail: true,
-			}, {
-				input: `!~`, fail: true,
 			}, {
 				input: `!(`, fail: true,
 			}, {

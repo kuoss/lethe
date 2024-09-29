@@ -81,6 +81,16 @@ func (i ItemType) IsComparisonOperator() bool {
 	}
 }
 
+// IsFilterOperator returns whether the Item corresponds to a filter operator.
+func (i ItemType) IsFilterOperator() bool {
+	switch i {
+	case NEQ, NEQ_REGEX, PIPE_EQL, PIPE_REGEX:
+		return true
+	default:
+		return false
+	}
+}
+
 // IsSetOperator returns whether the Item corresponds to a set operator.
 func (i ItemType) IsSetOperator() bool {
 	switch i {
@@ -149,20 +159,22 @@ var ItemTypeStr = map[ItemType]string{
 	TIMES:         "x",
 	SPACE:         "<space>",
 
-	SUB:       "-",
-	ADD:       "+",
-	MUL:       "*",
-	MOD:       "%",
-	DIV:       "/",
-	EQLC:      "==",
-	NEQ:       "!=",
-	LTE:       "<=",
-	LSS:       "<",
-	GTE:       ">=",
-	GTR:       ">",
-	EQL_REGEX: "=~",
-	NEQ_REGEX: "!~",
-	POW:       "^",
+	SUB:        "-",
+	ADD:        "+",
+	MUL:        "*",
+	MOD:        "%",
+	DIV:        "/",
+	EQLC:       "==",
+	NEQ:        "!=",
+	LTE:        "<=",
+	LSS:        "<",
+	GTE:        ">=",
+	GTR:        ">",
+	EQL_REGEX:  "=~",
+	NEQ_REGEX:  "!~",
+	PIPE_EQL:   "|=",
+	PIPE_REGEX: "|~",
+	POW:        "^",
 }
 
 func init() {
@@ -381,8 +393,18 @@ func lexStatements(l *Lexer) stateFn {
 	case r == '!':
 		if t := l.next(); t == '=' {
 			l.emit(NEQ)
+		} else if t == '~' {
+			l.emit(NEQ_REGEX)
 		} else {
 			return l.errorf("unexpected character after '!': %q", t)
+		}
+	case r == '|':
+		if t := l.next(); t == '=' {
+			l.emit(PIPE_EQL)
+		} else if t == '~' {
+			l.emit(PIPE_REGEX)
+		} else {
+			return l.errorf("unexpected character after '|': %q", t)
 		}
 	case r == '<':
 		if t := l.peek(); t == '=' {
