@@ -472,7 +472,7 @@ func TestParser(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("#%d %s", i, tc.input), func(t *testing.T) {
 			expr, err := parser.ParseExpr(tc.input)
 			if tc.wantError == "" {
 				assert.NoError(t, err)

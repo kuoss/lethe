@@ -279,6 +279,9 @@ var tests = []struct {
 			}, {
 				input:    `@`,
 				expected: []Item{{AT, 0, `@`}},
+			}, {
+				input:    `!~`,
+				expected: []Item{{NEQ_REGEX, 0, `!~`}},
 			},
 		},
 	},

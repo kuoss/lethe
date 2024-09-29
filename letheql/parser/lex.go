@@ -81,6 +81,7 @@ func (i ItemType) IsComparisonOperator() bool {
 	}
 }
 
+// IsFilterOperator returns whether the Item corresponds to a filter operator.
 func (i ItemType) IsFilterOperator() bool {
 	switch i {
 	case NEQ, NEQ_REGEX, PIPE_EQL, PIPE_REGEX:
@@ -403,7 +404,7 @@ func lexStatements(l *Lexer) stateFn {
 		} else if t == '~' {
 			l.emit(PIPE_REGEX)
 		} else {
-			return l.errorf("unexpected character after '!': %q", t)
+			return l.errorf("unexpected character after '|': %q", t)
 		}
 	case r == '<':
 		if t := l.peek(); t == '=' {
