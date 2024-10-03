@@ -37,7 +37,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          args: --verbose
           version: v1.60
 
   licenses:
