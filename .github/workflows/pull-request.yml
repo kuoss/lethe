@@ -7,21 +7,6 @@ permissions:
   pull-requests: write
 
 jobs:
-
-
-  goimports:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Jerome1337/goimports-action@v1.0.3
-
-  go-vet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-go@v5
-      - uses: actions/checkout@v4
-      - run: go vet ./...
-
   lint:
     runs-on: ubuntu-latest
     steps:
