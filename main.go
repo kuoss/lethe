@@ -5,8 +5,8 @@ import (
 
 	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/config"
-	"github.com/kuoss/lethe/handler"
 	"github.com/kuoss/lethe/rotator"
+	"github.com/kuoss/lethe/router"
 	"github.com/kuoss/lethe/storage/fileservice"
 	"github.com/kuoss/lethe/storage/logservice"
 	"github.com/kuoss/lethe/storage/queryservice"
@@ -39,10 +39,10 @@ func main() {
 	rotator := rotator.New(cfg, fileService)
 	rotator.Start(time.Duration(20) * time.Minute) // 20 minutes
 
-	// run handler
-	h := handler.New(cfg, fileService, queryService)
+	// run router
+	h := router.New(cfg, fileService, queryService)
 	err = h.Run()
 	if err != nil {
-		logger.Fatalf("handler run err: %s", err.Error())
+		logger.Fatalf("router run err: %s", err.Error())
 	}
 }

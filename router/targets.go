@@ -1,4 +1,4 @@
-package handler
+package router
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) Target(c *gin.Context) {
+func (r *Router) Target(c *gin.Context) {
 	activeTargets := []gin.H{}
-	for _, target := range h.fileService.ListTargets() {
+	for _, target := range r.fileService.ListTargets() {
 		labelKey := "__meta_kubernetes_node_name"
 		if target.LogType == "pod" {
 			labelKey = "__meta_kubernetes_namespace"

@@ -18,7 +18,7 @@ func FuzzNodeLabelMatchEqual(f *testing.F) {
 		nodeSel := &model.LogSelector{
 			Name: "node",
 			LabelMatchers: []*labels.Matcher{
-				&labels.Matcher{
+				{
 					Type:  labels.MatchEqual,
 					Name:  "process",
 					Value: needle,
@@ -50,7 +50,7 @@ func FuzzNodeLabelMatchNotEqual(f *testing.F) {
 		nodeSel := &model.LogSelector{
 			Name: "node",
 			LabelMatchers: []*labels.Matcher{
-				&labels.Matcher{
+				{
 					Type:  labels.MatchNotEqual,
 					Name:  "process",
 					Value: needle,
@@ -79,7 +79,7 @@ func FuzzNodeLabelMatchRegexOnlyContains(f *testing.F) {
 	nodeSel := &model.LogSelector{
 		Name: "node",
 		LabelMatchers: []*labels.Matcher{
-			&labels.Matcher{
+			{
 				Type:  labels.MatchRegexp,
 				Name:  "process",
 				Value: ".+bar",
@@ -110,7 +110,7 @@ func FuzzNodeLabelMatchRegexNotEqualOnlyContains(f *testing.F) {
 	nodeSel := &model.LogSelector{
 		Name: "node",
 		LabelMatchers: []*labels.Matcher{
-			&labels.Matcher{
+			{
 				Type:  labels.MatchNotRegexp,
 				Name:  "process",
 				Value: ".+bar",

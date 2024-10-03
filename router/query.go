@@ -1,4 +1,4 @@
-package handler
+package router
 
 import (
 	"net/http"
@@ -8,20 +8,20 @@ import (
 	"github.com/kuoss/lethe/util"
 )
 
-func (h *Handler) Query(c *gin.Context) {
+func (r *Router) Query(c *gin.Context) {
 	qs := c.Query("query")
-	h.query(c, qs, model.TimeRange{})
+	r.query(c, qs, model.TimeRange{})
 }
 
-func (h *Handler) QueryRange(c *gin.Context) {
+func (r *Router) QueryRange(c *gin.Context) {
 	qs := c.Query("query")
 	start := c.Query("start")
 	end := c.Query("end")
-	h.query(c, qs, model.TimeRange{Start: util.FloatStringToTime(start), End: util.FloatStringToTime(end)})
+	r.query(c, qs, model.TimeRange{Start: util.FloatStringToTime(start), End: util.FloatStringToTime(end)})
 }
 
-func (h *Handler) query(c *gin.Context, qs string, tr model.TimeRange) {
-	result := h.queryService.Query(c.Request.Context(), qs, tr)
+func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
+	result := r.queryService.Query(c.Request.Context(), qs, tr)
 
 	// error
 	if result.Err != nil {
