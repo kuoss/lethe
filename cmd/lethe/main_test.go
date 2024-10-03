@@ -26,6 +26,11 @@ func TestMustFileService(t *testing.T) {
 }
 
 func TestStartRotator(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
 	version := "test-version"
 	cfg := mustConfig(version)
 	fileService := mustFileService(cfg)
