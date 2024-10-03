@@ -3,19 +3,24 @@ package main
 import (
 	"testing"
 
+	"github.com/kuoss/common/tester"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMustConfig(t *testing.T) {
-	version := "test-version"
+	version := "test"
 	cfg := mustConfig(version)
 	assert.NotEmpty(t, cfg)
 	assert.Equal(t, version, cfg.Version)
 }
 
 func TestMustFileService(t *testing.T) {
-	version := "test-version"
-	cfg := mustConfig(version)
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	cfg := mustConfig("test")
 	fileService := mustFileService(cfg)
 	assert.NotNil(t, fileService, "Expected file service to be non-nil")
 }
