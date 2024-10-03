@@ -40,8 +40,7 @@ func New(version string) (*Config, error) {
 	v.SetDefault("retention.time", "15d")
 	v.SetDefault("retention.size", "1000g")
 
-	err := v.ReadInConfig()
-	if err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			logger.Warnf("Configuration lethe.yaml is not provided\n")
 		} else {

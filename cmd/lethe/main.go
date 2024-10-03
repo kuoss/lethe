@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kuoss/common/logger"
@@ -37,9 +38,9 @@ func main() {
 func mustConfig(version string) *config.Config {
 	cfg, err := config.New(version)
 	if err != nil {
-		logger.Fatalf("Failed to create new config: %s", err.Error())
+		panic(fmt.Errorf("failed to create new config: %v", err))
 	}
-	logger.Infof("Loaded configuration: %+v", cfg)
+	logger.Infof("Loaded configuration: %v", cfg)
 	return cfg
 }
 
