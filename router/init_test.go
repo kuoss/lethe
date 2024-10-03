@@ -1,4 +1,4 @@
-package handler
+package router
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	handler1 *Handler
+	router1 *Router
 )
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 	}
 	logService := logservice.New(fileService)
 	queryService := queryservice.New(logService)
-	handler1 = New(cfg, fileService, queryService)
+	router1 = New(cfg, fileService, queryService)
 }
 
 func testGET(url string) (code int, body string) {
@@ -41,6 +41,6 @@ func testGET(url string) (code int, body string) {
 	if err != nil {
 		panic(err)
 	}
-	handler1.router.ServeHTTP(w, req)
+	router1.ginRouter.ServeHTTP(w, req)
 	return w.Code, w.Body.String()
 }

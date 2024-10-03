@@ -1,4 +1,4 @@
-package handler
+package router
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) Metadata(c *gin.Context) {
+func (r *Router) Metadata(c *gin.Context) {
 	targets := []string{}
-	dirs := h.fileService.ListTargets()
+	dirs := r.fileService.ListTargets()
 
 	for _, d := range dirs {
 		var key string

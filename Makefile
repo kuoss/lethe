@@ -1,6 +1,5 @@
-PROMETHEUS_VER := v2.42.0
-VERSION := v0.2.1
-IMAGE := ghcr.io/kuoss/lethe:$(VERSION)
+COVERAGE_THRESHOLD = 65
+PROMETHEUS_VERSION := v2.42.0
 
 install-dev:
 	go mod tidy
@@ -9,49 +8,45 @@ install-dev:
 run-dev:
 	air
 
+.PHONY: test
 test:
-	hack/test-failfast.sh
+	go test -race --failfast ./...
 
-test-win:
-	.\hack\test-failfast.bat
 
-cover:
-	hack/test-cover.sh
+## checks
+.PHONY: checks
+checks: cover build lint licenses
 
-misspell:
-	hack/misspell.sh
+.PHONY: cover
+cover: test
+	@echo "Running tests and checking coverage..."
+	@go test -coverprofile=coverage.out ./...
+	@cat coverage.out | grep -v yaccpar > coverage2.out
+	@go tool cover -func=coverage2.out | grep total | awk '{print $$3}' | sed 's/%//' | \
+	awk -v threshold=$(COVERAGE_THRESHOLD) '{ if ($$1 < threshold) { print "Coverage is below threshold: " $$1 "% < " threshold "%"; exit 1 } else { print "Coverage is sufficient: " $$1 "%" } }'
 
-gocyclo:
-	hack/gocyclo.sh
-
-checks:
-	hack/checks.sh
-
-# go build
+.PHONY: build
 build:
-	go build -ldflags="-X 'main.Version=$(VERSION)'" -o bin/lethe
+	go build -o bin/lethe
 
-# docker build & push
+.PHONY: lint
+lint:
+	$(GOLANGCI_LINT) run
+
+.PHONY: licenses
+licenses: go-licenses
+	$(GO_LICENSES) check .
+
+
+## docker
 docker: 
-	docker build -t $(IMAGE) --build-arg VERSION=$(VERSION) . && docker push $(IMAGE)
+	docker build -t $(IMAGE) --build-arg VERSION=$(VERSION) .
 
 
-mock:
-	hack/mock/restart.sh
-
-mock-status:
-	hack/mock/status.sh
-
-mock-logs:
-	hack/mock/logs.sh
-
-mock-delete:
-	hack/mock/delete.sh
-
-## parser
+#### parser
 .PHONY: parser-clone
 parser-clone:
-	git clone -b $(PROMETHEUS_VER) --depth=1 https://github.com/prometheus/prometheus.git
+	git clone -b $(PROMETHEUS_VERSION) --depth=1 https://github.com/prometheus/prometheus.git
 	rm -rf letheql/parser
 	mv prometheus/promql/parser letheql/
 	rm -rf prometheus
@@ -66,6 +61,7 @@ parser-test:
 	go test -failfast github.com/kuoss/lethe/letheql/parser
 	go test -failfast github.com/kuoss/lethe/letheql/parser_test
 
+
 ##@ Dependencies
 
 ## Location to install dependencies to
@@ -76,20 +72,27 @@ $(LOCALBIN):
 ## Tool Binaries
 GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 GOYACC ?= $(LOCALBIN)/goyacc
+GO_LICENSES ?= $(LOCALBIN)/go-licenses
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v1.60.2
-GOYACC_VERSION := v0.3.0
+GOYACC_VERSION ?= v0.3.0
+GO_LICENSES_VERSION ?= v1.6.0
 
 .PHONY: golangci-lint
-golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
+golangci-lint: $(GOLANGCI_LINT)
 $(GOLANGCI_LINT): $(LOCALBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
 
 .PHONY: goyacc
-goyacc: $(GOYACC) ## Download goyacc locally if necessary.
+goyacc: $(GOYACC)
 $(GOYACC): $(LOCALBIN)
 	$(call go-install-tool,$(GOYACC),golang.org/x/tools/cmd/goyacc,$(GOYACC_VERSION))
+
+.PHONY: go-licenses
+go-licenses: $(GO_LICENSES)
+$(GO_LICENSES): $(LOCALBIN)
+	$(call go-install-tool,$(GO_LICENSES),github.com/google/go-licenses,$(GO_LICENSES_VERSION))
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary
