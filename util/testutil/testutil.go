@@ -51,7 +51,7 @@ func ResetLogData() {
 		}
 	}
 	fmt.Printf("fill   logDataPath: %s\n", logDataPath)
-	err := copyRecursively("./util/testutil/log", logDataPath)
+	err := copyRecursively("./testdata/log", logDataPath)
 	if err != nil {
 		panic(err)
 	}
