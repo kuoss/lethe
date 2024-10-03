@@ -13,9 +13,9 @@ test:
 	go test -race --failfast ./...
 
 
-## checks
+#### checks
 .PHONY: checks
-checks: cover build lint licenses
+checks: cover build lint licenses vulncheck
 
 .PHONY: cover
 cover: test
@@ -30,16 +30,21 @@ build:
 	go build -o bin/lethe
 
 .PHONY: lint
-lint:
+lint: golangci-lint
 	$(GOLANGCI_LINT) run
 
 .PHONY: licenses
 licenses: go-licenses
 	$(GO_LICENSES) check .
 
+.PHONY: vulncheck
+vulncheck: govulncheck
+	$(GOVULNCHECK) ./...
 
-## docker
-docker: 
+
+#### docker
+.PHONY: docker
+docker:
 	docker build -t $(IMAGE) --build-arg VERSION=$(VERSION) .
 
 
@@ -73,16 +78,23 @@ $(LOCALBIN):
 GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 GOYACC ?= $(LOCALBIN)/goyacc
 GO_LICENSES ?= $(LOCALBIN)/go-licenses
+GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v1.60.2
 GOYACC_VERSION ?= v0.3.0
 GO_LICENSES_VERSION ?= v1.6.0
+GOVULNCHECK_VERSION ?= latest
 
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT)
 $(GOLANGCI_LINT): $(LOCALBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+
+.PHONY: govulncheck
+govulncheck: $(GOVULNCHECK)
+$(GOVULNCHECK): $(LOCALBIN)
+	$(call go-install-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck,$(GOVULNCHECK_VERSION))
 
 .PHONY: goyacc
 goyacc: $(GOYACC)
