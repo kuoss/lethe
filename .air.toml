@@ -4,9 +4,9 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ."
+  cmd = "go build -o ./tmp/main ./cmd/lethe"
   delay = 1000
-  exclude_dir = ["tools", "cli", "testutil/log"]
+  exclude_dir = ["util/testutil/log", "util/testutil/ndjsonlog"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false

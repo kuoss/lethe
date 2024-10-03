@@ -1,12 +1,10 @@
+IMG ?= ghcr.io/kuoss/lethe:development
 COVERAGE_THRESHOLD = 65
 PROMETHEUS_VERSION := v2.42.0
 
-install-dev:
-	go mod tidy
-	which air || go install github.com/cosmtrek/air@latest
-
-run-dev:
-	air
+.PHONY: dev
+dev: air
+	$(AIR)
 
 .PHONY: test
 test:
@@ -15,7 +13,7 @@ test:
 
 #### checks
 .PHONY: checks
-checks: cover build lint licenses vulncheck
+checks: cover lint licenses vulncheck build docker-build
 
 .PHONY: cover
 cover: test
@@ -23,11 +21,7 @@ cover: test
 	@go test -coverprofile=coverage.out ./...
 	@cat coverage.out | grep -v yaccpar > coverage2.out
 	@go tool cover -func=coverage2.out | grep total | awk '{print $$3}' | sed 's/%//' | \
-	awk -v threshold=$(COVERAGE_THRESHOLD) '{ if ($$1 < threshold) { print "Coverage is below threshold: " $$1 "% < " threshold "%"; exit 1 } else { print "Coverage is sufficient: " $$1 "%" } }'
-
-.PHONY: build
-build:
-	go build -o bin/lethe
+	awk -v threshold=$(COVERAGE_THRESHOLD) '{ if ($$1 < threshold) { print "Coverage is below threshold: " $$1 "% < " threshold "%"; exit 1 } else { print "Coverage is sufficient: " $$1 "% (>=" threshold "%)" } }'
 
 .PHONY: lint
 lint: golangci-lint
@@ -35,17 +29,20 @@ lint: golangci-lint
 
 .PHONY: licenses
 licenses: go-licenses
-	$(GO_LICENSES) check .
+	$(GO_LICENSES) check ./...
 
 .PHONY: vulncheck
 vulncheck: govulncheck
 	$(GOVULNCHECK) ./...
 
+## build
+.PHONY: build
+build:
+	go build -o bin/lethe ./cmd/lethe/
 
-#### docker
-.PHONY: docker
-docker:
-	docker build -t $(IMAGE) --build-arg VERSION=$(VERSION) .
+.PHONY: docker-build
+docker-build:
+	docker build -t $(IMG) --build-arg VERSION=development .
 
 
 #### parser
@@ -75,16 +72,23 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
 ## Tool Binaries
+AIR ?= $(LOCALBIN)/air
 GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 GOYACC ?= $(LOCALBIN)/goyacc
 GO_LICENSES ?= $(LOCALBIN)/go-licenses
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 
 ## Tool Versions
+AIR_VERSION ?= latest
 GOLANGCI_LINT_VERSION ?= v1.60.2
 GOYACC_VERSION ?= v0.3.0
 GO_LICENSES_VERSION ?= v1.6.0
 GOVULNCHECK_VERSION ?= latest
+
+.PHONY: air
+air: $(AIR)
+$(AIR): $(LOCALBIN)
+	$(call go-install-tool,$(AIR),github.com/air-verse/air,$(AIR_VERSION))
 
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT)

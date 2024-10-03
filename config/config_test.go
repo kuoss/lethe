@@ -1,122 +1,134 @@
 package config
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/spf13/afero"
+	"github.com/kuoss/common/tester"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDefaultNew(t *testing.T) {
-	cfg, err := New("test")
-	if err != nil {
-		t.Error(err)
-	}
-	expected := &Config{
+func TestNew_default(t *testing.T) {
+	want := &Config{
+		Version:                 "test",
 		limit:                   1000,
 		logDataPath:             "/var/data/log",
 		retentionSize:           1000 * 1024 * 1024 * 1024,
 		retentionTime:           15 * 24 * time.Hour,
 		retentionSizingStrategy: "file",
 		timeout:                 20 * time.Second,
-		version:                 "test",
 		webListenAddress:        ":6060",
 	}
-	assert.Equal(t, expected, cfg)
+
+	got, err := New("test")
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
 }
 
-var customConfigYaml = `
-retention:
-  time: 1d
-  size: 200m
-storage:
-  driver: filesystem
-  log_data_path: /data/log
-`
+func TestNew_example(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/etc/lethe.example.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
 
-func TestNewFromFile(t *testing.T) {
-
-	appFS := afero.NewOsFs()
-	err := afero.WriteFile(appFS, filepath.Join("..", "etc", "lethe.yaml"), []byte(customConfigYaml), 0644)
-	if err != nil {
-		t.Error(err)
-	}
-	defer os.Remove(filepath.Join("..", "etc", "lethe.yaml"))
-
-	path := filepath.Join("..", "etc", "lethe.yaml")
-	_, err = appFS.Stat(path)
-
-	if os.IsNotExist(err) {
-		t.Errorf("file %q does not exist.\n", path)
+	want := &Config{
+		Version:                 "example",
+		limit:                   1000,
+		logDataPath:             "/data/log",
+		retentionSize:           100 * 1024 * 1024,
+		retentionTime:           24 * time.Hour,
+		retentionSizingStrategy: "file",
+		timeout:                 20 * time.Second,
+		webListenAddress:        ":6060",
 	}
 
-	cfg, err := New("test")
-	if err != nil {
-		t.Error(err)
-	}
-	expected := &Config{
+	got, err := New("example")
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+}
+
+func TestNew_ok1(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.ok1.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	want := &Config{
+		Version:                 "ok1",
 		limit:                   1000,
 		logDataPath:             "/data/log",
 		retentionSize:           200 * 1024 * 1024,
 		retentionTime:           24 * time.Hour,
 		retentionSizingStrategy: "file",
 		timeout:                 20 * time.Second,
-		version:                 "test",
 		webListenAddress:        ":6060",
 	}
-	assert.Equal(t, expected, cfg)
 
+	got, err := New("ok1")
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
 }
 
-var customConfigYaml2 = `
-retention:
-  size: 300m
-storage:
-  driver: filesystem
-  log_data_path: /var/data/log
-`
+func TestNew_ok2(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.ok2.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
 
-func TestNewFromFilePartial(t *testing.T) {
-
-	appFS := afero.NewOsFs()
-	err := afero.WriteFile(appFS, filepath.Join("..", "etc", "lethe.yaml"), []byte(customConfigYaml2), 0644)
-	if err != nil {
-		t.Error(err)
-	}
-	defer os.Remove(filepath.Join("..", "etc", "lethe.yaml"))
-
-	path := filepath.Join("..", "etc", "lethe.yaml")
-	_, err = appFS.Stat(path)
-
-	if os.IsNotExist(err) {
-		t.Errorf("file %q does not exist.\n", path)
-	}
-
-	cfg, err := New("test")
-	if err != nil {
-		t.Error(err)
-	}
-	expected := &Config{
+	want := &Config{
+		Version:                 "test2",
 		limit:                   1000,
 		logDataPath:             "/var/data/log",
 		retentionSize:           300 * 1024 * 1024,
 		retentionTime:           15 * 24 * time.Hour, // Only retentionTime feild is initialized with default value
 		retentionSizingStrategy: "file",
 		timeout:                 20 * time.Second,
-		version:                 "test",
 		webListenAddress:        ":6060",
 	}
-	assert.Equal(t, expected, cfg)
+
+	got, err := New("test2")
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
 }
 
-func TestExportedFunction(t *testing.T) {
+func TestNew_error1(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	got, err := New("error")
+	assert.EqualError(t, err, `readInConfig err: While parsing config: yaml: did not find expected key`)
+	assert.Nil(t, got)
+}
+
+func TestNew_error2(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.error2.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	got, err := New("error")
+	assert.EqualError(t, err, "stringToBytes err: cannot accept unit '0' in '200''. allowed units: [k, m, g]")
+	assert.Nil(t, got)
+}
+
+func TestNew_error3(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.error3.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	got, err := New("error")
+	assert.EqualError(t, err, "getDurationFromAge err: not a valid duration string: \"1\"")
+	assert.Nil(t, got)
+}
+
+func TestFunctions(t *testing.T) {
 	cfg, err := New("test")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
+
+	assert.Equal(t, "test", cfg.Version)
 
 	assert.Equal(t, 1000, cfg.Limit())
 
@@ -135,7 +147,8 @@ func TestExportedFunction(t *testing.T) {
 	assert.Equal(t, 1*24*time.Hour, cfg.RetentionTime())  // 1 days
 	cfg.SetRetentionTime(15 * 24 * time.Hour)             // 15 day
 
+	assert.Equal(t, 20*time.Second, cfg.Timeout())
+
 	assert.Equal(t, "file", cfg.RetentionSizingStrategy())
-	assert.Equal(t, "test", cfg.Version())
 	assert.Equal(t, ":6060", cfg.WebListenAddress())
 }

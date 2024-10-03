@@ -2,6 +2,7 @@ package fileservice
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/kuoss/lethe/config"
 	storagedriver "github.com/kuoss/lethe/storage/driver"
@@ -14,14 +15,13 @@ type FileService struct {
 }
 
 func New(cfg *config.Config) (*FileService, error) {
-	driver, err := factory.Get("filesystem", map[string]interface{}{"RootDirectory": cfg.LogDataPath()})
+	driver, err := factory.Get("filesystem", map[string]any{"RootDirectory": cfg.LogDataPath()})
 	if err != nil {
 		return nil, fmt.Errorf("factory.Get err: %w", err)
 	}
 
-	err = driver.Mkdir(cfg.LogDataPath())
-	if err != nil {
-		return nil, fmt.Errorf("mkdirAll err: %w", err)
+	if err := os.MkdirAll(cfg.LogDataPath(), os.ModePerm); err != nil {
+		return nil, fmt.Errorf("os.MkdirAll err: %w", err)
 	}
 
 	return &FileService{cfg, driver}, nil
