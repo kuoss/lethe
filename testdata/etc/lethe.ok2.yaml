@@ -1,0 +1,5 @@
+retention:
+  size: 300m
+storage:
+  driver: filesystem
+  log_data_path: /var/data/log

@@ -5,13 +5,13 @@ go 1.20
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/fscrypt v0.3.4
-	github.com/kuoss/common v0.1.3
+	github.com/kuoss/common v0.1.6
 	github.com/prometheus/common v0.43.0
 	github.com/prometheus/prometheus v0.43.0
 	github.com/spf13/afero v1.8.2
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.11.0
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.18.0
 )
 

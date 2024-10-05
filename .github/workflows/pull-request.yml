@@ -19,8 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-      - run: go test ./... -coverprofile=coverprofile
-      - run: cat coverprofile | grep -v yaccpar > coverage.out
+      - run: go test ./... -coverprofile=coverage.out
+      - run: sed -i '/yaccpar/d' coverage.out
       - uses: codecov/codecov-action@v3
       - run: go install github.com/mattn/goveralls@latest
       - run: goveralls -coverprofile=coverage.out -service=github
@@ -44,8 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-      - run: go install github.com/google/go-licenses@v1.6.0    
-      - run: go-licenses check .
+      - run: go install github.com/google/go-licenses@v1.6.0
+      - run: go-licenses check ./...
 
   docker-build:
     runs-on: ubuntu-latest

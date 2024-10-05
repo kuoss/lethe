@@ -12,13 +12,14 @@ import (
 )
 
 type Config struct {
+	Version string
+
 	limit                   int
 	logDataPath             string
 	retentionSize           int
 	retentionTime           time.Duration
 	retentionSizingStrategy string
 	timeout                 time.Duration
-	version                 string
 	webListenAddress        string
 }
 
@@ -39,35 +40,34 @@ func New(version string) (*Config, error) {
 	v.SetDefault("retention.time", "15d")
 	v.SetDefault("retention.size", "1000g")
 
-	err := v.ReadInConfig()
-	if err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logger.Infof("Configuration lethe.yaml is not provided\n")
+			logger.Warnf("Configuration lethe.yaml is not provided\n")
 		} else {
 			// Config file was found but another error was produced
-			return &Config{}, fmt.Errorf("readInConfig err: %w", err)
+			return nil, fmt.Errorf("readInConfig err: %w", err)
 		}
 	}
 
 	retentionSize, err := util.StringToBytes(v.GetString("retention.size"))
 	if err != nil {
-		return &Config{}, fmt.Errorf("stringToBytes err: %w", err)
+		return nil, fmt.Errorf("stringToBytes err: %w", err)
 	}
 
 	retentionTimeString := v.GetString("retention.time")
 	retentionTime, err := util.GetDurationFromAge(retentionTimeString)
 	if err != nil {
-		return &Config{}, fmt.Errorf("getDurationFromAge err: %w", err)
+		return nil, fmt.Errorf("getDurationFromAge err: %w", err)
 	}
 
 	return &Config{
+		Version:                 version,
 		limit:                   1000,
 		logDataPath:             v.GetString("storage.log_data_path"),
 		retentionSize:           retentionSize, // 1000g
 		retentionTime:           retentionTime, // 15d
 		retentionSizingStrategy: v.GetString("retention.sizingStrategy"),
 		timeout:                 v.GetDuration("timeout"),
-		version:                 version,
 		webListenAddress:        v.GetString("web.listen_address"),
 	}, nil
 }
@@ -103,10 +103,6 @@ func (c *Config) RetentionSizingStrategy() string {
 
 func (c *Config) Timeout() time.Duration {
 	return c.timeout
-}
-
-func (c *Config) Version() string {
-	return c.version
 }
 
 func (c *Config) WebListenAddress() string {

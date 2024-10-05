@@ -1,0 +1,6 @@
+retention:
+  size: 200m
+  time: 1d
+storage:
+  driver: filesystem
+  log_data_path: /tmp
