@@ -106,8 +106,7 @@ func TestDeleteByAge(t *testing.T) {
 			defer clock.SetPlaygroundMode(false)
 
 			_, cleanup := tester.MustSetupDir(t, map[string]string{
-				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-				"@/testdata/log":                 "data/log",
+				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
 
@@ -212,8 +211,7 @@ func TestDeleteBySize(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.retentionSize), func(t *testing.T) {
 			_, cleanup := tester.MustSetupDir(t, map[string]string{
-				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-				"@/testdata/log":                 "data/log",
+				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
 

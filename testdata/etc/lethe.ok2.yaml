@@ -1,5 +1,5 @@
 retention:
-  size: 300Gi
+  size: 300GB
 storage:
   driver: filesystem
-  logDataPath: /var/data/log
+  log_data_path: /var/data/log

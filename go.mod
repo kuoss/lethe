@@ -3,6 +3,7 @@ module github.com/kuoss/lethe
 go 1.20
 
 require (
+	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/fscrypt v0.3.4
 	github.com/kuoss/common v0.1.6
@@ -12,7 +13,6 @@ require (
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.18.0
-	k8s.io/apimachinery v0.26.2
 )
 
 require (
@@ -38,6 +38,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -67,7 +68,6 @@ require (
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
-	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

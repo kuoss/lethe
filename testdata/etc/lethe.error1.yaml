@@ -1,5 +1,5 @@
 :
-  size: 200Mi
+  size: 200MB
   time: 1d
 storage:
   driver: filesystem

@@ -14,7 +14,7 @@ type Rotator struct {
 }
 
 func New(cfg *config.Config, fileService *fileservice.FileService) *Rotator {
-	return &Rotator{cfg.Rotator.Interval, fileService}
+	return &Rotator{cfg.Retention.RotationInterval, fileService}
 }
 
 func (r *Rotator) Start() {

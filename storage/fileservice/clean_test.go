@@ -11,8 +11,7 @@ import (
 
 func TestClean(t *testing.T) {
 	tmpDir, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-		"@/testdata/log":                 "data/log",
+		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
 

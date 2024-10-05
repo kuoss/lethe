@@ -49,8 +49,7 @@ func TestDirSize(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
 			_, cleanup := tester.MustSetupDir(t, map[string]string{
-				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-				"@/testdata/log":                 "data/log",
+				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
 			cfg, err := config.New("test")
@@ -114,8 +113,7 @@ func TestList(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run("", func(t *testing.T) {
 			_, cleanup := tester.MustSetupDir(t, map[string]string{
-				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-				"@/testdata/log":                 "data/log",
+				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
 			cfg, err := config.New("test")
@@ -137,8 +135,7 @@ func TestList(t *testing.T) {
 
 func TestListLogDirs(t *testing.T) {
 	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-		"@/testdata/log":                 "data/log",
+		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
 	cfg, err := config.New("test")
@@ -157,8 +154,7 @@ func TestListLogDirs(t *testing.T) {
 
 func TestListLogDirsWithSize(t *testing.T) {
 	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-		"@/testdata/log":                 "data/log",
+		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
 	cfg, err := config.New("test")
@@ -177,8 +173,7 @@ func TestListLogDirsWithSize(t *testing.T) {
 
 func TestListTargets(t *testing.T) {
 	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-		"@/testdata/log":                 "data/log",
+		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
 	cfg, err := config.New("test")

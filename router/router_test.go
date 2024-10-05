@@ -15,8 +15,7 @@ import (
 
 func newRouter(t *testing.T) (*Router, func()) {
 	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
-		"@/testdata/log":                 "data/log",
+		"@/testdata/log": "data/log",
 	})
 	cfg, err := config.New("test")
 	require.NoError(t, err)

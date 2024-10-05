@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/alecthomas/units"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/viper"
 
 	"github.com/kuoss/common/logger"
 	_ "github.com/kuoss/lethe/storage/driver/filesystem"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 type Config struct {
@@ -19,7 +20,6 @@ type Config struct {
 
 	Query     Query
 	Retention Retention
-	Rotator   Rotator
 	Storage   Storage
 	Web       Web
 }
@@ -30,13 +30,10 @@ type Query struct {
 }
 
 type Retention struct {
-	SizingStrategy string
-	Size           int64
-	Time           time.Duration
-}
-
-type Rotator struct {
-	Interval time.Duration
+	Size             int64
+	Time             time.Duration
+	SizingStrategy   string
+	RotationInterval time.Duration
 }
 
 type Storage struct {
@@ -57,12 +54,12 @@ func New(version string) (*Config, error) {
 	// Set default values
 	v.SetDefault("query.limit", 1000)
 	v.SetDefault("query.timeout", "20s")
-	v.SetDefault("retention.size", "1000Gi")
+	v.SetDefault("retention.size", 0)
 	v.SetDefault("retention.time", "15d")
-	v.SetDefault("retention.sizingStrategy", "file")
-	v.SetDefault("rotator.interval", "20s")
-	v.SetDefault("storage.logDataPath", "/data/log")
-	v.SetDefault("web.listenAddress", ":6060")
+	v.SetDefault("retention.sizing_strategy", "file")
+	v.SetDefault("retention.rotation_interval", "20s")
+	v.SetDefault("storage.log_data_path", "data/log")
+	v.SetDefault("web.listen_address", ":6060")
 
 	// Read the configuration file, if it exists
 	if err := v.ReadInConfig(); err != nil {
@@ -77,7 +74,7 @@ func New(version string) (*Config, error) {
 	}
 	// units
 	retentionSizeString := v.GetString("retention.size")
-	retentionSize, err := resource.ParseQuantity(retentionSizeString)
+	retentionSize, err := parseSize(retentionSizeString)
 	if err != nil {
 		return nil, fmt.Errorf("parse retention size err: %w, size: %s", err, retentionSizeString)
 	}
@@ -95,18 +92,16 @@ func New(version string) (*Config, error) {
 			Timeout: v.GetDuration("query.timeout"),
 		},
 		Retention: Retention{
-			Size:           retentionSize.Value(),
-			Time:           time.Duration(retentionTime),
-			SizingStrategy: v.GetString("retention.sizingStrategy"),
-		},
-		Rotator: Rotator{
-			Interval: v.GetDuration("rotator.interval"),
+			Size:             int64(retentionSize),
+			Time:             time.Duration(retentionTime),
+			SizingStrategy:   v.GetString("retention.sizing_strategy"),
+			RotationInterval: v.GetDuration("retention.rotation_interval"),
 		},
 		Storage: Storage{
-			LogDataPath: v.GetString("storage.logDataPath"),
+			LogDataPath: v.GetString("storage.log_data_path"),
 		},
 		Web: Web{
-			ListenAddress: v.GetString("web.listenAddress"),
+			ListenAddress: v.GetString("web.listen_address"),
 		},
 	}, nil
 }
@@ -119,4 +114,27 @@ func showFileContent(filePath string) error {
 	}
 	fmt.Println(string(b))
 	return nil
+}
+
+func parseSize(sizeString string) (int64, error) {
+	// Handle legacy units and ensure the size string is uppercase for parsing
+	unitReplacements := map[string]string{
+		"k": "KB",
+		"m": "MB",
+		"g": "GB",
+	}
+
+	// Replace legacy units
+	for oldUnit, newUnit := range unitReplacements {
+		if strings.HasSuffix(sizeString, oldUnit) {
+			sizeString = strings.ReplaceAll(sizeString, oldUnit, newUnit)
+		}
+	}
+
+	// Parse the size string using units package
+	size, err := units.ParseBase2Bytes(sizeString)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse size '%s': %w", sizeString, err)
+	}
+	return int64(size), nil
 }
