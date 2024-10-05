@@ -3,4 +3,4 @@ retention:
   time: 1d
 storage:
   driver: filesystem
-  log_data_path: /data/log
+  log_data_path: /tmp/log

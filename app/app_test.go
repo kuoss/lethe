@@ -11,17 +11,26 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
-	})
+	_, cleanup := tester.SetupDir(t, map[string]string{})
 	defer cleanup()
 
 	wantConfig := &config.Config{
-		Version:   "test",
-		Query:     config.Query{Limit: 1000, Timeout: 20000000000},
-		Retention: config.Retention{SizingStrategy: "file", Size: 214748364800, Time: 86400000000000, RotationInterval: 20 * time.Second},
-		Storage:   config.Storage{LogDataPath: "/tmp"},
-		Web:       config.Web{ListenAddress: ":6060"},
+		Version: "test",
+		Query: config.Query{
+			Limit:   1000,
+			Timeout: 20000000000,
+		},
+		Retention: config.Retention{
+			Size:             0,
+			Time:             15 * 24 * time.Hour, // 15d
+			SizingStrategy:   "file",
+			RotationInterval: 20 * time.Second,
+		},
+		Storage: config.Storage{LogDataPath: "data/log"},
+		Web: config.Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	app, err := New("test")
@@ -54,6 +63,19 @@ func TestNew_error2(t *testing.T) {
 	require.Nil(t, app)
 }
 
+func TestRun_error4(t *testing.T) {
+	_, cleanup := tester.SetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.error4.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	app, err := New("test")
+	require.NoError(t, err)
+
+	err = app.Run()
+	require.EqualError(t, err, "listen tcp: address foo: missing port in address")
+}
+
 func TestRun_smokeTest(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{})
 	defer cleanup()
@@ -83,17 +105,4 @@ func TestRun_smokeTest(t *testing.T) {
 		t.Fatalf("panic occurred: %v", p)
 	}
 	require.True(t, done)
-}
-
-func TestRun_error4(t *testing.T) {
-	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error4.yaml": "etc/lethe.yaml",
-	})
-	defer cleanup()
-
-	app, err := New("test")
-	require.NoError(t, err)
-
-	err = app.Run()
-	require.EqualError(t, err, "listen tcp: address foo: missing port in address")
 }

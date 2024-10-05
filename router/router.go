@@ -25,6 +25,7 @@ func New(cfg *config.Config, fileService *fileservice.FileService, queryService 
 }
 
 func (r *Router) setupRouter() {
+	// gin.SetMode(r.config.Web.GinMode)
 	ginRouter := gin.Default()
 
 	ginRouter.GET("/-/healthy", r.Healthy)

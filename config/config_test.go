@@ -22,7 +22,10 @@ func TestNew(t *testing.T) {
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "data/log"},
-		Web:     Web{ListenAddress: ":6060"},
+		Web: Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	got, err := New("test")
@@ -46,7 +49,10 @@ func TestNew_example(t *testing.T) {
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "/data/log"},
-		Web:     Web{ListenAddress: ":6060"},
+		Web: Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	got, err := New("example")
@@ -69,8 +75,11 @@ func TestNew_ok1(t *testing.T) {
 			SizingStrategy:   "file",
 			RotationInterval: 20 * time.Second,
 		},
-		Storage: Storage{LogDataPath: "/data/log"},
-		Web:     Web{ListenAddress: ":6060"},
+		Storage: Storage{LogDataPath: "/tmp/log"},
+		Web: Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	got, err := New("ok1")
@@ -93,8 +102,11 @@ func TestNew_ok2(t *testing.T) {
 			SizingStrategy:   "file",
 			RotationInterval: 20 * time.Second,
 		},
-		Storage: Storage{LogDataPath: "/var/data/log"},
-		Web:     Web{ListenAddress: ":6060"},
+		Storage: Storage{LogDataPath: "/tmp/log"},
+		Web: Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	got, err := New("test2")
@@ -117,8 +129,11 @@ func TestNew_legacy(t *testing.T) {
 			SizingStrategy:   "file",
 			RotationInterval: 20 * time.Second,
 		},
-		Storage: Storage{LogDataPath: "/data/log"},
-		Web:     Web{ListenAddress: ":6060"},
+		Storage: Storage{LogDataPath: "/tmp/log"},
+		Web: Web{
+			ListenAddress: ":6060",
+			GinMode:       "release",
+		},
 	}
 
 	got, err := New("test2")

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/units"
+	"github.com/gin-gonic/gin"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/viper"
 
@@ -42,6 +43,7 @@ type Storage struct {
 
 type Web struct {
 	ListenAddress string
+	GinMode       string
 }
 
 func New(version string) (*Config, error) {
@@ -60,6 +62,7 @@ func New(version string) (*Config, error) {
 	v.SetDefault("retention.rotation_interval", "20s")
 	v.SetDefault("storage.log_data_path", "data/log")
 	v.SetDefault("web.listen_address", ":6060")
+	v.SetDefault("web.gin_mode", gin.ReleaseMode) // "release"
 
 	// Read the configuration file, if it exists
 	if err := v.ReadInConfig(); err != nil {
@@ -102,6 +105,7 @@ func New(version string) (*Config, error) {
 		},
 		Web: Web{
 			ListenAddress: v.GetString("web.listen_address"),
+			GinMode:       v.GetString("web.gin_mode"),
 		},
 	}, nil
 }
