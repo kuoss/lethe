@@ -30,29 +30,3 @@ func TestNew(t *testing.T) {
 	require.NotEmpty(t, app.router)
 	require.Equal(t, wantConfig, app.Config)
 }
-
-// func TestMustConfig(t *testing.T) {
-
-// }
-
-// func TestMustFileService(t *testing.T) {
-// 	defer cleanup()
-
-// 	cfg := mustConfig("test")
-// 	fileService := mustFileService(cfg)
-// 	require.NotNil(t, fileService, "Expected file service to be non-nil")
-// }
-
-// func TestStartRotator(t *testing.T) {
-// 	_, cleanup := tester.MustSetupDir(t, map[string]string{
-// 		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
-// 	})
-// 	defer cleanup()
-
-// 	version := "test-version"
-// 	cfg := mustConfig(version)
-// 	fileService := mustFileService(cfg)
-// 	require.NotPanics(t, func() {
-// 		startRotator(cfg, fileService)
-// 	}, "Expected startRotator to not panic")
-// }
