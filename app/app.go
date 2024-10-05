@@ -53,8 +53,5 @@ func New(version string) (*App, error) {
 
 func (a App) Run() error {
 	a.rotator.Start()
-	if err := a.router.Run(); err != nil {
-		return fmt.Errorf("failed to run router: %w", err)
-	}
-	return nil
+	return a.router.Run()
 }

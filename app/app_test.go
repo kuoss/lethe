@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -51,4 +52,48 @@ func TestNew_error2(t *testing.T) {
 	app, err := New("test")
 	require.Error(t, err)
 	require.Nil(t, app)
+}
+
+func TestRun_smokeTest(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{})
+	defer cleanup()
+
+	app, err := New("test")
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
+	defer cancel()
+	panicChan := make(chan interface{}, 1)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				panicChan <- r
+			}
+		}()
+		err := app.Run()
+		require.NoError(t, err)
+		close(panicChan)
+	}()
+
+	var done bool
+	select {
+	case <-ctx.Done():
+		done = true
+	case p := <-panicChan:
+		t.Fatalf("panic occurred: %v", p)
+	}
+	require.True(t, done)
+}
+
+func TestRun_error4(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.error4.yaml": "etc/lethe.yaml",
+	})
+	defer cleanup()
+
+	app, err := New("test")
+	require.NoError(t, err)
+
+	err = app.Run()
+	require.EqualError(t, err, "listen tcp: address foo: missing port in address")
 }
