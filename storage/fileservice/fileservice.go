@@ -10,23 +10,19 @@ import (
 )
 
 type FileService struct {
-	config *config.Config
+	Config *config.Config
 	driver storagedriver.Driver
 }
 
 func New(cfg *config.Config) (*FileService, error) {
-	driver, err := factory.Get("filesystem", map[string]any{"RootDirectory": cfg.LogDataPath()})
+	driver, err := factory.Get("filesystem", map[string]any{"RootDirectory": cfg.Storage.LogDataPath})
 	if err != nil {
 		return nil, fmt.Errorf("factory.Get err: %w", err)
 	}
 
-	if err := os.MkdirAll(cfg.LogDataPath(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(cfg.Storage.LogDataPath, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("os.MkdirAll err: %w", err)
 	}
 
 	return &FileService{cfg, driver}, nil
-}
-
-func (s *FileService) Config() *config.Config {
-	return s.config
 }

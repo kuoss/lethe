@@ -9,23 +9,23 @@ import (
 )
 
 type Rotator struct {
-	config      *config.Config
+	interval    time.Duration
 	fileService *fileservice.FileService
 }
 
 func New(cfg *config.Config, fileService *fileservice.FileService) *Rotator {
-	return &Rotator{cfg, fileService}
+	return &Rotator{cfg.Retention.RotationInterval, fileService}
 }
 
-func (r *Rotator) Start(interval time.Duration) {
-	go r.routineLoop(interval)
+func (r *Rotator) Start() {
+	go r.routineLoop()
 }
 
-func (r *Rotator) routineLoop(interval time.Duration) {
+func (r *Rotator) routineLoop() {
 	for {
 		r.RunOnce()
-		logger.Infof("routineLoop... sleep %s", interval)
-		time.Sleep(interval)
+		logger.Infof("routineLoop... sleep %s", r.interval)
+		time.Sleep(r.interval)
 	}
 }
 

@@ -1,6 +1,8 @@
 retention:
-  size: 200m
+  size: 200GB
   time: 1d
 storage:
   driver: filesystem
-  log_data_path: /tmp
+  log_data_path: /tmp/log
+web:
+  gin_mode: debug

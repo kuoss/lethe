@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kuoss/common/tester"
+	"github.com/kuoss/lethe/clock"
+	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/letheql"
 	"github.com/kuoss/lethe/letheql/model"
+	"github.com/kuoss/lethe/storage/fileservice"
+	"github.com/kuoss/lethe/storage/logservice"
 	"github.com/kuoss/lethe/storage/logservice/logmodel"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
-
-func TestNew(t *testing.T) {
-	assert.NotEmpty(t, queryService)
-}
 
 func TestQuery(t *testing.T) {
 	testCases := []struct {
@@ -39,14 +40,30 @@ func TestQuery(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+			clock.SetPlaygroundMode(true)
+			defer clock.SetPlaygroundMode(false)
+
+			_, cleanup := tester.SetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			cfg, err := config.New("test")
+			require.NoError(t, err)
+			fileService, err := fileservice.New(cfg)
+			require.NoError(t, err)
+			logService := logservice.New(cfg, fileService)
+			queryService := New(cfg, logService)
+			require.NotEmpty(t, queryService)
+
 			res := queryService.Query(context.TODO(), tc.qs, tc.tr)
 			if tc.wantError == "" {
-				assert.NoError(t, res.Err)
+				require.NoError(t, res.Err)
 			} else {
-				assert.EqualError(t, res.Err, tc.wantError)
+				require.EqualError(t, res.Err, tc.wantError)
 			}
 			res.Err = nil
-			assert.Equal(t, tc.want, res)
+			require.Equal(t, tc.want, res)
 		})
 	}
 }

@@ -1,5 +1,5 @@
 retention:
-  size: 200m
+  size: 200MB
   time: 1
 storage:
   driver: filesystem

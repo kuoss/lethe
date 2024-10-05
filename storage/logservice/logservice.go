@@ -15,15 +15,12 @@ import (
 )
 
 type LogService struct {
+	config      *config.Config
 	fileService *fileservice.FileService
 }
 
-func New(fileService *fileservice.FileService) *LogService {
-	return &LogService{fileService}
-}
-
-func (s *LogService) Config() *config.Config {
-	return s.fileService.Config()
+func New(cfg *config.Config, fileService *fileservice.FileService) *LogService {
+	return &LogService{cfg, fileService}
 }
 
 func (s *LogService) SelectLog(sel *model.LogSelector) (log model.Log, warnings model.Warnings, err error) {
@@ -53,9 +50,6 @@ func (s *LogService) SelectLog(sel *model.LogSelector) (log model.Log, warnings 
 
 	// log
 	log = s.getLogFromFiles(sel, files, mfs, &warnings)
-	if err != nil {
-		return log, warnings, fmt.Errorf("getTargets err: %w", err)
-	}
 	return log, warnings, nil
 }
 
@@ -110,7 +104,7 @@ func isFileInTimeRange(file string, tr *model.TimeRange) bool {
 
 // log
 func (s *LogService) getLogFromFiles(sel *model.LogSelector, files []string, mfs *match.MatchFuncSet, warnings *model.Warnings) model.Log {
-	limit := s.Config().Limit()
+	limit := s.config.Query.Limit
 	logLines := []model.LogLine{}
 	sort.Strings(files)
 	for _, file := range files {
@@ -126,7 +120,7 @@ func (s *LogService) getLogFromFiles(sel *model.LogSelector, files []string, mfs
 }
 
 func (s *LogService) addLogLinesFromFile(sel *model.LogSelector, logLines *[]model.LogLine, file string, mfs *match.MatchFuncSet, warnings *model.Warnings) {
-	limit := s.Config().Limit()
+	limit := s.config.Query.Limit
 	sc, err := s.fileService.Scanner(file)
 	if err != nil {
 		*warnings = append(*warnings, err)

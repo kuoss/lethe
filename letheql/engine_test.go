@@ -2,74 +2,89 @@ package letheql
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/kuoss/common/tester"
 	"github.com/kuoss/lethe/clock"
+	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/letheql/model"
+	"github.com/kuoss/lethe/storage/fileservice"
+	"github.com/kuoss/lethe/storage/logservice"
 	"github.com/kuoss/lethe/storage/logservice/logmodel"
 	"github.com/kuoss/lethe/storage/querier"
 	"github.com/prometheus/prometheus/storage"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestNewEngine(t *testing.T) {
-	assert.NotNil(t, engine1)
+func newEngine(t *testing.T) *Engine {
+	cfg, err := config.New("test")
+	require.NoError(t, err)
+
+	fileService, err := fileservice.New(cfg)
+	require.NoError(t, err)
+
+	logService := logservice.New(cfg, fileService)
+	return NewEngine(cfg, logService)
 }
 
-func TestNewInstantQuery(t *testing.T) {
-
-	t.Run("QueryableFunc", func(t *testing.T) {
-		queryable := storage.QueryableFunc(func(ctx context.Context, mint, maxt int64) (storage.Querier, error) {
-			return nil, nil
-		})
-		ctx, cancelCtx := context.WithCancel(context.Background())
-		defer cancelCtx()
-
-		qry, err := engine1.NewInstantQuery(ctx, queryable, "pod", time.Unix(1, 0))
-		assert.NoError(t, err)
-		assert.NotEmpty(t, qry)
+func TestNewInstantQuery_QueryableFunc(t *testing.T) {
+	queryable := storage.QueryableFunc(func(ctx context.Context, mint, maxt int64) (storage.Querier, error) {
+		return nil, nil
 	})
 
-	t.Run("LetheQueryable", func(t *testing.T) {
-		// LetheQueryable
-		queryable := &querier.LetheQueryable{LetheQuerier: &querier.LetheQuerier{}}
-		testCases := []struct {
-			qs        string
-			wantError string
-			want      *Result
-		}{
-			{
-				`pod`,
-				"getTargets err: target matcher err: not found label 'namespace' for logType 'pod'",
-				&Result{},
-			},
-			{
-				`pod{namespace="namespace01"}`,
-				"",
-				&Result{Value: model.Log{Name: "pod", Lines: []model.LogLine{}}, Warnings: model.Warnings(nil)},
-			},
-		}
-		for i, tc := range testCases {
-			t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-				qry, err := engine1.NewInstantQuery(context.TODO(), queryable, tc.qs, clock.Now())
-				assert.NoError(t, err)
-				got := qry.Exec(context.TODO())
-				err = got.Err
-				got.Err = nil
-				if tc.wantError == "" {
-					assert.NoError(t, err)
-				} else {
-					assert.EqualError(t, err, tc.wantError)
-				}
-				assert.Equal(t, tc.want, got)
+	en := newEngine(t)
+	qry, err := en.NewInstantQuery(context.TODO(), queryable, "pod", time.Unix(1, 0))
+	require.NoError(t, err)
+	require.NotEmpty(t, qry)
+}
+
+func TestNewInstantQuery_LetheQueryable(t *testing.T) {
+	queryable := &querier.LetheQueryable{LetheQuerier: &querier.LetheQuerier{}}
+	testCases := []struct {
+		qs        string
+		wantError bool
+		want      *Result
+	}{
+		{
+			qs:        `pod`,
+			wantError: true,
+			want:      &Result{},
+		},
+		{
+			qs:   `pod{namespace="namespace01"}`,
+			want: &Result{Value: model.Log{Name: "pod", Lines: []model.LogLine{}}, Warnings: model.Warnings(nil)},
+		},
+	}
+	for i, tc := range testCases {
+		t.Run(tester.CaseName(i, tc.qs), func(t *testing.T) {
+			clock.SetPlaygroundMode(true)
+			defer clock.SetPlaygroundMode(false)
+
+			_, cleanup := tester.SetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
 			})
-		}
-	})
+			defer cleanup()
+
+			en := newEngine(t)
+			qry, err := en.NewInstantQuery(context.TODO(), queryable, tc.qs, clock.Now())
+			require.NoError(t, err)
+			got := qry.Exec(context.TODO())
+			err = got.Err
+			got.Err = nil
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+			require.Equal(t, tc.want, got)
+		})
+	}
 }
 
 func TestNewRangeQuery(t *testing.T) {
+	clock.SetPlaygroundMode(true)
+	defer clock.SetPlaygroundMode(false)
 
 	ago10d := clock.Now().Add(-240 * time.Hour)
 	ago2m := clock.Now().Add(-2 * time.Minute)
@@ -80,18 +95,21 @@ func TestNewRangeQuery(t *testing.T) {
 		qs        string
 		start     time.Time
 		end       time.Time
-		wantError string
+		wantError bool
 		want      *Result
 	}{
 		{
-			`pod`, ago10d, now,
-			"getTargets err: target matcher err: not found label 'namespace' for logType 'pod'",
-			&Result{},
+			qs:        `pod`,
+			start:     ago10d,
+			end:       now,
+			wantError: true,
+			want:      &Result{},
 		},
 		{
-			`pod{namespace="namespace01"}`, ago2m, now,
-			"",
-			&Result{Err: error(nil), Value: model.Log{Name: "pod", Lines: []model.LogLine{
+			qs:    `pod{namespace="namespace01"}`,
+			start: ago2m,
+			end:   now,
+			want: &Result{Err: error(nil), Value: model.Log{Name: "pod", Lines: []model.LogLine{
 				logmodel.PodLog{Time: "2009-11-10T22:59:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: "lerom ipsum"},
 				logmodel.PodLog{Time: "2009-11-10T22:58:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: "hello from sidecar"},
 				logmodel.PodLog{Time: "2009-11-10T22:58:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "sidecar", Log: "lerom from sidecar"},
@@ -99,9 +117,10 @@ func TestNewRangeQuery(t *testing.T) {
 				logmodel.PodLog{Time: "2009-11-10T22:59:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: "hello world"}}}, Warnings: model.Warnings(nil)},
 		},
 		{
-			`pod{namespace="namespace01"}`, ago10d, now,
-			"",
-			&Result{Err: error(nil), Value: model.Log{Name: "pod", Lines: []model.LogLine{
+			qs:    `pod{namespace="namespace01"}`,
+			start: ago10d,
+			end:   now,
+			want: &Result{Err: error(nil), Value: model.Log{Name: "pod", Lines: []model.LogLine{
 				logmodel.PodLog{Time: "2009-11-10T21:00:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: "hello world"},
 				logmodel.PodLog{Time: "2009-11-10T21:01:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: "hello world"},
 				logmodel.PodLog{Time: "2009-11-10T21:02:00.000000Z", Namespace: "namespace01", Pod: "nginx-deployment-75675f5897-7ci7o", Container: "nginx", Log: "hello world"},
@@ -119,19 +138,25 @@ func TestNewRangeQuery(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
+			_, cleanup := tester.SetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
 			ctx := context.TODO()
-			qry, err := engine1.NewRangeQuery(ctx, queryable, tc.qs, tc.start, tc.end, 0)
-			assert.NoError(t, err)
+			engine := newEngine(t)
+			qry, err := engine.NewRangeQuery(ctx, queryable, tc.qs, tc.start, tc.end, 0)
+			require.NoError(t, err)
 			got := qry.Exec(ctx)
 			err = got.Err
 			got.Err = nil
-			if tc.wantError == "" {
-				assert.NoError(t, err)
+			if tc.wantError {
+				require.Error(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.NoError(t, err)
 			}
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 

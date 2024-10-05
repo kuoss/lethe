@@ -1,5 +1,8 @@
 retention:
-  size: 300GB
+  size: 200GB
+  time: 1d
 storage:
   driver: filesystem
   log_data_path: /tmp/log
+web:
+  listen_address: foo

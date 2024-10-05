@@ -1,5 +1,5 @@
 retention:
-  size: 200
+  size: 200x
   time: 1d
 storage:
   driver: filesystem

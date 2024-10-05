@@ -117,7 +117,7 @@ func (s *FileService) ListFiles() ([]LogFile, error) {
 	logFiles := []LogFile{}
 	rootDir := s.driver.RootDirectory()
 	for _, fileInfo := range fileInfos {
-		logPath := storagedriver.LogPath{RootDirectory: rootDir, Subpath: fullpath2subpath(s.config.LogDataPath(), fileInfo.Fullpath())}
+		logPath := storagedriver.LogPath{RootDirectory: rootDir, Subpath: fullpath2subpath(s.Config.Storage.LogDataPath, fileInfo.Fullpath())}
 		if logPath.Depth() == storagedriver.DepthFile {
 			logFiles = append(logFiles, LogFile{
 				Fullpath:  logPath.Fullpath(),

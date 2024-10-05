@@ -7,6 +7,7 @@ import (
 
 	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/clock"
+	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/letheql"
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/kuoss/lethe/storage/logservice"
@@ -18,9 +19,9 @@ type QueryService struct {
 	queryable *querier.LetheQueryable
 }
 
-func New(logService *logservice.LogService) *QueryService {
+func New(cfg *config.Config, logService *logservice.LogService) *QueryService {
 	return &QueryService{
-		engine: letheql.NewEngine(logService),
+		engine: letheql.NewEngine(cfg, logService),
 		queryable: &querier.LetheQueryable{
 			LetheQuerier: &querier.LetheQuerier{},
 		},

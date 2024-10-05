@@ -3,13 +3,15 @@ package router
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMetadata(t *testing.T) {
-	code, body := testGET("/api/v1/metadata")
-	assert.Equal(t, 200, code)
-	assert.JSONEq(t, `{
+	code, body, cleanup := testGET(t, "/api/v1/metadata")
+	defer cleanup()
+
+	require.Equal(t, 200, code)
+	require.JSONEq(t, `{
 		"data": {
 			"targets": [
 				"node{node=\"node01\"}",
