@@ -1,6 +1,6 @@
 retention:
-  size: 200m
+  size: 200Gi
   time: 1d
 storage:
   driver: filesystem
-  log_data_path: /data/log
+  logDataPath: /data/log

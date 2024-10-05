@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kuoss/common/tester"
 	"github.com/kuoss/lethe/clock"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestQuery(t *testing.T) {
@@ -42,17 +43,24 @@ func TestQuery(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i, tc.qs), func(t *testing.T) {
+			clock.SetPlaygroundMode(true)
+			defer clock.SetPlaygroundMode(false)
+
 			v := url.Values{}
 			v.Add("query", tc.qs)
-			code, body := testGET("/api/v1/query?" + v.Encode())
-			assert.Equal(t, tc.wantCode, code)
-			assert.Equal(t, tc.wantBody, body)
+			code, body, cleanup := testGET(t, "/api/v1/query?"+v.Encode())
+			defer cleanup()
+			require.Equal(t, tc.wantCode, code)
+			require.Equal(t, tc.wantBody, body)
 		})
 	}
 }
 
 func TestQueryRange(t *testing.T) {
+	clock.SetPlaygroundMode(true)
+	defer clock.SetPlaygroundMode(false)
+
 	now := clock.Now()
 	ago10d := now.Add(-240 * time.Hour)
 	testCases := []struct {
@@ -88,18 +96,26 @@ func TestQueryRange(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
+
 			v := url.Values{}
 			v.Add("query", tc.qs)
 			v.Add("start", time2string(tc.start))
 			v.Add("end", time2string(tc.end))
-			code, body := testGET("/api/v1/query_range?" + v.Encode())
-			assert.Equal(t, tc.wantCode, code)
-			assert.Equal(t, tc.wantBody, body)
+			code, body, cleanup := testGET(t, "/api/v1/query_range?"+v.Encode())
+			defer cleanup()
+			require.Equal(t, tc.wantCode, code)
+			require.Equal(t, tc.wantBody, body)
 		})
 	}
 }
 
 func time2string(t time.Time) string {
 	return fmt.Sprintf("%d", t.Unix())
+}
+
+func Test_FloatStringToTime(t *testing.T) {
+	want := time.Date(2015, time.July, 1, 20, 10, 51, 780999898, time.UTC)
+	got := floatStringToTime("1435781451.781")
+	require.True(t, want.Equal(got))
 }

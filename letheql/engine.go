@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kuoss/common/logger"
+	"github.com/kuoss/lethe/config"
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/kuoss/lethe/storage/logservice"
@@ -16,19 +17,20 @@ import (
 )
 
 type Engine struct {
+	cfg        *config.Config
 	logService *logservice.LogService
 }
 
-func NewEngine(logService *logservice.LogService) *Engine {
-	return &Engine{logService}
+func NewEngine(cfg *config.Config, logService *logservice.LogService) *Engine {
+	return &Engine{cfg, logService}
 }
 
-func (ng *Engine) NewInstantQuery(_ context.Context, q storage.Queryable, qs string, ts time.Time) (Query, error) {
+func (en *Engine) NewInstantQuery(_ context.Context, q storage.Queryable, qs string, ts time.Time) (Query, error) {
 	expr, err := parser.ParseExpr(qs)
 	if err != nil {
 		return nil, err
 	}
-	qry, err := ng.newQuery(q, expr, ts, ts, 0)
+	qry, err := en.newQuery(q, expr, ts, ts, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +39,13 @@ func (ng *Engine) NewInstantQuery(_ context.Context, q storage.Queryable, qs str
 	return qry, nil
 }
 
-func (ng *Engine) NewRangeQuery(_ context.Context, q storage.Queryable, qs string, start, end time.Time, interval time.Duration) (Query, error) {
+func (en *Engine) NewRangeQuery(_ context.Context, q storage.Queryable, qs string, start, end time.Time, interval time.Duration) (Query, error) {
 	logger.Infof("newRangeQuery qs: %s", qs)
 	expr, err := parser.ParseExpr(qs)
 	if err != nil {
 		return nil, err
 	}
-	qry, err := ng.newQuery(q, expr, start, end, interval)
+	qry, err := en.newQuery(q, expr, start, end, interval)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +54,7 @@ func (ng *Engine) NewRangeQuery(_ context.Context, q storage.Queryable, qs strin
 	return qry, nil
 }
 
-func (ng *Engine) newQuery(q storage.Queryable, expr parser.Expr, start, end time.Time, interval time.Duration) (*query, error) {
+func (en *Engine) newQuery(q storage.Queryable, expr parser.Expr, start, end time.Time, interval time.Duration) (*query, error) {
 	es := &parser.EvalStmt{
 		Expr:     expr,
 		Start:    start,
@@ -61,27 +63,27 @@ func (ng *Engine) newQuery(q storage.Queryable, expr parser.Expr, start, end tim
 	}
 	qry := &query{
 		stmt:      es,
-		ng:        ng,
+		ng:        en,
 		queryable: q,
 	}
 	return qry, nil
 }
 
-func (ng *Engine) exec(ctx context.Context, q *query) (v parser.Value, ws model.Warnings, err error) {
-	ctx, cancel := context.WithTimeout(ctx, ng.logService.Config().Timeout())
+func (en *Engine) exec(ctx context.Context, q *query) (v parser.Value, ws model.Warnings, err error) {
+	ctx, cancel := context.WithTimeout(ctx, en.cfg.Query.Timeout)
 	q.cancel = cancel
 	defer q.cancel()
 	switch s := q.Statement().(type) {
 	case *parser.EvalStmt:
-		return ng.execEvalStmt(ctx, q, s)
+		return en.execEvalStmt(ctx, q, s)
 	case parser.TestStmt:
 		return nil, nil, s(ctx)
 	}
 	panic(fmt.Errorf("letheql.exec: unhandled statement of type %T", q.Statement()))
 }
 
-func (ng *Engine) execEvalStmt(ctx context.Context, query *query, s *parser.EvalStmt) (parser.Value, model.Warnings, error) {
-	mint, maxt := ng.findMinMaxTime(s)
+func (en *Engine) execEvalStmt(ctx context.Context, query *query, s *parser.EvalStmt) (parser.Value, model.Warnings, error) {
+	mint, maxt := en.findMinMaxTime(s)
 	querier, err := query.queryable.Querier(ctx, mint, maxt)
 	if err != nil {
 		return nil, nil, fmt.Errorf("querier err: %w", err)
@@ -90,7 +92,7 @@ func (ng *Engine) execEvalStmt(ctx context.Context, query *query, s *parser.Eval
 
 	// Range evaluation.
 	evaluator := &evaluator{
-		logService:     ng.logService,
+		logService:     en.logService,
 		start:          s.Start,
 		end:            s.End,
 		startTimestamp: timeMilliseconds(s.Start),

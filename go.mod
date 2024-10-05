@@ -8,11 +8,11 @@ require (
 	github.com/kuoss/common v0.1.6
 	github.com/prometheus/common v0.43.0
 	github.com/prometheus/prometheus v0.43.0
-	github.com/spf13/afero v1.8.2
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sys v0.18.0
+	k8s.io/apimachinery v0.26.2
 )
 
 require (
@@ -53,6 +53,7 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
@@ -66,6 +67,7 @@ require (
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

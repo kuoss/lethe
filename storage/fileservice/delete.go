@@ -11,7 +11,7 @@ import (
 )
 
 func (s *FileService) DeleteByAge() error {
-	retentionTime := s.config.RetentionTime()
+	retentionTime := s.Config.Retention.Time
 	if retentionTime == 0 {
 		logger.Infof("retentionTime is 0 (DeleteByAge skipped)")
 		return nil
@@ -44,7 +44,7 @@ func (s *FileService) DeleteByAge() error {
 }
 
 func (s *FileService) DeleteBySize() error {
-	retentionSize := s.config.RetentionSize()
+	retentionSize := s.Config.Retention.Size
 	if retentionSize == 0 {
 		logger.Infof("retentionSize is 0 (DeleteBySize skipped)")
 		return nil
@@ -60,19 +60,19 @@ func (s *FileService) DeleteBySize() error {
 	})
 
 	// calculate sum of all files size
-	var used int = 0
+	var used int64 = 0
 	for _, file := range files {
-		used += int(file.Size)
+		used += file.Size
 	}
 
-	var deleteSize int = 0
+	var deleteSize int64 = 0
 	var deleteFiles []LogFile
 	for _, file := range files {
 		if used-deleteSize < retentionSize {
 			break
 		}
 		deleteFiles = append(deleteFiles, file)
-		deleteSize += int(file.Size)
+		deleteSize += file.Size
 	}
 	logger.Infof("DeleteBySize: try to flush %d files, %d bytes", len(deleteFiles), deleteSize)
 	for _, file := range deleteFiles {
@@ -87,7 +87,7 @@ func (s *FileService) DeleteBySize() error {
 }
 
 func (s *FileService) GetUsedBytes(subpath string) (int, error) {
-	if s.config.RetentionSizingStrategy() == "disk" {
+	if s.Config.Retention.SizingStrategy == "disk" {
 		return s.GetUsedBytesFromDisk(subpath)
 	}
 	return s.GetUsedBytesFromFiles(subpath)

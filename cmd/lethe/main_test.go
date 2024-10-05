@@ -1,40 +1,52 @@
 package main
 
 import (
+	"errors"
 	"testing"
 
-	"github.com/kuoss/common/tester"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMustConfig(t *testing.T) {
-	version := "test"
-	cfg := mustConfig(version)
-	assert.NotEmpty(t, cfg)
-	assert.Equal(t, version, cfg.Version)
+type MockApp struct {
+	newErr error
+	runErr error
 }
 
-func TestMustFileService(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
-	})
-	defer cleanup()
-
-	cfg := mustConfig("test")
-	fileService := mustFileService(cfg)
-	assert.NotNil(t, fileService, "Expected file service to be non-nil")
+func (m *MockApp) New(version string) error {
+	return m.newErr
 }
 
-func TestStartRotator(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
-	})
-	defer cleanup()
+func (m *MockApp) Run() error {
+	return m.runErr
+}
 
-	version := "test-version"
-	cfg := mustConfig(version)
-	fileService := mustFileService(cfg)
-	assert.NotPanics(t, func() {
-		startRotator(cfg, fileService)
-	}, "Expected startRotator to not panic")
+func TestMainFunc(t *testing.T) {
+	originalApp := myApp
+	originalExit := exit
+	defer func() {
+		myApp = originalApp
+		exit = originalExit
+	}()
+
+	var gotExitCode int
+	exit = func(code int) {
+		gotExitCode = code
+	}
+
+	t.Run("ok", func(t *testing.T) {
+		myApp = &MockApp{}
+		main()
+		require.Equal(t, 0, gotExitCode)
+	})
+	t.Run("new error", func(t *testing.T) {
+		myApp = &MockApp{newErr: errors.New("fake new error")}
+		main()
+		require.Equal(t, 1, gotExitCode)
+	})
+
+	t.Run("run error", func(t *testing.T) {
+		myApp = &MockApp{runErr: errors.New("fake run error")}
+		main()
+		require.Equal(t, 1, gotExitCode)
+	})
 }

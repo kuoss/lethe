@@ -5,7 +5,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/kuoss/common/tester"
+	"github.com/kuoss/lethe/config"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFullpath2subpath(t *testing.T) {
@@ -17,14 +19,14 @@ func TestFullpath2subpath(t *testing.T) {
 		{"", "", "."},
 		{"hello", "", "../."},
 		{"", "hello", "hello"},
-		{"tmp/init", "tmp/init/pod", "pod"},
-		{"tmp/init", "tmp/init/pod/ns1", "pod/ns1"},
-		{"tmp/init", "tmp/init/pod/ns1/2023", "pod/ns1/2023"},
+		{"data/log", "data/log/pod", "pod"},
+		{"data/log", "data/log/pod/ns1", "pod/ns1"},
+		{"data/log", "data/log/pod/ns1/2023", "pod/ns1/2023"},
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
 			got := fullpath2subpath(tc.rootDir, tc.fullpath)
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 }
@@ -36,7 +38,7 @@ func TestDirSize(t *testing.T) {
 		wantError string
 	}{
 		{"", 0, ""},
-		{"hello", 0, "Path not found: hello, err: open err: open tmp/init/hello: no such file or directory"},
+		{"hello", 0, "Path not found: hello, err: open err: open data/log/hello: no such file or directory"},
 		{"node", 0, ""},
 		{"pod", 0, ""},
 		{"node/node01", 1234, ""},
@@ -44,15 +46,25 @@ func TestDirSize(t *testing.T) {
 		{"pod/namespace01", 2620, ""},
 		{"pod/namespace02", 1137, ""},
 	}
-	for _, tc := range testCases {
-		t.Run("", func(t *testing.T) {
+	for i, tc := range testCases {
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
+				"@/testdata/log":                 "data/log",
+			})
+			defer cleanup()
+			cfg, err := config.New("test")
+			require.NoError(t, err)
+			fileService, err := New(cfg)
+			require.NoError(t, err)
+
 			got, err := fileService.dirSize(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 }
@@ -76,7 +88,7 @@ func TestList(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"list err: Path not found: hello, err: open err: open tmp/init/hello: no such file or directory",
+			"list err: Path not found: hello, err: open err: open data/log/hello: no such file or directory",
 		},
 		{
 			"node",
@@ -96,51 +108,89 @@ func TestList(t *testing.T) {
 		{
 			"pod/namespace01/2029-11-10_23.log",
 			nil,
-			"list err: readdirnames err: readdirent tmp/init/pod/namespace01/2029-11-10_23.log: not a directory",
+			"list err: readdirnames err: readdirent data/log/pod/namespace01/2029-11-10_23.log: not a directory",
 		},
 	}
 	for _, tc := range testCases {
 		t.Run("", func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
+				"@/testdata/log":                 "data/log",
+			})
+			defer cleanup()
+			cfg, err := config.New("test")
+			require.NoError(t, err)
+			fileService, err := New(cfg)
+			require.NoError(t, err)
+
 			got, err := fileService.List(tc.subpath)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 			sort.Strings(got)
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 }
 
 func TestListLogDirs(t *testing.T) {
-	// TODO: if runtime.GOOS == "windows"
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
+		"@/testdata/log":                 "data/log",
+	})
+	defer cleanup()
+	cfg, err := config.New("test")
+	require.NoError(t, err)
+	fileService, err := New(cfg)
+	require.NoError(t, err)
+
 	want := []LogDir{
-		{Fullpath: "tmp/init/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
-		{Fullpath: "tmp/init/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
-		{Fullpath: "tmp/init/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
-		{Fullpath: "tmp/init/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""}}
+		{Fullpath: "data/log/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
+		{Fullpath: "data/log/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
+		{Fullpath: "data/log/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""},
+		{Fullpath: "data/log/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 0, FirstFile: "", LastFile: "", Size: 0, LastForward: ""}}
 	got := fileService.ListLogDirs()
-	assert.Equal(t, want, got)
+	require.Equal(t, want, got)
 }
 
 func TestListLogDirsWithSize(t *testing.T) {
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
+		"@/testdata/log":                 "data/log",
+	})
+	defer cleanup()
+	cfg, err := config.New("test")
+	require.NoError(t, err)
+	fileService, err := New(cfg)
+	require.NoError(t, err)
+
 	want := []LogDir{
-		{Fullpath: "tmp/init/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 2, FirstFile: "2009-11-10_21.log", LastFile: "2009-11-10_22.log", Size: 1234, LastForward: ""},
-		{Fullpath: "tmp/init/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 2, FirstFile: "2009-11-01_00.log", LastFile: "2009-11-10_21.log", Size: 1116, LastForward: ""},
-		{Fullpath: "tmp/init/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 4, FirstFile: "2000-01-01_00.log", LastFile: "2029-11-10_23.log", Size: 2620, LastForward: ""},
-		{Fullpath: "tmp/init/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 2, FirstFile: "0000-00-00_00.log", LastFile: "2009-11-10_22.log", Size: 1137, LastForward: ""}}
+		{Fullpath: "data/log/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 2, FirstFile: "2009-11-10_21.log", LastFile: "2009-11-10_22.log", Size: 1234, LastForward: ""},
+		{Fullpath: "data/log/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 2, FirstFile: "2009-11-01_00.log", LastFile: "2009-11-10_21.log", Size: 1116, LastForward: ""},
+		{Fullpath: "data/log/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 4, FirstFile: "2000-01-01_00.log", LastFile: "2029-11-10_23.log", Size: 2620, LastForward: ""},
+		{Fullpath: "data/log/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 2, FirstFile: "0000-00-00_00.log", LastFile: "2009-11-10_22.log", Size: 1137, LastForward: ""}}
 	got := fileService.ListLogDirsWithSize()
-	assert.Equal(t, want, got)
+	require.Equal(t, want, got)
 }
 
 func TestListTargets(t *testing.T) {
-	// TODO: if runtime.GOOS == "windows"
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/etc/lethe.test.yaml": "etc/lethe.yaml",
+		"@/testdata/log":                 "data/log",
+	})
+	defer cleanup()
+	cfg, err := config.New("test")
+	require.NoError(t, err)
+	fileService, err := New(cfg)
+	require.NoError(t, err)
+
 	want := []LogDir{
-		{Fullpath: "tmp/init/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 2, FirstFile: "2009-11-10_21.log", LastFile: "2009-11-10_22.log", Size: 1234, LastForward: "2009-11-10T23:00:00Z"},
-		{Fullpath: "tmp/init/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 2, FirstFile: "2009-11-01_00.log", LastFile: "2009-11-10_21.log", Size: 1116, LastForward: "2009-11-10T21:58:00Z"},
-		{Fullpath: "tmp/init/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 4, FirstFile: "2000-01-01_00.log", LastFile: "2029-11-10_23.log", Size: 2620, LastForward: "2009-11-10T23:00:00Z"},
-		{Fullpath: "tmp/init/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 2, FirstFile: "0000-00-00_00.log", LastFile: "2009-11-10_22.log", Size: 1137, LastForward: "2009-11-10T22:58:00Z"}}
+		{Fullpath: "data/log/node/node01", Subpath: "node/node01", LogType: "node", Target: "node01", FileCount: 2, FirstFile: "2009-11-10_21.log", LastFile: "2009-11-10_22.log", Size: 1234, LastForward: "2009-11-10T23:00:00Z"},
+		{Fullpath: "data/log/node/node02", Subpath: "node/node02", LogType: "node", Target: "node02", FileCount: 2, FirstFile: "2009-11-01_00.log", LastFile: "2009-11-10_21.log", Size: 1116, LastForward: "2009-11-10T21:58:00Z"},
+		{Fullpath: "data/log/pod/namespace01", Subpath: "pod/namespace01", LogType: "pod", Target: "namespace01", FileCount: 4, FirstFile: "2000-01-01_00.log", LastFile: "2029-11-10_23.log", Size: 2620, LastForward: "2009-11-10T23:00:00Z"},
+		{Fullpath: "data/log/pod/namespace02", Subpath: "pod/namespace02", LogType: "pod", Target: "namespace02", FileCount: 2, FirstFile: "0000-00-00_00.log", LastFile: "2009-11-10_22.log", Size: 1137, LastForward: "2009-11-10T22:58:00Z"}}
 	got := fileService.ListTargets()
-	assert.Equal(t, want, got)
+	require.Equal(t, want, got)
 }

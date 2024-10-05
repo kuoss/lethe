@@ -5,27 +5,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kuoss/common/tester"
 	storagedriver "github.com/kuoss/lethe/storage/driver"
-	"github.com/kuoss/lethe/util/testutil"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func init() {
-	dir := "tmp/storage_driver_filesystem_filewriter_test"
-	testutil.ChdirRoot()
-	err := os.RemoveAll(dir)
-	if err != nil {
-		panic(err)
-	}
-	err = os.Mkdir(dir, 0755)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func TestFileWriter(t *testing.T) {
-	f, err := os.Create("tmp/storage_driver_filesystem_filewriter_test/greet.txt")
-	assert.NoError(t, err)
+	_, cleanup := tester.MustSetupDir(t, map[string]string{
+		"@/testdata/log": "data/log",
+	})
+	defer cleanup()
+
+	f, err := os.Create("data/log/greet.txt")
+	require.NoError(t, err)
 	bw := bufio.NewWriter(f)
 
 	var fw storagedriver.FileWriter = &fileWriter{
@@ -38,11 +30,11 @@ func TestFileWriter(t *testing.T) {
 	}
 	s := "hello"
 	n, err := fw.Write([]byte(s))
-	assert.NoError(t, err)
-	assert.Equal(t, len(s), n)
+	require.NoError(t, err)
+	require.Equal(t, len(s), n)
 	fw.Close()
 
-	content, err := os.ReadFile("tmp/storage_driver_filesystem_filewriter_test/greet.txt")
-	assert.NoError(t, err)
-	assert.Equal(t, "hello", string(content))
+	content, err := os.ReadFile("data/log/greet.txt")
+	require.NoError(t, err)
+	require.Equal(t, "hello", string(content))
 }

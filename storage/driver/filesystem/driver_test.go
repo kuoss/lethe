@@ -5,21 +5,11 @@ import (
 	"sort"
 	"testing"
 
-	storagedriver "github.com/kuoss/lethe/storage/driver"
-	"github.com/kuoss/lethe/util/testutil"
-	"github.com/stretchr/testify/assert"
-)
+	// storagedriver "github.com/kuoss/lethe/storage/driver"
 
-var (
-	driver1            storagedriver.Driver
-	logDataPath_driver = "tmp/storage_driver_filesystem_driver_test"
+	"github.com/kuoss/common/tester"
+	"github.com/stretchr/testify/require"
 )
-
-func init() {
-	testutil.ChdirRoot()
-	testutil.ResetLogData()
-	driver1 = New(Params{RootDirectory: logDataPath_driver})
-}
 
 func TestNew(t *testing.T) {
 	testCases := []struct {
@@ -42,109 +32,105 @@ func TestNew(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
 			got := New(tc.params)
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
-}
-
-func TestRootDirectory(t *testing.T) {
-	got := driver1.RootDirectory()
-	assert.Equal(t, logDataPath_driver, got)
-}
-
-func TestName(t *testing.T) {
-	got := driver1.Name()
-	assert.Equal(t, "filesystem", got)
 }
 
 func TestGetContent(t *testing.T) {
 	testCases := []struct {
 		path      string
 		want      string
-		wantError string
+		wantError bool
 	}{
 		{
-			"",
-			"",
-			"read tmp/storage_driver_filesystem_driver_test: is a directory",
+			path:      "",
+			want:      "",
+			wantError: true,
 		},
 		{
-			"node",
-			"",
-			"read tmp/storage_driver_filesystem_driver_test/node: is a directory",
+			path:      "node",
+			want:      "",
+			wantError: true,
 		},
 		{
-			"pod/namespace01/2009-11-10_21.log",
-			"2009-11-10T21:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:01:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:02:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n",
-			"",
+			path: "pod/namespace01/2009-11-10_21.log",
+			want: "2009-11-10T21:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:01:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:02:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n",
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := driver1.GetContent(tc.path)
-			if tc.wantError == "" {
-				assert.NoError(t, err)
+		t.Run(tester.CaseName(i), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			got, err := d.GetContent(tc.path)
+			if tc.wantError {
+				require.Error(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.NoError(t, err)
 			}
-			assert.Equal(t, tc.want, string(got))
+			require.Equal(t, tc.want, string(got))
 		})
 	}
 }
 
 func TestPutContent(t *testing.T) {
 	testCases := []struct {
-		path       string
-		content    string
-		wantError  string
-		wantError2 string
-		want       string
+		path      string
+		content   string
+		wantError bool
+		want      string
 	}{
 		{
-			"", "",
-			"open tmp/storage_driver_filesystem_driver_test: is a directory",
-			"",
-			"",
+			path:      "",
+			content:   "",
+			wantError: true,
+			want:      "",
 		},
 		{
-			"node", "",
-			"open tmp/storage_driver_filesystem_driver_test/node: is a directory",
-			"",
-			"",
+			path:      "node",
+			content:   "",
+			wantError: true,
+			want:      "",
 		},
 		{
-			"pod/namespace01/test1.log", "hello",
-			"",
-			"",
-			"hello",
+			path:    "pod/namespace01/test1.log",
+			content: "hello",
+			want:    "hello",
 		},
 		{
-			"pod/namespace01/2009-11-10_21.log", "hello",
-			"",
-			"",
-			"hello11-10T21:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:01:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:02:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n",
+			path:    "pod/namespace01/2009-11-10_21.log",
+			content: "hello",
+			want:    "hello11-10T21:00:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:01:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n2009-11-10T21:02:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world\n",
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			err := driver1.PutContent(tc.path, ([]byte)(tc.content))
-			if tc.wantError == "" {
-				assert.NoError(t, err)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			err := d.PutContent(tc.path, ([]byte)(tc.content))
+			if tc.wantError {
+				require.Error(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
-				return
+				require.NoError(t, err)
 			}
-			got, err := driver1.GetContent(tc.path)
-			if tc.wantError2 == "" {
-				assert.NoError(t, err)
+
+			got, err := d.GetContent(tc.path)
+			if tc.wantError {
+				require.Error(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError2)
-				return
+				require.NoError(t, err)
 			}
-			assert.Equal(t, tc.want, string(got))
+			require.Equal(t, tc.want, string(got))
 		})
 	}
-	testutil.ResetLogData()
 }
 
 func TestReader(t *testing.T) {
@@ -166,14 +152,20 @@ func TestReader(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := driver1.Reader(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			got, err := d.Reader(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
-				assert.NotEmpty(t, got)
+				require.NoError(t, err)
+				require.NotEmpty(t, got)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
-				assert.Nil(t, got)
+				require.EqualError(t, err, tc.wantError)
+				require.Nil(t, got)
 			}
 		})
 	}
@@ -182,38 +174,42 @@ func TestReader(t *testing.T) {
 func TestWriter(t *testing.T) {
 	testCases := []struct {
 		path      string
-		wantError string
+		wantError bool
+		want      string
 	}{
 		{
-			"",
-			"open tmp/storage_driver_filesystem_driver_test: is a directory",
+			path:      "",
+			wantError: true,
 		},
 		{
-			"hello",
-			"",
+			path:      "node",
+			wantError: true,
 		},
 		{
-			"node",
-			"open tmp/storage_driver_filesystem_driver_test/node: is a directory",
+			path: "hello",
 		},
 		{
-			"pod/namespace01/2009-11-10_21.log",
-			"",
+			path: "pod/namespace01/2009-11-10_21.log",
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := driver1.Writer(tc.path)
-			if tc.wantError == "" {
-				assert.NoError(t, err)
-				assert.NotEmpty(t, got)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			got, err := d.Writer(tc.path)
+			if tc.wantError {
+				require.Error(t, err)
+				require.Nil(t, got)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
-				assert.Nil(t, got)
+				require.NoError(t, err)
+				require.NotEmpty(t, got)
 			}
 		})
 	}
-	testutil.ResetLogData()
 }
 
 func TestStat(t *testing.T) {
@@ -224,50 +220,56 @@ func TestStat(t *testing.T) {
 	}{
 		{
 			"",
-			"tmp/storage_driver_filesystem_driver_test",
+			"data/log",
 			"",
 		},
 		{
 			"hello",
 			"",
-			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"Path not found: hello, err: stat err: stat data/log/hello: no such file or directory",
 		},
 		{
 			"node",
-			"tmp/storage_driver_filesystem_driver_test/node",
+			"data/log/node",
 			"",
 		},
 		{
 			"pod",
-			"tmp/storage_driver_filesystem_driver_test/pod",
+			"data/log/pod",
 			"",
 		},
 		{
 			"pod/namespace01",
-			"tmp/storage_driver_filesystem_driver_test/pod/namespace01",
+			"data/log/pod/namespace01",
 			"",
 		},
 		{
 			"pod/namespace01/hello.log",
 			"",
-			"Path not found: pod/namespace01/hello.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/hello.log: no such file or directory",
+			"Path not found: pod/namespace01/hello.log, err: stat err: stat data/log/pod/namespace01/hello.log: no such file or directory",
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log",
-			"tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log",
+			"data/log/pod/namespace01/2009-11-10_21.log",
 			"",
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			fi, err := driver1.Stat(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			fi, err := d.Stat(tc.path)
 			if tc.wantError != "" {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			got := fi.Fullpath()
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 }
@@ -291,7 +293,7 @@ func TestList(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"Path not found: hello, err: open err: open tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"Path not found: hello, err: open err: open data/log/hello: no such file or directory",
 		},
 		{
 			"pod",
@@ -305,15 +307,21 @@ func TestList(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := driver1.List(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			got, err := d.List(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 			sort.Strings(got)
-			assert.Equal(t, tc.want, got)
+			require.Equal(t, tc.want, got)
 		})
 	}
 }
@@ -326,44 +334,45 @@ func TestMove(t *testing.T) {
 	}{
 		{
 			"", "",
-			"rename tmp/storage_driver_filesystem_driver_test tmp/storage_driver_filesystem_driver_test: file exists",
+			"rename data/log data/log: file exists",
 		},
 		{
 			"hello", "",
-			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"Path not found: hello, err: stat err: stat data/log/hello: no such file or directory",
 		},
 		{
 			"", "hello",
-			"rename tmp/storage_driver_filesystem_driver_test tmp/storage_driver_filesystem_driver_test/hello: invalid argument",
+			"rename data/log data/log/hello: invalid argument",
 		},
 		{
 			"hello", "hello",
-			"Path not found: hello, err: stat err: stat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"Path not found: hello, err: stat err: stat data/log/hello: no such file or directory",
 		},
 		{
 			"pod/namespace01/hello.log", "pod/namespace01/hello.log",
-			"Path not found: pod/namespace01/hello.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/hello.log: no such file or directory",
+			"Path not found: pod/namespace01/hello.log, err: stat err: stat data/log/pod/namespace01/hello.log: no such file or directory",
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log", "pod/namespace01/2009-11-10_00.log", // move
 			"",
 		},
-		{
-			"pod/namespace01/2009-11-10_21.log", "pod/namespace01/2009-11-10_00.log", // duplicate
-			"Path not found: pod/namespace01/2009-11-10_21.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log: no such file or directory",
-		},
 	}
-	for _, tc := range testCases {
-		t.Run("", func(t *testing.T) {
-			err := driver1.Move(tc.a, tc.b)
+	for i, tc := range testCases {
+		t.Run(tester.CaseName(i, tc.a, tc.b), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			err := d.Move(tc.a, tc.b)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 		})
 	}
-	testutil.ResetLogData()
 }
 
 func TestDelete(t *testing.T) {
@@ -387,22 +396,23 @@ func TestDelete(t *testing.T) {
 			"pod/namespace01/2009-11-10_21.log", // delete
 			"",
 		},
-		{
-			"pod/namespace01/2009-11-10_21.log", // duplicate
-			"Path not found: pod/namespace01/2009-11-10_21.log, err: stat err: stat tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log: no such file or directory",
-		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			err := driver1.Delete(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			err := d.Delete(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 		})
 	}
-	testutil.ResetLogData()
 }
 
 func TestWalk(t *testing.T) {
@@ -415,52 +425,58 @@ func TestWalk(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"walk err: walkFunc err: lstat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"walk err: walkFunc err: lstat data/log/hello: no such file or directory",
 		},
 		{
-			"tmp/storage_driver_filesystem_driver_test",
+			"data/log",
 			nil,
-			"walk err: walkFunc err: lstat tmp/storage_driver_filesystem_driver_test/tmp/storage_driver_filesystem_driver_test: no such file or directory",
+			"walk err: walkFunc err: lstat data/log/data/log: no such file or directory",
 		},
 		// ok
 		{
 			"",
-			[]string{"tmp/storage_driver_filesystem_driver_test/node/node01/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/node/node01/2009-11-10_22.log", "tmp/storage_driver_filesystem_driver_test/node/node02/2009-11-01_00.log", "tmp/storage_driver_filesystem_driver_test/node/node02/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2000-01-01_00.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_22.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2029-11-10_23.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace02/0000-00-00_00.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace02/2009-11-10_22.log"},
+			[]string{"data/log/node/node01/2009-11-10_21.log", "data/log/node/node01/2009-11-10_22.log", "data/log/node/node02/2009-11-01_00.log", "data/log/node/node02/2009-11-10_21.log", "data/log/pod/namespace01/2000-01-01_00.log", "data/log/pod/namespace01/2009-11-10_21.log", "data/log/pod/namespace01/2009-11-10_22.log", "data/log/pod/namespace01/2029-11-10_23.log", "data/log/pod/namespace02/0000-00-00_00.log", "data/log/pod/namespace02/2009-11-10_22.log"},
 			"",
 		},
 		{
 			"node",
-			[]string{"tmp/storage_driver_filesystem_driver_test/node/node01/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/node/node01/2009-11-10_22.log", "tmp/storage_driver_filesystem_driver_test/node/node02/2009-11-01_00.log", "tmp/storage_driver_filesystem_driver_test/node/node02/2009-11-10_21.log"},
+			[]string{"data/log/node/node01/2009-11-10_21.log", "data/log/node/node01/2009-11-10_22.log", "data/log/node/node02/2009-11-01_00.log", "data/log/node/node02/2009-11-10_21.log"},
 			"",
 		},
 		{
 			"pod",
-			[]string{"tmp/storage_driver_filesystem_driver_test/pod/namespace01/2000-01-01_00.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_22.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2029-11-10_23.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace02/0000-00-00_00.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace02/2009-11-10_22.log"},
+			[]string{"data/log/pod/namespace01/2000-01-01_00.log", "data/log/pod/namespace01/2009-11-10_21.log", "data/log/pod/namespace01/2009-11-10_22.log", "data/log/pod/namespace01/2029-11-10_23.log", "data/log/pod/namespace02/0000-00-00_00.log", "data/log/pod/namespace02/2009-11-10_22.log"},
 			"",
 		},
 		{
 			"pod/namespace01",
-			[]string{"tmp/storage_driver_filesystem_driver_test/pod/namespace01/2000-01-01_00.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_22.log", "tmp/storage_driver_filesystem_driver_test/pod/namespace01/2029-11-10_23.log"},
+			[]string{"data/log/pod/namespace01/2000-01-01_00.log", "data/log/pod/namespace01/2009-11-10_21.log", "data/log/pod/namespace01/2009-11-10_22.log", "data/log/pod/namespace01/2029-11-10_23.log"},
 			"",
 		},
 		{
 			"pod/namespace01/2009-11-10_21.log",
-			[]string{"tmp/storage_driver_filesystem_driver_test/pod/namespace01/2009-11-10_21.log"},
+			[]string{"data/log/pod/namespace01/2009-11-10_21.log"},
 			"",
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			infos, err := driver1.Walk(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			infos, err := d.Walk(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				paths := []string{}
 				for _, info := range infos {
 					paths = append(paths, info.Fullpath())
 				}
-				assert.Equal(t, tc.want, paths)
+				require.Equal(t, tc.want, paths)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 		})
 	}
@@ -476,12 +492,12 @@ func TestWalkDir(t *testing.T) {
 		{
 			"hello",
 			nil,
-			"walkdir err: walkDirFunc err: lstat tmp/storage_driver_filesystem_driver_test/hello: no such file or directory",
+			"walkdir err: walkDirFunc err: lstat data/log/hello: no such file or directory",
 		},
 		{
-			"tmp/storage_driver_filesystem_driver_test",
+			"data/log",
 			nil,
-			"walkdir err: walkDirFunc err: lstat tmp/storage_driver_filesystem_driver_test/tmp/storage_driver_filesystem_driver_test: no such file or directory",
+			"walkdir err: walkDirFunc err: lstat data/log/data/log: no such file or directory",
 		},
 		// ok
 		{
@@ -511,13 +527,19 @@ func TestWalkDir(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := driver1.WalkDir(tc.path)
+		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
+			_, cleanup := tester.MustSetupDir(t, map[string]string{
+				"@/testdata/log": "data/log",
+			})
+			defer cleanup()
+
+			d := New(Params{RootDirectory: "data/log"})
+			got, err := d.WalkDir(tc.path)
 			if tc.wantError == "" {
-				assert.NoError(t, err)
-				assert.Equal(t, tc.want, got)
+				require.NoError(t, err)
+				require.Equal(t, tc.want, got)
 			} else {
-				assert.EqualError(t, err, tc.wantError)
+				require.EqualError(t, err, tc.wantError)
 			}
 		})
 	}

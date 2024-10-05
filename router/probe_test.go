@@ -3,17 +3,19 @@ package router
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHealthy(t *testing.T) {
-	code, body := testGET("/-/healthy")
-	assert.Equal(t, 200, code)
-	assert.Equal(t, "Venti is Healthy.\n", body)
+	code, body, cleanup := testGET(t, "/-/healthy")
+	defer cleanup()
+	require.Equal(t, 200, code)
+	require.Equal(t, "Venti is Healthy.\n", body)
 }
 
 func TestReady(t *testing.T) {
-	code, body := testGET("/-/ready")
-	assert.Equal(t, 200, code)
-	assert.Equal(t, "Venti is Ready.\n", body)
+	code, body, cleanup := testGET(t, "/-/ready")
+	defer cleanup()
+	require.Equal(t, 200, code)
+	require.Equal(t, "Venti is Ready.\n", body)
 }

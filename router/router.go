@@ -39,5 +39,5 @@ func (r *Router) setupRouter() {
 }
 
 func (r *Router) Run() error {
-	return r.ginRouter.Run(r.config.WebListenAddress())
+	return r.ginRouter.Run(r.config.Web.ListenAddress)
 }

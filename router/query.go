@@ -1,11 +1,13 @@
 package router
 
 import (
+	"math"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kuoss/lethe/letheql/model"
-	"github.com/kuoss/lethe/util"
+	"github.com/spf13/cast"
 )
 
 func (r *Router) Query(c *gin.Context) {
@@ -17,7 +19,7 @@ func (r *Router) QueryRange(c *gin.Context) {
 	qs := c.Query("query")
 	start := c.Query("start")
 	end := c.Query("end")
-	r.query(c, qs, model.TimeRange{Start: util.FloatStringToTime(start), End: util.FloatStringToTime(end)})
+	r.query(c, qs, model.TimeRange{Start: floatStringToTime(start), End: floatStringToTime(end)})
 }
 
 func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
@@ -68,4 +70,9 @@ func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
 		obj["warnings"] = result.Warnings
 	}
 	c.JSON(http.StatusOK, obj)
+}
+
+func floatStringToTime(timeFloat string) time.Time {
+	sec, dec := math.Modf(cast.ToFloat64(timeFloat))
+	return time.Unix(int64(sec), int64(dec*(1e9)))
 }
