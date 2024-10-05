@@ -11,7 +11,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.main.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -33,7 +33,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNew_error1(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -44,7 +44,7 @@ func TestNew_error1(t *testing.T) {
 }
 
 func TestNew_error2(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -55,7 +55,7 @@ func TestNew_error2(t *testing.T) {
 }
 
 func TestRun_smokeTest(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{})
+	_, cleanup := tester.SetupDir(t, map[string]string{})
 	defer cleanup()
 
 	app, err := New("test")
@@ -86,7 +86,7 @@ func TestRun_smokeTest(t *testing.T) {
 }
 
 func TestRun_error4(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error4.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()

@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNew_example(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/etc/lethe.example.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -55,7 +55,7 @@ func TestNew_example(t *testing.T) {
 }
 
 func TestNew_ok1(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.ok1.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -79,7 +79,7 @@ func TestNew_ok1(t *testing.T) {
 }
 
 func TestNew_ok2(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.ok2.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -103,7 +103,7 @@ func TestNew_ok2(t *testing.T) {
 }
 
 func TestNew_legacy(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.legacy.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -127,7 +127,7 @@ func TestNew_legacy(t *testing.T) {
 }
 
 func TestNew_error1(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -138,7 +138,7 @@ func TestNew_error1(t *testing.T) {
 }
 
 func TestNew_error2(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error2.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
@@ -149,7 +149,7 @@ func TestNew_error2(t *testing.T) {
 }
 
 func TestNew_error3(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/etc/lethe.error3.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()

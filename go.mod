@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/fscrypt v0.3.4
-	github.com/kuoss/common v0.1.6
+	github.com/kuoss/common v0.1.7
 	github.com/prometheus/common v0.43.0
 	github.com/prometheus/prometheus v0.43.0
 	github.com/spf13/cast v1.4.1

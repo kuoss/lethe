@@ -60,7 +60,7 @@ func TestGetContent(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -109,7 +109,7 @@ func TestPutContent(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -153,7 +153,7 @@ func TestReader(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -194,7 +194,7 @@ func TestWriter(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -256,7 +256,7 @@ func TestStat(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -308,7 +308,7 @@ func TestList(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -359,7 +359,7 @@ func TestMove(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.a, tc.b), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -399,7 +399,7 @@ func TestDelete(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -461,7 +461,7 @@ func TestWalk(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -528,7 +528,7 @@ func TestWalkDir(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()

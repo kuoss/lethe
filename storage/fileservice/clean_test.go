@@ -10,7 +10,7 @@ import (
 )
 
 func TestClean(t *testing.T) {
-	tmpDir, cleanup := tester.MustSetupDir(t, map[string]string{
+	tmpDir, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()

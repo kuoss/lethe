@@ -61,7 +61,7 @@ func TestNewInstantQuery_LetheQueryable(t *testing.T) {
 			clock.SetPlaygroundMode(true)
 			defer clock.SetPlaygroundMode(false)
 
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -139,7 +139,7 @@ func TestNewRangeQuery(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()

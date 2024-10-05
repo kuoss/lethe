@@ -11,7 +11,7 @@ import (
 )
 
 func TestFileWriter(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()

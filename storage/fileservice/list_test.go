@@ -48,7 +48,7 @@ func TestDirSize(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(tester.CaseName(i, tc.path), func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -112,7 +112,7 @@ func TestList(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run("", func(t *testing.T) {
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
@@ -134,7 +134,7 @@ func TestList(t *testing.T) {
 }
 
 func TestListLogDirs(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
@@ -153,7 +153,7 @@ func TestListLogDirs(t *testing.T) {
 }
 
 func TestListLogDirsWithSize(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
@@ -172,7 +172,7 @@ func TestListLogDirsWithSize(t *testing.T) {
 }
 
 func TestListTargets(t *testing.T) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()

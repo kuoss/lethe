@@ -14,7 +14,7 @@ import (
 )
 
 func newRouter(t *testing.T) (*Router, func()) {
-	_, cleanup := tester.MustSetupDir(t, map[string]string{
+	_, cleanup := tester.SetupDir(t, map[string]string{
 		"@/testdata/log": "data/log",
 	})
 	cfg, err := config.New("test")

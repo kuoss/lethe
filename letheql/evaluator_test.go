@@ -338,7 +338,7 @@ func TestEval(t *testing.T) {
 			clock.SetPlaygroundMode(true)
 			defer clock.SetPlaygroundMode(false)
 
-			_, cleanup := tester.MustSetupDir(t, map[string]string{
+			_, cleanup := tester.SetupDir(t, map[string]string{
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
