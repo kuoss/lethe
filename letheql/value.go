@@ -300,9 +300,8 @@ func (m Matrix) ContainsSameLabelset() bool {
 // Result holds the resulting value of an execution or an error
 // if any occurred.
 type Result struct {
-	Err   error
-	Value parser.Value
-	// Warnings storage.Warnings
+	Err      error
+	Value    parser.Value
 	Warnings model.Warnings
 }
 

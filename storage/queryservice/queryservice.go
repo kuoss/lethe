@@ -36,7 +36,7 @@ func (s *QueryService) Query(ctx context.Context, qs string, tr model.TimeRange)
 			End:   now,
 		}
 	}
-	qry, err := s.engine.NewRangeQuery(ctx, s.queryable, qs, tr.Start, tr.End, 0)
+	qry, err := s.engine.NewRangeQuery(ctx, s.queryable, qs, tr.Start, tr.End)
 	if err != nil {
 		return &letheql.Result{Err: err}
 	}

@@ -146,7 +146,7 @@ func TestNewRangeQuery(t *testing.T) {
 
 			ctx := context.TODO()
 			engine := newEngine(t)
-			qry, err := engine.NewRangeQuery(ctx, queryable, tc.qs, tc.start, tc.end, 0)
+			qry, err := engine.NewRangeQuery(ctx, queryable, tc.qs, tc.start, tc.end)
 			require.NoError(t, err)
 			got := qry.Exec(ctx)
 			err = got.Err

@@ -19,7 +19,6 @@ type evaluator struct {
 
 	startTimestamp int64 // Start time in milliseconds.
 	endTimestamp   int64 // End time in milliseconds.
-	interval       int64 // Interval in milliseconds.
 
 	start time.Time
 	end   time.Time
