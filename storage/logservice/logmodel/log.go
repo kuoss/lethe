@@ -5,9 +5,8 @@ import "fmt"
 type LogType string
 
 const (
-	LogTypeAudit LogType = "audit"
-	LogTypeNode  LogType = "node"
-	LogTypePod   LogType = "pod"
+	LogTypeNode LogType = "node"
+	LogTypePod  LogType = "pod"
 )
 
 type NodeLog struct {

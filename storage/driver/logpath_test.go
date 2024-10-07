@@ -1,9 +1,9 @@
 package driver
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/kuoss/common/tester"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -71,7 +71,7 @@ func TestGetDepth(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d  %s  %s", i, tc.rootDirectory, tc.subpath), func(t *testing.T) {
+		t.Run(tester.CaseName(i, tc.rootDirectory, tc.subpath), func(t *testing.T) {
 			logPath := LogPath{RootDirectory: tc.rootDirectory, Subpath: tc.subpath}
 			got := logPath.Depth()
 			assert.Equal(t, tc.want, got)

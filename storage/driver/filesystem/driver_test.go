@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"fmt"
 	"sort"
 	"testing"
 
@@ -30,7 +29,7 @@ func TestNew(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			got := New(tc.params)
 			require.Equal(t, tc.want, got)
 		})

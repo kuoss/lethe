@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kuoss/common/tester"
 	"github.com/kuoss/lethe/storage/driver"
 	"github.com/kuoss/lethe/storage/driver/factory/fake"
 	"github.com/stretchr/testify/assert"
@@ -49,7 +50,7 @@ func TestRegister(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			unregisterAll()
 			err := Register(tc.name, tc.factory)
 			if tc.wantError == "" {
@@ -102,7 +103,7 @@ func TestGet(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			driver, err := Get(tc.name, tc.parameters)
 			got := fmt.Sprintf("%#v", driver)
 			if tc.wantError == "" {

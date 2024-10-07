@@ -1,7 +1,6 @@
 package fileservice
 
 import (
-	"fmt"
 	"sort"
 	"testing"
 
@@ -24,7 +23,7 @@ func TestFullpath2subpath(t *testing.T) {
 		{"data/log", "data/log/pod/ns1/2023", "pod/ns1/2023"},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			got := fullpath2subpath(tc.rootDir, tc.fullpath)
 			require.Equal(t, tc.want, got)
 		})

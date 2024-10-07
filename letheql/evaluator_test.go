@@ -51,7 +51,7 @@ func TestNewEvaluator(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			got := evaluator{logService, context.TODO(), tc.startTimestamp, tc.endTimestamp, time.Time{}, time.Time{}}
 			require.Equal(t, tc.want, got)
 		})
