@@ -1,27 +1,15 @@
 package main
 
 import (
-	"os"
+	"log"
 
-	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/app"
 )
 
-var (
-	Version = "development"
-
-	myApp app.IApp
-	exit  = os.Exit
-)
+var Version = "development"
 
 func main() {
-	logger.Infof("Starting Lethe, version: %s", Version)
-	if err := myApp.New(Version); err != nil {
-		logger.Errorf("Failed to create app: %s", err.Error())
-		exit(1)
-	}
-	if err := myApp.Run(); err != nil {
-		logger.Errorf("Failed to run app: %s", err.Error())
-		exit(1)
+	if err := app.Run(Version); err != nil {
+		log.Fatalf("Failed to run app: %v", err)
 	}
 }
