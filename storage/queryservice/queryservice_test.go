@@ -2,7 +2,6 @@ package queryservice
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/kuoss/common/tester"
@@ -39,7 +38,7 @@ func TestQuery(t *testing.T) {
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+		t.Run(tester.CaseName(i), func(t *testing.T) {
 			clock.SetPlaygroundMode(true)
 			defer clock.SetPlaygroundMode(false)
 

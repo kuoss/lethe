@@ -32,15 +32,13 @@ func TestNewEvaluator(t *testing.T) {
 	testCases := []struct {
 		startTimestamp int64
 		endTimestamp   int64
-		interval       int64
 		want           evaluator
 	}{
 		{
-			0, 0, 0,
+			0, 0,
 			evaluator{
 				logService,
 				context.TODO(),
-				0,
 				0,
 				0,
 				time.Time{},
@@ -48,13 +46,13 @@ func TestNewEvaluator(t *testing.T) {
 			},
 		},
 		{
-			0, 0, 0,
-			evaluator{logService, context.TODO(), 0, 0, 0, time.Time{}, time.Time{}},
+			0, 0,
+			evaluator{logService, context.TODO(), 0, 0, time.Time{}, time.Time{}},
 		},
 	}
 	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got := evaluator{logService, context.TODO(), tc.startTimestamp, tc.endTimestamp, tc.interval, time.Time{}, time.Time{}}
+		t.Run(tester.CaseName(i), func(t *testing.T) {
+			got := evaluator{logService, context.TODO(), tc.startTimestamp, tc.endTimestamp, time.Time{}, time.Time{}}
 			require.Equal(t, tc.want, got)
 		})
 	}
@@ -359,7 +357,6 @@ func TestEval(t *testing.T) {
 					ctx:            context.TODO(),
 					startTimestamp: 0,
 					endTimestamp:   0,
-					interval:       0,
 					start:          now.Add(-4 * time.Hour),
 					end:            now,
 				}
