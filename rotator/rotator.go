@@ -14,29 +14,29 @@ type Rotator struct {
 }
 
 func New(cfg *config.Config, fileService *fileservice.FileService) *Rotator {
-	return &Rotator{cfg.Retention.RotationInterval, fileService}
+	return &Rotator{
+		interval:    cfg.Retention.RotationInterval,
+		fileService: fileService,
+	}
 }
 
 func (r *Rotator) Start() {
-	go r.routineLoop()
+	go r.rotatePeriodically()
 }
 
-func (r *Rotator) routineLoop() {
+func (r *Rotator) rotatePeriodically() {
 	for {
-		r.RunOnce()
-		logger.Infof("routineLoop... sleep %s", r.interval)
+		r.Rotate()
+		logger.Infof("sleep %s", r.interval)
 		time.Sleep(r.interval)
 	}
 }
 
-func (r *Rotator) RunOnce() {
-	err := r.fileService.DeleteByAge()
-	if err != nil {
-		logger.Errorf("deleteByAge err: %s", err.Error())
+func (r *Rotator) Rotate() {
+	if err := r.fileService.DeleteByAge(); err != nil {
+		logger.Errorf("DeleteByAge err: %v", err)
 	}
-	err = r.fileService.DeleteBySize()
-	if err != nil {
-		logger.Errorf("deleteBySize err: %s", err.Error())
+	if err := r.fileService.DeleteBySize(); err != nil {
+		logger.Errorf("DeleteBySize err: %v", err)
 	}
-	r.fileService.Clean()
 }
