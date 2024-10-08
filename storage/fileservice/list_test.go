@@ -51,6 +51,7 @@ func TestDirSize(t *testing.T) {
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
+
 			cfg, err := config.New("test")
 			require.NoError(t, err)
 			fileService, err := New(cfg)
@@ -115,6 +116,7 @@ func TestList(t *testing.T) {
 				"@/testdata/log": "data/log",
 			})
 			defer cleanup()
+
 			cfg, err := config.New("test")
 			require.NoError(t, err)
 			fileService, err := New(cfg)
@@ -137,6 +139,7 @@ func TestListLogDirs(t *testing.T) {
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
+
 	cfg, err := config.New("test")
 	require.NoError(t, err)
 	fileService, err := New(cfg)
@@ -156,6 +159,7 @@ func TestListLogDirsWithSize(t *testing.T) {
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
+
 	cfg, err := config.New("test")
 	require.NoError(t, err)
 	fileService, err := New(cfg)
@@ -175,6 +179,7 @@ func TestListTargets(t *testing.T) {
 		"@/testdata/log": "data/log",
 	})
 	defer cleanup()
+
 	cfg, err := config.New("test")
 	require.NoError(t, err)
 	fileService, err := New(cfg)
