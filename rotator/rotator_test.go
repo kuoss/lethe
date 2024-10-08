@@ -87,7 +87,7 @@ func TestRunOnce(t *testing.T) {
 			require.NoError(t, err)
 			rotator := New(cfg, fileService)
 
-			rotator.RunOnce()
+			rotator.Rotate()
 
 			list, err := rotator.fileService.ListFiles()
 			subpaths := []string{}
