@@ -1,8 +1,8 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.21-alpine AS builder
 ARG VERSION
 WORKDIR /build
 COPY go.mod go.sum ./
-RUN go mod download -x
+RUN go mod download
 COPY . ./
 RUN go build -ldflags="-X 'main.Version=$VERSION'" -o /build/bin/lethe ./cmd/lethe/
 
