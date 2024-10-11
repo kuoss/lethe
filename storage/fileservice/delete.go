@@ -7,7 +7,6 @@ import (
 
 	"github.com/kuoss/common/logger"
 	"github.com/kuoss/lethe/clock"
-	"golang.org/x/sys/unix"
 )
 
 func (s *FileService) DeleteByAge() error {
@@ -84,32 +83,4 @@ func (s *FileService) DeleteBySize() error {
 	}
 	logger.Infof("DeleteBySize(%d < %d): DONE", used, retentionSize)
 	return nil
-}
-
-func (s *FileService) GetUsedBytes(subpath string) (int, error) {
-	if s.Config.Retention.SizeStrategy == "disk" {
-		return s.GetUsedBytesFromDisk(subpath)
-	}
-	return s.GetUsedBytesFromFiles(subpath)
-}
-
-func (s *FileService) GetUsedBytesFromFiles(subpath string) (int, error) {
-	fileInfos, err := s.driver.Walk(subpath)
-	if err != nil {
-		return 0, err
-	}
-	var size int
-	for _, fileInfo := range fileInfos {
-		size += int(fileInfo.Size())
-	}
-	return size, err
-}
-
-func (s *FileService) GetUsedBytesFromDisk(path string) (int, error) {
-	var stat unix.Statfs_t
-	err := unix.Statfs(path, &stat)
-	if err != nil {
-		return 0, err
-	}
-	return int(stat.Blocks - stat.Bavail*uint64(stat.Bsize)), nil
 }
