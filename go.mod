@@ -1,8 +1,8 @@
 module github.com/kuoss/lethe
 
-go 1.22
+go 1.22.0
 
-toolchain go1.22.4
+toolchain go1.22.3
 
 require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
