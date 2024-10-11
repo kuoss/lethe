@@ -44,8 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-      - run: go install github.com/google/go-licenses@v1.6.0
-      - run: go-licenses check ./...
+      - run: make licenses
 
   docker-build:
     runs-on: ubuntu-latest
