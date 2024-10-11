@@ -18,7 +18,7 @@ func TestNew(t *testing.T) {
 		Retention: Retention{
 			Size:             0,
 			Time:             15 * 24 * time.Hour,
-			SizingStrategy:   "file",
+			SizeStrategy:     "file",
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "data/log"},
@@ -40,12 +40,12 @@ func TestNew_example(t *testing.T) {
 	defer cleanup()
 
 	want := &Config{
-		Version: "example",
+		Version: "test",
 		Query:   Query{Limit: 1000, Timeout: 20 * time.Second},
 		Retention: Retention{
 			Size:             1000 * 1024 * 1024 * 1024, // 1000GB
 			Time:             15 * 24 * time.Hour,       // 15d
-			SizingStrategy:   "file",
+			SizeStrategy:     "file",
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "/data/log"},
@@ -55,7 +55,7 @@ func TestNew_example(t *testing.T) {
 		},
 	}
 
-	got, err := New("example")
+	got, err := New("test")
 	require.NoError(t, err)
 	require.Equal(t, want, got)
 }
@@ -72,7 +72,7 @@ func TestNew_ok1(t *testing.T) {
 		Retention: Retention{
 			Size:             200 * 1024 * 1024 * 1024, // 200GB
 			Time:             24 * time.Hour,           // 1d
-			SizingStrategy:   "file",
+			SizeStrategy:     "file",
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "/tmp/log"},
@@ -99,7 +99,7 @@ func TestNew_ok2(t *testing.T) {
 		Retention: Retention{
 			Size:             300 * 1024 * 1024 * 1024, // 300GB
 			Time:             15 * 24 * time.Hour,      // 15d
-			SizingStrategy:   "file",
+			SizeStrategy:     "file",
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "/tmp/log"},
@@ -126,7 +126,7 @@ func TestNew_legacy(t *testing.T) {
 		Retention: Retention{
 			Size:             100 * 1024 * 1024 * 1024, // 100GB
 			Time:             15 * 24 * time.Hour,      // 15d
-			SizingStrategy:   "file",
+			SizeStrategy:     "file",
 			RotationInterval: 20 * time.Second,
 		},
 		Storage: Storage{LogDataPath: "/tmp/log"},

@@ -31,11 +31,11 @@ func TestQuery(t *testing.T) {
 		},
 		{
 			`pod{namespace="namespace01"}`,
-			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lerom ipsum"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"}],"resultType":"logs"},"status":"success"}`,
+			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lorem ipsum"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"}],"resultType":"logs"},"status":"success"}`,
 		},
 		{
 			`pod{namespace="namespace01"} |= "ipsum"`,
-			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lerom ipsum"}],"resultType":"logs"},"status":"success"}`,
+			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lorem ipsum"}],"resultType":"logs"},"status":"success"}`,
 		},
 		{
 			`node{node="node01",process!="kubelet"} |= "hello" != "sidecar"`,
@@ -84,11 +84,11 @@ func TestQueryRange(t *testing.T) {
 		},
 		{
 			`pod{namespace="namespace01"}`, ago10d, now,
-			200, `{"data":{"result":[{"time":"2009-11-10T21:00:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T21:01:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T21:02:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lerom ipsum"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"lerom from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"}],"resultType":"logs"},"status":"success"}`,
+			200, `{"data":{"result":[{"time":"2009-11-10T21:00:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T21:01:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T21:02:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:56:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lorem ipsum"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:57:00.000000Z","namespace":"namespace01","pod":"apache-75675f5897-7ci7o","container":"httpd","log":"hello from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"lorem from sidecar"},{"time":"2009-11-10T22:58:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"sidecar","log":"hello from sidecar"},{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"hello world"}],"resultType":"logs"},"status":"success"}`,
 		},
 		{
 			`pod{namespace="namespace01"} |= "ipsum"`, ago10d, now,
-			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lerom ipsum"}],"resultType":"logs"},"status":"success"}`,
+			200, `{"data":{"result":[{"time":"2009-11-10T22:59:00.000000Z","namespace":"namespace01","pod":"nginx-deployment-75675f5897-7ci7o","container":"nginx","log":"lorem ipsum"}],"resultType":"logs"},"status":"success"}`,
 		},
 		{
 			`node{node="node01",process!="kubelet"} |= "hello" != "sidecar"`, ago10d, now,
@@ -114,8 +114,8 @@ func time2string(t time.Time) string {
 	return fmt.Sprintf("%d", t.Unix())
 }
 
-func Test_FloatStringToTime(t *testing.T) {
+func TestToTime(t *testing.T) {
 	want := time.Date(2015, time.July, 1, 20, 10, 51, 780999898, time.UTC)
-	got := floatStringToTime("1435781451.781")
+	got := toTime("1435781451.781")
 	require.True(t, want.Equal(got))
 }
