@@ -39,12 +39,13 @@ jobs:
         with:
           version: v1.60
 
-  licenses:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-      - run: make licenses
+  # https://github.com/google/go-licenses/issues/244
+  # licenses:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-go@v5
+  #     - run: make licenses
 
   docker-build:
     runs-on: ubuntu-latest

@@ -1,5 +1,5 @@
 IMG ?= ghcr.io/kuoss/lethe:development
-COVERAGE_THRESHOLD = 65
+COVERAGE_THRESHOLD = 70
 PROMETHEUS_VERSION := v2.42.0
 
 .PHONY: dev
@@ -33,7 +33,8 @@ lint: golangci-lint
 
 .PHONY: licenses
 licenses: tidy go-licenses
-	$(GO_LICENSES) check ./...
+	# https://github.com/google/go-licenses/issues/244
+  	# $(GO_LICENSES) check ./...
 
 .PHONY: vulncheck
 vulncheck: govulncheck
