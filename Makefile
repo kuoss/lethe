@@ -6,6 +6,10 @@ PROMETHEUS_VERSION := v2.42.0
 dev: air
 	$(AIR)
 
+.PHONY: tidy
+tidy:
+	go mod tidy
+
 .PHONY: test
 test:
 	go test -race --failfast ./...
@@ -28,7 +32,7 @@ lint: golangci-lint
 	$(GOLANGCI_LINT) run
 
 .PHONY: licenses
-licenses: go-licenses
+licenses: tidy go-licenses
 	$(GO_LICENSES) check ./...
 
 .PHONY: vulncheck
