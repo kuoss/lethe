@@ -2,5 +2,4 @@ retention:
   size: 200MB
   time: 1
 storage:
-  driver: filesystem
   log_data_path: /data/log

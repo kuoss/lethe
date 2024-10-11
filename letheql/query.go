@@ -4,23 +4,20 @@ import (
 	"context"
 
 	"github.com/kuoss/lethe/letheql/parser"
-	"github.com/prometheus/prometheus/storage"
 )
 
 type Query interface {
 	Cancel()
-	Close()
 	Exec(ctx context.Context) *Result
 	Statement() parser.Statement
 	String() string
 }
 
 type query struct {
-	q         string
-	queryable storage.Queryable
-	stmt      parser.Statement
-	cancel    func()
-	ng        *Engine
+	q      string
+	stmt   parser.Statement
+	cancel func()
+	ng     *Engine
 }
 
 func (q *query) Cancel() {
@@ -29,11 +26,9 @@ func (q *query) Cancel() {
 	}
 }
 
-func (q *query) Close() {}
-
 func (q *query) Exec(ctx context.Context) *Result {
-	res, warnings, err := q.ng.exec(ctx, q)
-	return &Result{Err: err, Value: res, Warnings: warnings}
+	value, warnings, err := q.ng.exec(ctx, q)
+	return &Result{err, value, warnings}
 }
 
 func (q *query) Statement() parser.Statement {

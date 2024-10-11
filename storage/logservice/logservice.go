@@ -24,12 +24,8 @@ func New(cfg *config.Config, fileService *fileservice.FileService) *LogService {
 }
 
 func (s *LogService) SelectLog(sel *model.LogSelector) (log model.Log, warnings model.Warnings, err error) {
-
 	// type
-	switch sel.Name {
-	case "node":
-	case "pod":
-	default:
+	if sel.Name != "node" && sel.Name != "pod" {
 		return log, warnings, fmt.Errorf("unknown logType: %s", sel.Name)
 	}
 
@@ -74,18 +70,17 @@ func (s *LogService) getTargets(sel *model.LogSelector, warnings *model.Warnings
 	return targets, nil
 }
 
-// files
-func (s *LogService) getFiles(sel *model.LogSelector, targets []string, warnings *model.Warnings) (files []string) {
-
+func (s *LogService) getFiles(sel *model.LogSelector, targets []string, ws *model.Warnings) []string {
+	var files []string
 	for _, target := range targets {
-		all, err := s.fileService.List(target)
+		list, err := s.fileService.List(target)
 		if err != nil {
-			*warnings = append(*warnings, fmt.Errorf("list err: %w", err))
+			*ws = append(*ws, fmt.Errorf("list err: %w", err))
 			continue
 		}
-		for _, file := range all {
-			if isFileInTimeRange(file, &sel.TimeRange) {
-				files = append(files, file)
+		for _, item := range list {
+			if isFileInTimeRange(item, &sel.TimeRange) {
+				files = append(files, item)
 			}
 		}
 	}
@@ -98,7 +93,7 @@ func isFileInTimeRange(file string, tr *model.TimeRange) bool {
 	if err != nil {
 		return false
 	}
-	fileEnd := fileStart.Add(time.Duration(3599) * time.Second) // per hour for one logs
+	fileEnd := fileStart.Add(time.Hour) // per hour for one logs
 	return tr.Start.Before(fileEnd) && tr.End.After(fileStart)
 }
 

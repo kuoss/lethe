@@ -1,11 +1,11 @@
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
-2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] lerom ipsum
+2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] lorem ipsum
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|apache-75675f5897-7ci7o|httpd] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] hello from sidecar
-2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] lerom from sidecar
+2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] lorem from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|sidecar] hello from sidecar
 2000-01-01T01:23:00.000000Z[namespace01|nginx-deployment-75675f5897-7ci7o|nginx] hello world

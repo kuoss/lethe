@@ -11,20 +11,15 @@ import (
 	"github.com/kuoss/lethe/letheql"
 	"github.com/kuoss/lethe/letheql/model"
 	"github.com/kuoss/lethe/storage/logservice"
-	"github.com/kuoss/lethe/storage/querier"
 )
 
 type QueryService struct {
-	engine    *letheql.Engine
-	queryable *querier.LetheQueryable
+	engine *letheql.Engine
 }
 
 func New(cfg *config.Config, logService *logservice.LogService) *QueryService {
 	return &QueryService{
 		engine: letheql.NewEngine(cfg, logService),
-		queryable: &querier.LetheQueryable{
-			LetheQuerier: &querier.LetheQuerier{},
-		},
 	}
 }
 
@@ -36,7 +31,7 @@ func (s *QueryService) Query(ctx context.Context, qs string, tr model.TimeRange)
 			End:   now,
 		}
 	}
-	qry, err := s.engine.NewRangeQuery(ctx, s.queryable, qs, tr.Start, tr.End)
+	qry, err := s.engine.NewRangeQuery(qs, tr.Start, tr.End)
 	if err != nil {
 		return &letheql.Result{Err: err}
 	}

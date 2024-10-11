@@ -33,7 +33,7 @@ type Query struct {
 type Retention struct {
 	Size             int64
 	Time             time.Duration
-	SizingStrategy   string
+	SizeStrategy     string
 	RotationInterval time.Duration
 }
 
@@ -58,7 +58,7 @@ func New(version string) (*Config, error) {
 	v.SetDefault("query.timeout", "20s")
 	v.SetDefault("retention.size", 0)
 	v.SetDefault("retention.time", "15d")
-	v.SetDefault("retention.sizing_strategy", "file")
+	v.SetDefault("retention.size_strategy", "file")
 	v.SetDefault("retention.rotation_interval", "20s")
 	v.SetDefault("storage.log_data_path", "data/log")
 	v.SetDefault("web.listen_address", ":6060")
@@ -75,6 +75,7 @@ func New(version string) (*Config, error) {
 	} else {
 		_ = showFileContent(v.ConfigFileUsed())
 	}
+
 	// units
 	retentionSizeString := v.GetString("retention.size")
 	retentionSize, err := parseSize(retentionSizeString)
@@ -97,7 +98,7 @@ func New(version string) (*Config, error) {
 		Retention: Retention{
 			Size:             int64(retentionSize),
 			Time:             time.Duration(retentionTime),
-			SizingStrategy:   v.GetString("retention.sizing_strategy"),
+			SizeStrategy:     v.GetString("retention.size_strategy"),
 			RotationInterval: v.GetDuration("retention.rotation_interval"),
 		},
 		Storage: Storage{

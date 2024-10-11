@@ -63,7 +63,6 @@ func (ev *evaluator) Eval(expr parser.Expr) (v parser.Value, ws model.Warnings, 
 }
 
 func (ev *evaluator) eval(expr parser.Expr) (parser.Value, model.Warnings) {
-
 	if err := contextDone(ev.ctx, "expression evaluation"); err != nil {
 		ev.error(err)
 	}
@@ -71,16 +70,12 @@ func (ev *evaluator) eval(expr parser.Expr) (parser.Value, model.Warnings) {
 	switch e := expr.(type) {
 	case *parser.BinaryExpr:
 		return ev.evalBinaryExpr(e)
-
 	case *parser.StringLiteral:
 		return String{V: e.Val, T: ev.startTimestamp}, nil
-
 	case *parser.VectorSelector:
-		return ev.vectorSelector(e)
-
+		return ev.evalVectorSelector(e)
 	case *model.LogSelector:
-		return ev.logSelector(e)
-
+		return ev.evalLogSelector(e)
 	}
 	panic(fmt.Errorf("eval: unhandled expr: %#v", expr))
 }
@@ -91,7 +86,7 @@ func (ev *evaluator) evalWithWarnings(expr parser.Expr, warnings *model.Warnings
 	return val, *warnings
 }
 
-func (ev *evaluator) vectorSelector(vs *parser.VectorSelector) (*model.LogSelector, model.Warnings) {
+func (ev *evaluator) evalVectorSelector(vs *parser.VectorSelector) (*model.LogSelector, model.Warnings) {
 	return &model.LogSelector{
 		Name:          vs.Name,
 		LabelMatchers: vs.LabelMatchers,
@@ -99,7 +94,7 @@ func (ev *evaluator) vectorSelector(vs *parser.VectorSelector) (*model.LogSelect
 	}, nil
 }
 
-func (ev *evaluator) logSelector(ls *model.LogSelector) (parser.Value, model.Warnings) {
+func (ev *evaluator) evalLogSelector(ls *model.LogSelector) (parser.Value, model.Warnings) {
 	val, ws, err := ev.logService.SelectLog(ls)
 	if err != nil {
 		ev.error(err)
@@ -108,14 +103,11 @@ func (ev *evaluator) logSelector(ls *model.LogSelector) (parser.Value, model.War
 }
 
 func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, model.Warnings) {
-
-	// currently we can handle 'filter operator + string' form only
 	if !expr.Op.IsFilterOperator() {
 		ev.error(fmt.Errorf("evalBinaryExpr err: not filter operator: %s", expr.Op))
 	}
 
 	switch lhs := expr.LHS.(type) {
-
 	case *parser.BinaryExpr:
 		newLHS, warnings := ev.eval(lhs)
 		switch nl := newLHS.(type) {
@@ -123,30 +115,18 @@ func (ev *evaluator) evalBinaryExpr(expr *parser.BinaryExpr) (parser.Value, mode
 			expr.LHS = nl
 			return ev.evalWithWarnings(expr, &warnings)
 		}
-
 	case *parser.VectorSelector:
-		newLHS, warnings := ev.vectorSelector(lhs)
+		newLHS, warnings := ev.evalVectorSelector(lhs)
 		expr.LHS = newLHS
 		return ev.evalWithWarnings(expr, &warnings)
-
 	case *model.LogSelector:
 		switch rhs := expr.RHS.(type) {
 		case *parser.StringLiteral:
-			lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
-				Op:    expr.Op,
-				Value: rhs.Val,
-			})
+			lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{Op: expr.Op, Value: rhs.Val})
 			return lhs, nil
-		case *parser.StepInvariantExpr:
-			val, ws := ev.eval(rhs.Expr)
-			lhs.LineMatchers = append(lhs.LineMatchers, &model.LineMatcher{
-				Op:    expr.Op,
-				Value: val.String(),
-			})
-			return lhs, ws
 		default:
 			ev.error(fmt.Errorf("unknown type rhs: %#v", rhs))
 		}
 	}
-	panic(fmt.Errorf("evalBinaryExpr unhandles op:[%s], lhs:[%s], rhs:[%s]", expr.Op, expr.LHS, expr.RHS))
+	panic(fmt.Errorf("evalBinaryExpr unhandles op:%s, lhs:%s, rhs:%s", expr.Op, expr.LHS, expr.RHS))
 }

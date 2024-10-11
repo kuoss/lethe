@@ -19,7 +19,7 @@ func (r *Router) QueryRange(c *gin.Context) {
 	qs := c.Query("query")
 	start := c.Query("start")
 	end := c.Query("end")
-	r.query(c, qs, model.TimeRange{Start: floatStringToTime(start), End: floatStringToTime(end)})
+	r.query(c, qs, model.TimeRange{Start: toTime(start), End: toTime(end)})
 }
 
 func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
@@ -45,10 +45,7 @@ func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
 		if ok {
 			obj := gin.H{
 				"status": "success",
-				"data": gin.H{
-					"resultType": "logs",
-					"result":     log.Lines,
-				},
+				"data":   gin.H{"resultType": "logs", "result": log.Lines},
 			}
 			if len(result.Warnings) > 0 {
 				obj["warnings"] = result.Warnings
@@ -61,10 +58,7 @@ func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
 	// any
 	obj := gin.H{
 		"status": "success",
-		"data": gin.H{
-			"resultType": result.Value.Type(),
-			"result":     result.Value,
-		},
+		"data":   gin.H{"resultType": result.Value.Type(), "result": result.Value},
 	}
 	if len(result.Warnings) > 0 {
 		obj["warnings"] = result.Warnings
@@ -72,7 +66,7 @@ func (r *Router) query(c *gin.Context, qs string, tr model.TimeRange) {
 	c.JSON(http.StatusOK, obj)
 }
 
-func floatStringToTime(timeFloat string) time.Time {
+func toTime(timeFloat string) time.Time {
 	sec, dec := math.Modf(cast.ToFloat64(timeFloat))
 	return time.Unix(int64(sec), int64(dec*(1e9)))
 }

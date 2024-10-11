@@ -87,7 +87,7 @@ func (s *FileService) DeleteBySize() error {
 }
 
 func (s *FileService) GetUsedBytes(subpath string) (int, error) {
-	if s.Config.Retention.SizingStrategy == "disk" {
+	if s.Config.Retention.SizeStrategy == "disk" {
 		return s.GetUsedBytesFromDisk(subpath)
 	}
 	return s.GetUsedBytesFromFiles(subpath)
