@@ -28,11 +28,11 @@ func Run(version string) error {
 	logService := logservice.New(cfg, fileService)
 	queryService := queryservice.New(cfg, logService)
 
-	// Create rotator & router
+	// Start rotater
 	myRotator := rotator.New(cfg, fileService)
-	myRouter := router.New(cfg, fileService, queryService)
-
-	// Run
 	myRotator.Start()
+
+	// Run router
+	myRouter := router.New(cfg, fileService, queryService)
 	return myRouter.Run()
 }
