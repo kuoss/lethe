@@ -141,35 +141,35 @@ func TestNew_legacy(t *testing.T) {
 	require.Equal(t, want, got)
 }
 
-func TestNew_error1(t *testing.T) {
+func TestNew_error_invalid(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
+		"@/testdata/etc/lethe.error.invalid.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
 
-	got, err := New("error")
-	require.Error(t, err)
+	got, err := New("test")
+	require.EqualError(t, err, `Config file has error: While parsing config: yaml: did not find expected key`)
 	require.Nil(t, got)
 }
 
-func TestNew_error2(t *testing.T) {
+func TestNew_error_size(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error2.yaml": "etc/lethe.yaml",
+		"@/testdata/etc/lethe.error.size.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
 
-	got, err := New("error")
-	require.Error(t, err)
+	got, err := New("test")
+	require.EqualError(t, err, `parse retention size err: failed to parse size '200x': units: unknown unit x in 200x, size: 200x`)
 	require.Nil(t, got)
 }
 
-func TestNew_error3(t *testing.T) {
+func TestNew_error_time(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error3.yaml": "etc/lethe.yaml",
+		"@/testdata/etc/lethe.error.time.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
 
-	got, err := New("error")
-	require.Error(t, err)
+	got, err := New("test")
+	require.EqualError(t, err, `parse retention time err: not a valid duration string: "1", time: 1`)
 	require.Nil(t, got)
 }

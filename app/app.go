@@ -12,7 +12,15 @@ import (
 	"github.com/kuoss/lethe/storage/queryservice"
 )
 
-func Run(version string) error {
+type IApp interface {
+	Run(version string) error
+}
+
+type App struct{}
+
+func (a App) Run(version string) error {
+	logger.Infof("Starting Lethe 💧 version=%s", version)
+
 	// Load configuration
 	cfg, err := config.New(version)
 	if err != nil {
