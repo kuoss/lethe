@@ -12,7 +12,15 @@ import (
 	"github.com/kuoss/lethe/storage/queryservice"
 )
 
-func Run(version string) error {
+type IApp interface {
+	Run(version string) error
+}
+
+type App struct{}
+
+func (a App) Run(version string) error {
+	logger.Infof("Starting Lethe 💧 version=%s", version)
+
 	// Load configuration
 	cfg, err := config.New(version)
 	if err != nil {
@@ -28,11 +36,11 @@ func Run(version string) error {
 	logService := logservice.New(cfg, fileService)
 	queryService := queryservice.New(cfg, logService)
 
-	// Create rotator & router
+	// Start rotater
 	myRotator := rotator.New(cfg, fileService)
-	myRouter := router.New(cfg, fileService, queryService)
-
-	// Run
 	myRotator.Start()
+
+	// Run router
+	myRouter := router.New(cfg, fileService, queryService)
 	return myRouter.Run()
 }

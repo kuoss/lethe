@@ -1,0 +1,5 @@
+retention:
+  size: 200GB
+  time: 1d
+storage:
+  log_data_path: /dev/null

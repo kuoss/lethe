@@ -9,34 +9,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun_error1(t *testing.T) {
+func TestRun_error_invalid(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
+		"@/testdata/etc/lethe.error.invalid.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
 
-	err := Run("test")
-	require.Error(t, err)
+	err := new(App).Run("test")
+	require.EqualError(t, err, `failed to load configuration: Config file has error: While parsing config: yaml: did not find expected key`)
 }
 
-func TestRun_error2(t *testing.T) {
+func TestRun_error_log_data_path(t *testing.T) {
 	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error1.yaml": "etc/lethe.yaml",
+		"@/testdata/etc/lethe.error.log_data_path.yaml": "etc/lethe.yaml",
 	})
 	defer cleanup()
 
-	err := Run("test")
-	require.Error(t, err)
-}
-
-func TestRun_error4(t *testing.T) {
-	_, cleanup := tester.SetupDir(t, map[string]string{
-		"@/testdata/etc/lethe.error4.yaml": "etc/lethe.yaml",
-	})
-	defer cleanup()
-
-	err := Run("test")
-	require.Error(t, err)
+	err := new(App).Run("test")
+	require.EqualError(t, err, `new fileservice err: os.MkdirAll err: mkdir /dev/null: not a directory`)
 }
 
 func TestRun_smokeTest(t *testing.T) {
@@ -52,7 +42,7 @@ func TestRun_smokeTest(t *testing.T) {
 				panicChan <- r
 			}
 		}()
-		err := Run("test")
+		err := new(App).Run("test")
 		require.NoError(t, err)
 		close(panicChan)
 	}()
