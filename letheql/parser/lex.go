@@ -642,7 +642,11 @@ func digitVal(ch rune) int {
 
 // skipSpaces skips the spaces until a non-space is encountered.
 func skipSpaces(l *Lexer) {
-	for isSpace(l.peek()) {
+	for {
+		r := l.peek()
+		if !isSpace(r) {
+			break
+		}
 		l.next()
 	}
 	l.ignore()
