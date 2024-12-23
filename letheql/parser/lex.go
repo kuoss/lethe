@@ -810,24 +810,24 @@ func lexIdentifier(l *Lexer) stateFn {
 // a colon rune. If the identifier is a keyword the respective keyword Item
 // is scanned.
 func lexKeywordOrIdentifier(l *Lexer) stateFn {
-Loop:
 	for {
-		switch r := l.next(); {
-		case isAlphaNumeric(r) || r == ':':
-			// absorb.
-		default:
+		r := l.next()
+		if !isAlphaNumeric(r) && r != ':' {
 			l.backup()
-			word := l.input[l.start:l.pos]
-			if kw, ok := key[strings.ToLower(word)]; ok {
-				l.emit(kw)
-			} else if !strings.Contains(word, ":") {
-				l.emit(IDENTIFIER)
-			} else {
-				l.emit(METRIC_IDENTIFIER)
-			}
-			break Loop
+			break
 		}
 	}
+
+	word := l.input[l.start:l.pos]
+	switch {
+	case key[strings.ToLower(word)] != 0:
+		l.emit(key[strings.ToLower(word)])
+	case strings.Contains(word, ":"):
+		l.emit(METRIC_IDENTIFIER)
+	default:
+		l.emit(IDENTIFIER)
+	}
+
 	if l.seriesDesc && l.peek() != '{' {
 		return lexValueSequence
 	}
