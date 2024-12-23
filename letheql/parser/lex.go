@@ -259,7 +259,7 @@ type Lexer struct {
 
 // next returns the next rune in the input.
 func (l *Lexer) next() rune {
-	if int(l.pos) >= len(l.input) {
+	if l.pos >= Pos(len(l.input)) {
 		l.width = 0
 		return eof
 	}
@@ -271,8 +271,10 @@ func (l *Lexer) next() rune {
 
 // peek returns but does not consume the next rune in the input.
 func (l *Lexer) peek() rune {
-	r := l.next()
-	l.backup()
+	if l.pos >= Pos(len(l.input)) {
+		return eof
+	}
+	r, _ := utf8.DecodeRuneInString(l.input[l.pos:])
 	return r
 }
 
