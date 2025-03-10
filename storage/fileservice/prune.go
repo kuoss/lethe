@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/kuoss/lethe/storage/fileservice/fileutil"
 )
 
 func (s *FileService) Prune() error {
@@ -34,7 +36,7 @@ func (s *FileService) removeBuggyFiles() error {
 
 func (s *FileService) removeEmptyDirs() error {
 	for _, d := range s.ListLogDirs() {
-		empty, err := isEmpty(d.Fullpath)
+		empty, err := fileutil.IsEmpty(d.Fullpath)
 		if err != nil {
 			return fmt.Errorf("isEmpty err: %w", err)
 		}

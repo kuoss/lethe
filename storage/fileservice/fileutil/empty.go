@@ -1,11 +1,11 @@
-package fileservice
+package fileutil
 
 import (
 	"io"
 	"os"
 )
 
-func isEmpty(name string) (bool, error) {
+func IsEmpty(name string) (bool, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return false, err

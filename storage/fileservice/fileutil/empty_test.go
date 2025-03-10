@@ -1,10 +1,12 @@
-package fileservice
+package fileutil_test
 
 import (
 	"fmt"
 	"io/fs"
 	"os"
 	"testing"
+
+	"github.com/kuoss/lethe/storage/fileservice/fileutil"
 )
 
 func TestIsEmpty(t *testing.T) {
@@ -35,7 +37,7 @@ func TestIsEmpty(t *testing.T) {
 
 	// Test case for empty directory
 	t.Run("Empty directory", func(t *testing.T) {
-		empty, err := isEmpty(emptyDir)
+		empty, err := fileutil.IsEmpty(emptyDir)
 		if err != nil {
 			t.Errorf("Expected no error, but got %v", err)
 		}
@@ -46,7 +48,7 @@ func TestIsEmpty(t *testing.T) {
 
 	// Test case for non-empty directory
 	t.Run("Non-empty directory", func(t *testing.T) {
-		empty, err := isEmpty(nonEmptyDir)
+		empty, err := fileutil.IsEmpty(nonEmptyDir)
 		if err != nil {
 			t.Errorf("Expected no error, but got %v", err)
 		}
@@ -57,7 +59,7 @@ func TestIsEmpty(t *testing.T) {
 
 	// Test case for non-existent directory
 	t.Run("Non-existent directory", func(t *testing.T) {
-		_, err := isEmpty("nonExistentDir")
+		_, err := fileutil.IsEmpty("nonExistentDir")
 		if err == nil {
 			t.Errorf("Expected error for non-existent directory, but got none")
 		}
