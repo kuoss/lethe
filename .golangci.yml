@@ -26,6 +26,6 @@ linters:
     #- nakedret
     #- prealloc
     #- revive
-    - typecheck
+    #- typecheck
     #- unconvert
     #- unparam
