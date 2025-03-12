@@ -39,4 +39,5 @@ func (r *Rotator) Rotate() {
 	if err := r.fileService.DeleteBySize(); err != nil {
 		logger.Errorf("DeleteBySize err: %v", err)
 	}
+	r.fileService.Prune()
 }
