@@ -2,7 +2,6 @@ package fileservice
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -38,7 +37,7 @@ func TestPrune(t *testing.T) {
 
 func TestIsOldEmptyDir(t *testing.T) {
 	// Create a temporary directory for testing
-	tempDir, err := ioutil.TempDir("", "testdir")
+	tempDir, err := os.MkdirTemp("", "testdir")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}
@@ -63,11 +62,11 @@ func TestIsOldEmptyDir(t *testing.T) {
 
 	t.Run("Test non-empty directory", func(t *testing.T) {
 		// Create a new file in the directory
-		file, err := ioutil.TempFile(tempDir, "testfile")
+		file, err := os.MkdirTemp(tempDir, "testfile")
 		if err != nil {
 			t.Fatalf("Failed to create file in temp directory: %v", err)
 		}
-		file.Close()
+		defer os.RemoveAll(file) // Clean up after test
 
 		// Call the function
 		isOldEmpty, err := isOldEmptyDir(tempDir)
@@ -81,7 +80,7 @@ func TestIsOldEmptyDir(t *testing.T) {
 
 	t.Run("Test empty directory newer than 24 hours", func(t *testing.T) {
 		// Remove test file if created previously
-		files, _ := ioutil.ReadDir(tempDir)
+		files, _ := os.ReadDir(tempDir)
 		for _, f := range files {
 			os.Remove(fmt.Sprintf("%s/%s", tempDir, f.Name()))
 		}
