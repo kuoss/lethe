@@ -13,18 +13,18 @@ import (
 func (s *FileService) Prune() {
 	warns, err := s.removeUnneccesaryFiles()
 	if err != nil {
-		logger.Errorf("%s err: %v", "removeUnneccesaryFiles", err)
+		logger.Errorf("removeUnneccesaryFiles err: %v", err)
 	}
 	if len(warns) > 0 {
-		logger.Warnf("%s warns: %v", "removeUnneccesaryFiles", warns)
+		logger.Warnf("removeUnneccesaryFiles warns: %v", warns)
 	}
 
 	warns, err = s.removeOldEmptyDirs()
 	if err != nil {
-		logger.Errorf("%s err: %v", "removeOldEmptyDirs", err)
+		logger.Errorf("removeOldEmptyDirs err: %v", err)
 	}
 	if len(warns) > 0 {
-		logger.Warnf("%s warns: %v", "removeOldEmptyDirs", warns)
+		logger.Warnf("removeOldEmptyDirs warns: %v", warns)
 	}
 }
 
