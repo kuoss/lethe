@@ -19,12 +19,10 @@ func (s *FileService) Prune() {
 
 func printWarningsAndError(place string, warns []string, err error) {
 	if err != nil {
-		logger.Errorf("%s error: %v", place, err)
+		logger.Errorf("%s err: %v", place, err)
 	}
 	if len(warns) > 0 {
-		for _, warn := range warns {
-			logger.Warnf("%s warning: %s", place, warn)
-		}
+		logger.Warnf("%s warns: %v", place, warns)
 	}
 }
 
