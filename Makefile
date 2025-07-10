@@ -1,6 +1,6 @@
 IMG ?= ghcr.io/kuoss/lethe:development
 COVERAGE_THRESHOLD = 70
-PROMETHEUS_VERSION := v2.42.0 # v0.304.2
+PROMETHEUS_VERSION := v0.304.2
 
 .PHONY: dev
 dev: air
@@ -86,7 +86,7 @@ GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 ## Tool Versions
 AIR_VERSION ?= latest
 GOLANGCI_LINT_VERSION ?= v1.60.2
-GOYACC_VERSION ?= v0.3.0 # v0.34.0
+GOYACC_VERSION ?= v0.34.0
 GO_LICENSES_VERSION ?= v1.6.0
 GOVULNCHECK_VERSION ?= latest
 
