@@ -85,7 +85,7 @@ GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 
 ## Tool Versions
 AIR_VERSION ?= latest
-GOLANGCI_LINT_VERSION ?= v1.60.2
+GOLANGCI_LINT_VERSION ?= v2.2.1
 GOYACC_VERSION ?= v0.34.0
 GO_LICENSES_VERSION ?= v1.6.0
 GOVULNCHECK_VERSION ?= latest
@@ -97,8 +97,11 @@ $(AIR): $(LOCALBIN)
 
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT)
-$(GOLANGCI_LINT): $(LOCALBIN)
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+$(GOLANGCI_LINT):
+	mkdir -p ./bin
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/$(GOLANGCI_LINT_VERSION)/install.sh \
+		| sed -e '/install -d/d' \
+		| sh -s -- -b ./bin $(GOLANGCI_LINT_VERSION)
 
 .PHONY: govulncheck
 govulncheck: $(GOVULNCHECK)
