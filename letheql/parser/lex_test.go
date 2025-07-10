@@ -525,7 +525,8 @@ var tests = []struct {
 			{
 				input: `=~`, fail: true,
 			}, {
-				input: `!~`, fail: true,
+				input:    `!~`,                         // letheql
+				expected: []Item{{NEQ_REGEX, 0, `!~`}}, // letheql
 			}, {
 				input: `!(`, fail: true,
 			}, {

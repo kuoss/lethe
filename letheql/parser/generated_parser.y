@@ -107,6 +107,8 @@ MOD
 MUL
 NEQ
 NEQ_REGEX
+PIPE_EQL
+PIPE_REGEX
 POW
 SUB
 AT
@@ -193,7 +195,7 @@ START_METRIC_SELECTOR
 // Operators are listed with increasing precedence.
 %left LOR
 %left LAND LUNLESS
-%left EQLC GTE GTR LSS LTE NEQ
+%left EQLC GTE GTR LSS LTE NEQ NEQ_REGEX PIPE_EQL PIPE_REGEX
 %left ADD SUB
 %left MUL DIV MOD ATAN2
 %right POW
@@ -290,6 +292,9 @@ binary_expr     : expr ADD     bin_modifier expr { $$ = yylex.(*parser).newBinar
                 | expr MOD     bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
                 | expr MUL     bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
                 | expr NEQ     bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
+                | expr NEQ_REGEX  bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
+                | expr PIPE_EQL   bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
+                | expr PIPE_REGEX bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
                 | expr POW     bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
                 | expr SUB     bin_modifier expr { $$ = yylex.(*parser).newBinaryExpression($1, $2, $3, $4) }
                 ;
