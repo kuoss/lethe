@@ -7,14 +7,12 @@ toolchain go1.24.3
 require (
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b
 	github.com/gin-gonic/gin v1.10.1
-	github.com/google/fscrypt v0.3.5
 	github.com/kuoss/common v0.1.7
 	github.com/prometheus/common v0.65.0
 	github.com/prometheus/prometheus v0.304.2
 	github.com/spf13/cast v1.9.2
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/sys v0.34.0
 )
 
 require (
@@ -43,7 +41,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
@@ -62,6 +59,7 @@ require (
 	golang.org/x/arch v0.19.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/api v0.239.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
