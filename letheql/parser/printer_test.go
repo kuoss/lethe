@@ -45,6 +45,14 @@ func TestExprString(t *testing.T) {
 			out: `sum without (instance) (task:errors:rate10s{job="s"})`,
 		},
 		{
+			in:  `sum by("foo.bar") (task:errors:rate10s{job="s"})`,
+			out: `sum by ("foo.bar") (task:errors:rate10s{job="s"})`,
+		},
+		{
+			in:  `sum without("foo.bar") (task:errors:rate10s{job="s"})`,
+			out: `sum without ("foo.bar") (task:errors:rate10s{job="s"})`,
+		},
+		{
 			in: `topk(5, task:errors:rate10s{job="s"})`,
 		},
 		{
@@ -135,6 +143,30 @@ func TestExprString(t *testing.T) {
 		{
 			in: `a[1m] @ end()`,
 		},
+		{
+			in: `{__name__="",a="x"}`,
+		},
+		{
+			in: `{"a.b"="c"}`,
+		},
+		{
+			in: `{"0"="1"}`,
+		},
+		{
+			in:  `{"_0"="1"}`,
+			out: `{_0="1"}`,
+		},
+		{
+			in: `{""="0"}`,
+		},
+		{
+			in:  "{``=\"0\"}",
+			out: `{""="0"}`,
+		},
+		{
+			in:  "1048576",
+			out: "1048576",
+		},
 	}
 
 	for _, test := range inputs {
@@ -215,6 +247,16 @@ func TestVectorSelector_String(t *testing.T) {
 				},
 			},
 			expected: `{__name__="foobar"}`,
+		},
+		{
+			name: "empty name matcher",
+			vs: VectorSelector{
+				LabelMatchers: []*labels.Matcher{
+					labels.MustNewMatcher(labels.MatchEqual, labels.MetricName, ""),
+					labels.MustNewMatcher(labels.MatchEqual, "a", "x"),
+				},
+			},
+			expected: `{__name__="",a="x"}`,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"github.com/kuoss/lethe/letheql/parser"
 	commonModel "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/labels"
+	"github.com/prometheus/prometheus/promql/parser/posrange"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,10 +26,10 @@ func TestParser(t *testing.T) {
 				Op: parser.PIPE_EQL,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 3}},
+					PosRange: posrange.PositionRange{Start: 0, End: 3}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello",
-					PosRange: parser.PositionRange{Start: 5, End: 12}},
+					PosRange: posrange.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
 		{
@@ -38,10 +39,10 @@ func TestParser(t *testing.T) {
 				Op: parser.PIPE_REGEX,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 3}},
+					PosRange: posrange.PositionRange{Start: 0, End: 3}},
 				RHS: &parser.StringLiteral{
 					Val:      "hel.*",
-					PosRange: parser.PositionRange{Start: 5, End: 12}},
+					PosRange: posrange.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
 		{
@@ -51,10 +52,10 @@ func TestParser(t *testing.T) {
 				Op: parser.NEQ,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 3}},
+					PosRange: posrange.PositionRange{Start: 0, End: 3}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello",
-					PosRange: parser.PositionRange{Start: 5, End: 12}},
+					PosRange: posrange.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
 		{
@@ -64,10 +65,10 @@ func TestParser(t *testing.T) {
 				Op: parser.NEQ_REGEX,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 3}},
+					PosRange: posrange.PositionRange{Start: 0, End: 3}},
 				RHS: &parser.StringLiteral{
 					Val:      "hel.*",
-					PosRange: parser.PositionRange{Start: 5, End: 12}},
+					PosRange: posrange.PositionRange{Start: 5, End: 12}},
 				ReturnBool: false},
 		},
 		{
@@ -77,10 +78,10 @@ func TestParser(t *testing.T) {
 				Op: parser.PIPE_EQL,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 3}},
+					PosRange: posrange.PositionRange{Start: 0, End: 3}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello",
-					PosRange: parser.PositionRange{Start: 7, End: 14}},
+					PosRange: posrange.PositionRange{Start: 7, End: 14}},
 				ReturnBool: false},
 		},
 		{
@@ -92,10 +93,10 @@ func TestParser(t *testing.T) {
 					Name: "pod",
 					LabelMatchers: []*labels.Matcher{
 						parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 5}},
+					PosRange: posrange.PositionRange{Start: 0, End: 5}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello",
-					PosRange: parser.PositionRange{Start: 9, End: 16}},
+					PosRange: posrange.PositionRange{Start: 9, End: 16}},
 				ReturnBool: false},
 		},
 		{
@@ -105,10 +106,10 @@ func TestParser(t *testing.T) {
 				Op: parser.PIPE_REGEX,
 				LHS: &parser.VectorSelector{
 					Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 5}},
+					PosRange: posrange.PositionRange{Start: 0, End: 5}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello.*",
-					PosRange: parser.PositionRange{Start: 9, End: 18}},
+					PosRange: posrange.PositionRange{Start: 9, End: 18}},
 				ReturnBool: false},
 		},
 		{
@@ -120,10 +121,10 @@ func TestParser(t *testing.T) {
 					Name: "pod", LabelMatchers: []*labels.Matcher{
 						parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 						parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 28}},
+					PosRange: posrange.PositionRange{Start: 0, End: 28}},
 				RHS: &parser.StringLiteral{
 					Val:      "hello",
-					PosRange: parser.PositionRange{Start: 32, End: 39}},
+					PosRange: posrange.PositionRange{Start: 32, End: 39}},
 				ReturnBool: false},
 		},
 		{
@@ -135,10 +136,10 @@ func TestParser(t *testing.T) {
 					Name: "pod", LabelMatchers: []*labels.Matcher{
 						parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 						parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 28}},
+					PosRange: posrange.PositionRange{Start: 0, End: 28}},
 				RHS: &parser.StringLiteral{
 					Val:      "hel.*",
-					PosRange: parser.PositionRange{Start: 32, End: 39}},
+					PosRange: posrange.PositionRange{Start: 32, End: 39}},
 				ReturnBool: false},
 		},
 		// BinaryExpr - multi FilterOperator (nested)
@@ -151,14 +152,14 @@ func TestParser(t *testing.T) {
 					Op: parser.PIPE_EQL,
 					LHS: &parser.VectorSelector{
 						Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-						PosRange: parser.PositionRange{Start: 0, End: 3}},
+						PosRange: posrange.PositionRange{Start: 0, End: 3}},
 					RHS: &parser.StringLiteral{
 						Val:      "hello",
-						PosRange: parser.PositionRange{Start: 5, End: 12}},
+						PosRange: posrange.PositionRange{Start: 5, End: 12}},
 					ReturnBool: false},
 				RHS: &parser.StringLiteral{
 					Val:      "world",
-					PosRange: parser.PositionRange{Start: 14, End: 21}},
+					PosRange: posrange.PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
 		{
@@ -170,14 +171,14 @@ func TestParser(t *testing.T) {
 					Op: parser.PIPE_REGEX,
 					LHS: &parser.VectorSelector{
 						Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-						PosRange: parser.PositionRange{Start: 0, End: 3}},
+						PosRange: posrange.PositionRange{Start: 0, End: 3}},
 					RHS: &parser.StringLiteral{
 						Val:      "hel.*",
-						PosRange: parser.PositionRange{Start: 5, End: 12}},
+						PosRange: posrange.PositionRange{Start: 5, End: 12}},
 					ReturnBool: false},
 				RHS: &parser.StringLiteral{
 					Val:      "world",
-					PosRange: parser.PositionRange{Start: 14, End: 21}},
+					PosRange: posrange.PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
 		{
@@ -189,14 +190,14 @@ func TestParser(t *testing.T) {
 					Op: parser.PIPE_REGEX,
 					LHS: &parser.VectorSelector{
 						Name: "pod", LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-						PosRange: parser.PositionRange{Start: 0, End: 3}},
+						PosRange: posrange.PositionRange{Start: 0, End: 3}},
 					RHS: &parser.StringLiteral{
 						Val:      "hel.*",
-						PosRange: parser.PositionRange{Start: 5, End: 12}},
+						PosRange: posrange.PositionRange{Start: 5, End: 12}},
 					ReturnBool: false},
 				RHS: &parser.StringLiteral{
 					Val:      "wor.*",
-					PosRange: parser.PositionRange{Start: 14, End: 21}},
+					PosRange: posrange.PositionRange{Start: 14, End: 21}},
 				ReturnBool: false},
 		},
 
@@ -206,7 +207,7 @@ func TestParser(t *testing.T) {
 			"",
 			&parser.NumberLiteral{
 				Val:      42,
-				PosRange: parser.PositionRange{Start: 0, End: 2}},
+				PosRange: posrange.PositionRange{Start: 0, End: 2}},
 		},
 
 		{
@@ -214,7 +215,7 @@ func TestParser(t *testing.T) {
 			"",
 			&parser.StringLiteral{
 				Val:      "hello",
-				PosRange: parser.PositionRange{Start: 0, End: 7}},
+				PosRange: posrange.PositionRange{Start: 0, End: 7}},
 		},
 
 		// VectorSelector
@@ -225,7 +226,7 @@ func TestParser(t *testing.T) {
 				Name: "pod",
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 3}},
+				PosRange: posrange.PositionRange{Start: 0, End: 3}},
 		},
 		{
 			`pod{}`,
@@ -234,7 +235,7 @@ func TestParser(t *testing.T) {
 				Name: "pod",
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 5}},
+				PosRange: posrange.PositionRange{Start: 0, End: 5}},
 		},
 		{
 			`pod{namespace="namespace01"}`,
@@ -244,7 +245,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 28}},
+				PosRange: posrange.PositionRange{Start: 0, End: 28}},
 		},
 		{
 			`pod{namespace="not-exists"}`,
@@ -254,7 +255,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "not-exists"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 27}},
+				PosRange: posrange.PositionRange{Start: 0, End: 27}},
 		},
 		{
 			`pod{namespace="namespace01",pod="nginx"}`,
@@ -265,7 +266,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, "pod", "nginx"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 40}},
+				PosRange: posrange.PositionRange{Start: 0, End: 40}},
 		},
 		{
 			`pod{namespace="namespace01",pod="nginx-*"}`,
@@ -276,7 +277,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, "pod", "nginx-*"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 42}},
+				PosRange: posrange.PositionRange{Start: 0, End: 42}},
 		},
 		{
 			`pod{namespace="namespace01",container="nginx"}`,
@@ -287,7 +288,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, "container", "nginx"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 46}},
+				PosRange: posrange.PositionRange{Start: 0, End: 46}},
 		},
 		{
 			`pod{namespace="namespace*",container="nginx"}`,
@@ -298,7 +299,7 @@ func TestParser(t *testing.T) {
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace*"),
 					parser.MustLabelMatcher(labels.MatchEqual, "container", "nginx"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 45}},
+				PosRange: posrange.PositionRange{Start: 0, End: 45}},
 		},
 
 		// MatrixSelector
@@ -312,7 +313,7 @@ func TestParser(t *testing.T) {
 						parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 						parser.MustLabelMatcher(labels.MatchEqual, "pod", "nginx-*"),
 						parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-					PosRange: parser.PositionRange{Start: 0, End: 42}},
+					PosRange: posrange.PositionRange{Start: 0, End: 42}},
 				Range: 180000000000, EndPos: 46},
 		},
 
@@ -333,9 +334,9 @@ func TestParser(t *testing.T) {
 								parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 								parser.MustLabelMatcher(labels.MatchEqual, "pod", "nginx-*"),
 								parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-							PosRange: parser.PositionRange{Start: 16, End: 58}},
+							PosRange: posrange.PositionRange{Start: 16, End: 58}},
 						Range: 180000000000, EndPos: 62}},
-				PosRange: parser.PositionRange{Start: 0, End: 63}},
+				PosRange: posrange.PositionRange{Start: 0, End: 63}},
 		},
 		{
 			`count_over_time(pod{}[3m])`,
@@ -350,9 +351,9 @@ func TestParser(t *testing.T) {
 						VectorSelector: &parser.VectorSelector{
 							Name:          "pod",
 							LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-							PosRange:      parser.PositionRange{Start: 16, End: 21}},
+							PosRange:      posrange.PositionRange{Start: 16, End: 21}},
 						Range: 180000000000, EndPos: 25}},
-				PosRange: parser.PositionRange{Start: 0, End: 26}},
+				PosRange: posrange.PositionRange{Start: 0, End: 26}},
 		},
 
 		// BinaryExpr
@@ -371,12 +372,12 @@ func TestParser(t *testing.T) {
 							VectorSelector: &parser.VectorSelector{
 								Name:          "pod",
 								LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-								PosRange:      parser.PositionRange{Start: 16, End: 21}},
+								PosRange:      posrange.PositionRange{Start: 16, End: 21}},
 							Range: 180000000000, EndPos: 25}},
-					PosRange: parser.PositionRange{Start: 0, End: 26}},
+					PosRange: posrange.PositionRange{Start: 0, End: 26}},
 				RHS: &parser.NumberLiteral{
 					Val:      10,
-					PosRange: parser.PositionRange{Start: 29, End: 31}}},
+					PosRange: posrange.PositionRange{Start: 29, End: 31}}},
 		},
 		{
 			`count_over_time(pod{}[3m]) < 10`,
@@ -393,12 +394,12 @@ func TestParser(t *testing.T) {
 							VectorSelector: &parser.VectorSelector{
 								Name:          "pod",
 								LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-								PosRange:      parser.PositionRange{Start: 16, End: 21}},
+								PosRange:      posrange.PositionRange{Start: 16, End: 21}},
 							Range: 180000000000, EndPos: 25}},
-					PosRange: parser.PositionRange{Start: 0, End: 26}},
+					PosRange: posrange.PositionRange{Start: 0, End: 26}},
 				RHS: &parser.NumberLiteral{
 					Val:      10,
-					PosRange: parser.PositionRange{Start: 29, End: 31}}},
+					PosRange: posrange.PositionRange{Start: 29, End: 31}}},
 		},
 		{
 			`count_over_time(pod{}[3m]) == 21`,
@@ -415,12 +416,12 @@ func TestParser(t *testing.T) {
 							VectorSelector: &parser.VectorSelector{
 								Name:          "pod",
 								LabelMatchers: []*labels.Matcher{parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-								PosRange:      parser.PositionRange{Start: 16, End: 21}},
+								PosRange:      posrange.PositionRange{Start: 16, End: 21}},
 							Range: 180000000000, EndPos: 25}},
-					PosRange: parser.PositionRange{Start: 0, End: 26}},
+					PosRange: posrange.PositionRange{Start: 0, End: 26}},
 				RHS: &parser.NumberLiteral{
 					Val:      21,
-					PosRange: parser.PositionRange{Start: 30, End: 32}},
+					PosRange: posrange.PositionRange{Start: 30, End: 32}},
 				VectorMatching: (*parser.VectorMatching)(nil),
 				ReturnBool:     false},
 		},
@@ -434,7 +435,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 28},
+				PosRange: posrange.PositionRange{Start: 0, End: 28},
 			},
 		},
 		{
@@ -445,7 +446,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 28},
+				PosRange: posrange.PositionRange{Start: 0, End: 28},
 			},
 		},
 		{
@@ -456,7 +457,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 28},
+				PosRange: posrange.PositionRange{Start: 0, End: 28},
 			},
 		},
 		{
@@ -467,7 +468,7 @@ func TestParser(t *testing.T) {
 				LabelMatchers: []*labels.Matcher{
 					parser.MustLabelMatcher(labels.MatchEqual, "namespace", "namespace01"),
 					parser.MustLabelMatcher(labels.MatchEqual, commonModel.MetricNameLabel, "pod")},
-				PosRange: parser.PositionRange{Start: 0, End: 28},
+				PosRange: posrange.PositionRange{Start: 0, End: 28},
 			},
 		},
 	}

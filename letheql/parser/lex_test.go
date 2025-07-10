@@ -17,6 +17,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/prometheus/prometheus/promql/parser/posrange"
 )
 
 type testCase struct {
@@ -130,6 +132,84 @@ var tests = []struct {
 			}, {
 				input:    "0x123",
 				expected: []Item{{NUMBER, 0, "0x123"}},
+			}, {
+				input: "1..2",
+				fail:  true,
+			}, {
+				input: "1.2.",
+				fail:  true,
+			}, {
+				input:    "00_1_23_4.56_7_8",
+				expected: []Item{{NUMBER, 0, "00_1_23_4.56_7_8"}},
+			}, {
+				input: "00_1_23__4.56_7_8",
+				fail:  true,
+			}, {
+				input: "00_1_23_4._56_7_8",
+				fail:  true,
+			}, {
+				input: "00_1_23_4_.56_7_8",
+				fail:  true,
+			}, {
+				input:    "0x1_2_34",
+				expected: []Item{{NUMBER, 0, "0x1_2_34"}},
+			}, {
+				input: "0x1_2__34",
+				fail:  true,
+			}, {
+				input: "0x1_2__34.5_6p1", // "0x1.1p1"-based formats are not supported yet.
+				fail:  true,
+			}, {
+				input: "0x1_2__34.5_6",
+				fail:  true,
+			}, {
+				input: "0x1_2__34.56",
+				fail:  true,
+			}, {
+				input: "1_e2",
+				fail:  true,
+			}, {
+				input:    "1.e2",
+				expected: []Item{{NUMBER, 0, "1.e2"}},
+			}, {
+				input: "1e.2",
+				fail:  true,
+			}, {
+				input: "1e+.2",
+				fail:  true,
+			}, {
+				input: "1ee2",
+				fail:  true,
+			}, {
+				input: "1e+e2",
+				fail:  true,
+			}, {
+				input: "1e",
+				fail:  true,
+			}, {
+				input: "1e+",
+				fail:  true,
+			}, {
+				input:    "1e1_2_34",
+				expected: []Item{{NUMBER, 0, "1e1_2_34"}},
+			}, {
+				input: "1e_1_2_34",
+				fail:  true,
+			}, {
+				input: "1e1_2__34",
+				fail:  true,
+			}, {
+				input: "1e+_1_2_34",
+				fail:  true,
+			}, {
+				input: "1e-_1_2_34",
+				fail:  true,
+			}, {
+				input: "12_",
+				fail:  true,
+			}, {
+				input:    "_1_2",
+				expected: []Item{{IDENTIFIER, 0, "_1_2"}},
 			},
 		},
 	},
@@ -279,9 +359,6 @@ var tests = []struct {
 			}, {
 				input:    `@`,
 				expected: []Item{{AT, 0, `@`}},
-			}, {
-				input:    `!~`,
-				expected: []Item{{NEQ_REGEX, 0, `!~`}},
 			},
 		},
 	},
@@ -448,6 +525,9 @@ var tests = []struct {
 			{
 				input: `=~`, fail: true,
 			}, {
+				input:    `!~`,                         // letheql
+				expected: []Item{{NEQ_REGEX, 0, `!~`}}, // letheql
+			}, {
 				input: `!(`, fail: true,
 			}, {
 				input: "1a", fail: true,
@@ -492,6 +572,161 @@ var tests = []struct {
 			},
 			{
 				input: "`\xff`", fail: true,
+			},
+		},
+	},
+	{
+		name: "histogram series descriptions",
+		tests: []testCase{
+			{
+				input: `{} {{buckets:[5]}}`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{BUCKETS_DESC, 5, `buckets`},
+					{COLON, 12, `:`},
+					{LEFT_BRACKET, 13, `[`},
+					{NUMBER, 14, `5`},
+					{RIGHT_BRACKET, 15, `]`},
+					{CLOSE_HIST, 16, `}}`},
+				},
+				seriesDesc: true,
+			},
+			{
+				input: `{} {{buckets: [5 10 7]}}`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{BUCKETS_DESC, 5, `buckets`},
+					{COLON, 12, `:`},
+					{SPACE, 13, ` `},
+					{LEFT_BRACKET, 14, `[`},
+					{NUMBER, 15, `5`},
+					{SPACE, 16, ` `},
+					{NUMBER, 17, `10`},
+					{SPACE, 19, ` `},
+					{NUMBER, 20, `7`},
+					{RIGHT_BRACKET, 21, `]`},
+					{CLOSE_HIST, 22, `}}`},
+				},
+				seriesDesc: true,
+			},
+			{
+				input: `{} {{buckets: [5 10 7] schema:1}}`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{BUCKETS_DESC, 5, `buckets`},
+					{COLON, 12, `:`},
+					{SPACE, 13, ` `},
+					{LEFT_BRACKET, 14, `[`},
+					{NUMBER, 15, `5`},
+					{SPACE, 16, ` `},
+					{NUMBER, 17, `10`},
+					{SPACE, 19, ` `},
+					{NUMBER, 20, `7`},
+					{RIGHT_BRACKET, 21, `]`},
+					{SPACE, 22, ` `},
+					{SCHEMA_DESC, 23, `schema`},
+					{COLON, 29, `:`},
+					{NUMBER, 30, `1`},
+					{CLOSE_HIST, 31, `}}`},
+				},
+				seriesDesc: true,
+			},
+			{
+				input: `{} {{buckets: [Inf NaN] schema:1}}`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{BUCKETS_DESC, 5, `buckets`},
+					{COLON, 12, `:`},
+					{SPACE, 13, ` `},
+					{LEFT_BRACKET, 14, `[`},
+					{NUMBER, 15, `Inf`},
+					{SPACE, 18, ` `},
+					{NUMBER, 19, `NaN`},
+					{RIGHT_BRACKET, 22, `]`},
+					{SPACE, 23, ` `},
+					{SCHEMA_DESC, 24, `schema`},
+					{COLON, 30, `:`},
+					{NUMBER, 31, `1`},
+					{CLOSE_HIST, 32, `}}`},
+				},
+				seriesDesc: true,
+			},
+			{ // Series with sum as -Inf and count as NaN.
+				input: `{} {{buckets: [5 10 7] sum:Inf count:NaN}}`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{BUCKETS_DESC, 5, `buckets`},
+					{COLON, 12, `:`},
+					{SPACE, 13, ` `},
+					{LEFT_BRACKET, 14, `[`},
+					{NUMBER, 15, `5`},
+					{SPACE, 16, ` `},
+					{NUMBER, 17, `10`},
+					{SPACE, 19, ` `},
+					{NUMBER, 20, `7`},
+					{RIGHT_BRACKET, 21, `]`},
+					{SPACE, 22, ` `},
+					{SUM_DESC, 23, `sum`},
+					{COLON, 26, `:`},
+					{NUMBER, 27, `Inf`},
+					{SPACE, 30, ` `},
+					{COUNT_DESC, 31, `count`},
+					{COLON, 36, `:`},
+					{NUMBER, 37, `NaN`},
+					{CLOSE_HIST, 40, `}}`},
+				},
+				seriesDesc: true,
+			},
+			{
+				input: `{} {{sum:1}}+{{sum:0}}x2 {{sum:1}}+{{sum:0}}x3`,
+				expected: []Item{
+					{LEFT_BRACE, 0, `{`},
+					{RIGHT_BRACE, 1, `}`},
+					{SPACE, 2, ` `},
+					{OPEN_HIST, 3, `{{`},
+					{SUM_DESC, 5, `sum`},
+					{COLON, 8, `:`},
+					{NUMBER, 9, `1`},
+					{CLOSE_HIST, 10, `}}`},
+					{ADD, 12, `+`},
+					{OPEN_HIST, 13, `{{`},
+					{SUM_DESC, 15, `sum`},
+					{COLON, 18, `:`},
+					{NUMBER, 19, `0`},
+					{CLOSE_HIST, 20, `}}`},
+					{TIMES, 22, `x`},
+					{NUMBER, 23, `2`},
+					{SPACE, 24, ` `},
+					{OPEN_HIST, 25, `{{`},
+					{SUM_DESC, 27, `sum`},
+					{COLON, 30, `:`},
+					{NUMBER, 31, `1`},
+					{CLOSE_HIST, 32, `}}`},
+					{ADD, 34, `+`},
+					{OPEN_HIST, 35, `{{`},
+					{SUM_DESC, 37, `sum`},
+					{COLON, 40, `:`},
+					{NUMBER, 41, `0`},
+					{CLOSE_HIST, 42, `}}`},
+					{TIMES, 44, `x`},
+					{NUMBER, 45, `3`},
+				},
+				seriesDesc: true,
 			},
 		},
 	},
@@ -717,6 +952,10 @@ var tests = []struct {
 				input: `test:name{on!~"bar"}[:4s]`,
 				fail:  true,
 			},
+			{
+				input: `test:name{on!~"bar"}[1s:1s:1s]`,
+				fail:  true,
+			},
 		},
 	},
 }
@@ -736,7 +975,6 @@ func TestLexer(t *testing.T) {
 
 				for l.state = lexStatements; l.state != nil; {
 					out = append(out, Item{})
-
 					l.NextItem(&out[len(out)-1])
 				}
 
@@ -748,18 +986,12 @@ func TestLexer(t *testing.T) {
 							hasError = true
 						}
 					}
-					if !hasError {
-						t.Logf("%d: input %q", i, test.input)
-						require.Fail(t, "expected lexing error but did not fail")
-					}
+					require.True(t, hasError, "%d: input %q, expected lexing error but did not fail", i, test.input)
 					continue
 				}
-				if lastItem.Typ == ERROR {
-					t.Logf("%d: input %q", i, test.input)
-					require.Fail(t, "unexpected lexing error at position %d: %s", lastItem.Pos, lastItem)
-				}
+				require.NotEqual(t, ERROR, lastItem.Typ, "%d: input %q, unexpected lexing error at position %d: %s", i, test.input, lastItem.Pos, lastItem)
 
-				eofItem := Item{EOF, Pos(len(test.input)), ""}
+				eofItem := Item{EOF, posrange.Pos(len(test.input)), ""}
 				require.Equal(t, lastItem, eofItem, "%d: input %q", i, test.input)
 
 				out = out[:len(out)-1]

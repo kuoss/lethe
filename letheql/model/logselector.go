@@ -6,6 +6,7 @@ import (
 
 	"github.com/kuoss/lethe/letheql/parser"
 	"github.com/prometheus/prometheus/model/labels"
+	"github.com/prometheus/prometheus/promql/parser/posrange"
 )
 
 type TimeRange struct {
@@ -29,9 +30,9 @@ type LogSelector struct {
 const ValueTypeLogSelector parser.ValueType = "logselector"
 
 // implements parser.Expr
-func (e *LogSelector) PromQLExpr()                         {}
-func (e *LogSelector) Pretty(int) string                   { return e.String() }
-func (e *LogSelector) PositionRange() parser.PositionRange { return parser.PositionRange{} }
+func (e *LogSelector) PromQLExpr()                           {}
+func (e *LogSelector) Pretty(int) string                     { return e.String() }
+func (e *LogSelector) PositionRange() posrange.PositionRange { return posrange.PositionRange{} }
 
 // implements parser.Value
 func (e *LogSelector) Type() parser.ValueType { return ValueTypeLogSelector }
