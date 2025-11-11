@@ -1,4 +1,4 @@
-FROM golang:1.23.12-alpine AS builder
+FROM golang:1.24-alpine AS builder
 ARG VERSION
 WORKDIR /build
 COPY go.mod go.sum ./
@@ -6,7 +6,7 @@ RUN go mod download
 COPY . ./
 RUN go build -ldflags="-X 'main.Version=$VERSION'" -o /build/bin/lethe ./cmd/lethe/
 
-FROM alpine:3.20.6
+FROM alpine:3.22.2
 RUN apk update \
   && apk upgrade \
   && apk add --no-cache \
