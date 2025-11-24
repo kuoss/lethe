@@ -10,27 +10,18 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "lethetool",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Tooling for the Lethe logging system.",
 }
 
-func Execute(version string) {
+func Execute(ver string) {
 	// config
-	config.Version = version
+	config.Version = ver
 
-	// execute
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(version.New())
 }
